@@ -340,7 +340,6 @@ body {
 .admin-datetime { font-size:.7rem; color:var(--gold); }
 .admin-client { display:flex; justify-content:space-between; font-size:.75rem; color:rgba(255,255,255,0.5); margin-bottom:.8rem; }
 .admin-actions { display:flex; gap:.6rem; }
-.btn-whatsapp { flex:2; padding:.6rem; background:rgba(37,211,102,0.15); border:1px solid rgba(37,211,102,0.35); color:#25d366; font-size:.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; }
 .btn-cancel { flex:1; padding:.6rem; background:rgba(255,100,100,0.1); border:1px solid rgba(255,100,100,0.3); color:#ff8080; font-size:.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
 .btn-delete { flex:1; padding:.6rem; background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.3); color:#ff5555; font-size:.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
 .bc-status.cancelled { background:rgba(255,100,100,0.1); border-color:rgba(255,100,100,0.3); color:#ff8080; }
@@ -959,9 +958,8 @@ function renderAdminBookings(data) {
         <a href="tel:${r.client_phone}" style="color:var(--gold);text-decoration:none">📞 ${r.client_phone}</a>
       </div>
       <div class="admin-actions">
-        <button class="btn-whatsapp" onclick="sendWhatsApp('${r.client_phone}', '${r.client_name}', '${r.reservation_date}', '${r.reservation_time}', '${r.service}')">💬 WhatsApp</button>
-        ${r.status !== 'cancelled' ? `<button class="btn-cancel" onclick="cancelBooking(${r.id})">✗ Annuler</button>` : ''}
-        <button class="btn-delete" onclick="deleteBooking(${r.id})">🗑</button>
+        ${r.status !== 'cancelled' ? `<button class="btn-cancel" onclick="cancelBooking(${r.id})">✗ Annuler | إلغاء</button>` : ''}
+        <button class="btn-delete" onclick="deleteBooking(${r.id})">🗑 Supprimer | حذف</button>
       </div>
     </div>
   `).join('');
@@ -982,25 +980,7 @@ function applyFilters() {
   renderAdminBookings(filtered);
 }
 
-function sendWhatsApp(phone, name, date, time, service) {
-  // Format phone: remove 0 at start, add 213
-  let formatted = phone.replace(/\s/g, '');
-  if(formatted.startsWith('0')) formatted = '213' + formatted.slice(1);
-  
-  const msg = `Salam ${name} 👋
-
-Hada rappel ta3 rendez-vous dyalk chez BANGS Barber Shop ✂️
-
-📅 Date: ${formatDate(date)}
-⏰ Heure: ${time}
-💈 Service: ${service}
-
-Ntsawrok! 🙏
-— BANGS Barber Shop`;
-
-  const url = `https://wa.me/${formatted}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-}
+async function cancelBooking(id) {
   await db.from('reservations').update({status: 'cancelled'}).eq('id', id);
   showToast('Réservation annulée | تم الإلغاء', 'error');
   loadAdminBookings();
