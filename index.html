@@ -880,33 +880,22 @@ document.getElementById('inp-name').addEventListener('input', validateStep3);
 document.getElementById('inp-phone').addEventListener('input', validateStep3);
 
 // ── ADMIN ──
+const ADMIN_PASS = 'younes123';
 let adminAuth = false;
 
-document.getElementById('btn-admin-login').addEventListener('click', async () => {
+document.getElementById('btn-admin-login').addEventListener('click', () => {
   const pass = document.getElementById('inp-admin-pass').value;
-  const btn = document.getElementById('btn-admin-login');
-  btn.textContent = '...';
-  btn.disabled = true;
-
-  const { data, error } = await db.auth.signInWithPassword({
-    email: 'admin@bangs.dz',
-    password: pass
-  });
-
-  if(error) {
-    document.getElementById('admin-error').style.display = 'block';
-    btn.textContent = 'Entrer | دخول';
-    btn.disabled = false;
-  } else {
+  if(pass === ADMIN_PASS) {
     adminAuth = true;
     document.getElementById('admin-login').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'block';
     loadAdminBookings();
+  } else {
+    document.getElementById('admin-error').style.display = 'block';
   }
 });
 
-document.getElementById('btn-admin-logout').addEventListener('click', async () => {
-  await db.auth.signOut();
+document.getElementById('btn-admin-logout').addEventListener('click', () => {
   adminAuth = false;
   document.getElementById('admin-login').style.display = 'flex';
   document.getElementById('admin-dashboard').style.display = 'none';
@@ -1014,20 +1003,6 @@ document.getElementById('btn-filter-reset').addEventListener('click', () => {
   document.getElementById('filter-status').value = '';
   renderAdminBookings(allAdminData);
 });
-
-// ── GLOBALS for onclick ──
-window.selectService = selectService;
-window.selectDate = selectDate;
-window.selectSlot = selectSlot;
-window.cancelBooking = cancelBooking;
-window.deleteBooking = deleteBooking;
-window.showPage = showPage;
-window.goStep = goStep;
-window.confirmBooking = confirmBooking;
-window.resetBooking = resetBooking;
-window.validateStep3 = validateStep3;
-window.prevMonth = prevMonth;
-window.nextMonth = nextMonth;
 
 </script>
 </body>
