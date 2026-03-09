@@ -559,6 +559,21 @@ body {
     </div>
 
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:1rem">Réservations | الحجوزات</div>
+    
+    <!-- Filtres -->
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <input class="form-input" id="filter-name" type="text" placeholder="🔍 Chercher par nom | بحث بالاسم" style="font-size:.8rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="filter-date" type="date" style="font-size:.8rem">
+        <select class="form-input" id="filter-status" style="font-size:.8rem;cursor:pointer">
+          <option value="">Tous | الكل</option>
+          <option value="confirmed">Confirmé | مؤكد</option>
+          <option value="cancelled">Annulé | ملغى</option>
+        </select>
+      </div>
+      <button id="btn-filter-reset" style="background:none;border:1px solid var(--border);color:rgba(255,255,255,0.4);padding:.5rem;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.1em">✕ Réinitialiser | إعادة تعيين</button>
+    </div>
+
     <div id="admin-bookings" style="padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem"></div>
   </div>
 </div>
@@ -887,22 +902,28 @@ document.getElementById('btn-admin-logout').addEventListener('click', () => {
 
 document.getElementById('nav-admin').addEventListener('click', () => showPage('admin'));
 
+let allAdminData = [];
+
 async function loadAdminBookings() {
   const container = document.getElementById('admin-bookings');
   container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
   const { data } = await db.from('reservations').select('*').order('reservation_date', {ascending: true});
-  
+  allAdminData = data || [];
+  renderAdminBookings(allAdminData);
+}
+
+function renderAdminBookings(data) {
+  const container = document.getElementById('admin-bookings');
+
   if(!data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>Aucune réservation</p></div>';
+    container.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>Aucun résultat | لا توجد نتائج</p></div>';
     return;
   }
 
-  // Stats
   const today = new Date().toISOString().split('T')[0];
-  const todayCount = data.filter(r => r.reservation_date === today).length;
-  const totalCount = data.length;
+  const todayCount = allAdminData.filter(r => r.reservation_date === today).length;
   document.getElementById('stat-today').textContent = todayCount;
-  document.getElementById('stat-total').textContent = totalCount;
+  document.getElementById('stat-total').textContent = allAdminData.length;
 
   container.innerHTML = data.map(r => `
     <div class="admin-card" id="acard-${r.id}">
@@ -925,6 +946,21 @@ async function loadAdminBookings() {
   `).join('');
 }
 
+function applyFilters() {
+  const name = document.getElementById('filter-name').value.trim().toLowerCase();
+  const date = document.getElementById('filter-date').value;
+  const status = document.getElementById('filter-status').value;
+
+  let filtered = allAdminData.filter(r => {
+    const matchName = !name || r.client_name.toLowerCase().includes(name);
+    const matchDate = !date || r.reservation_date === date;
+    const matchStatus = !status || r.status === status;
+    return matchName && matchDate && matchStatus;
+  });
+
+  renderAdminBookings(filtered);
+}
+
 async function cancelBooking(id) {
   await db.from('reservations').update({status: 'cancelled'}).eq('id', id);
   showToast('Réservation annulée | تم الإلغاء', 'error');
@@ -938,6 +974,16 @@ async function deleteBooking(id) {
 }
 
 document.getElementById('btn-admin-refresh').addEventListener('click', loadAdminBookings);
+
+document.getElementById('filter-name').addEventListener('input', applyFilters);
+document.getElementById('filter-date').addEventListener('change', applyFilters);
+document.getElementById('filter-status').addEventListener('change', applyFilters);
+document.getElementById('btn-filter-reset').addEventListener('click', () => {
+  document.getElementById('filter-name').value = '';
+  document.getElementById('filter-date').value = '';
+  document.getElementById('filter-status').value = '';
+  renderAdminBookings(allAdminData);
+});
 
 </script>
 </body>
