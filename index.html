@@ -901,7 +901,7 @@ async function confirmBooking() {
     .eq('barber', state.selectedBarber?.name)
     .neq('status', 'cancelled');
 
-  if((existing && existing.length > 0) || (error && error.code === '23505')) {
+  if(existing && existing.length > 0) {
     showToast('Ce créneau est déjà pris! Choisissez un autre ⚠️', 'error');
     btn.disabled = false;
     btn.textContent = '✓ Confirmer le rendez-vous';
