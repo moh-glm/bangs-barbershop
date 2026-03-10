@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>BANGS Barber Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
   --teal: #1a6b6b;
@@ -344,7 +344,44 @@ body {
 .btn-delete { flex:1; padding:.6rem; background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.3); color:#ff5555; font-size:.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
 .bc-status.cancelled { background:rgba(255,100,100,0.1); border-color:rgba(255,100,100,0.3); color:#ff8080; }
 
-@keyframes popIn { from { opacity:0; transform:scale(.8); } to { opacity:1; transform:scale(1); } }
+/* ── BARBERS ── */
+.barbers-list { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:.6rem; }
+.barber-card {
+  display:flex; flex-direction:column; align-items:center; gap:.5rem;
+  padding:1rem; background:var(--card); border:1px solid var(--border);
+  cursor:pointer; transition: all .2s;
+}
+.barber-card:hover, .barber-card.selected { border-color:var(--gold); background:var(--card2); }
+.barber-avatar { width:48px; height:48px; border-radius:50%; background:rgba(26,107,107,0.3); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+.barber-card.selected .barber-avatar { border-color:var(--gold); }
+.barber-name { font-size:.8rem; font-weight:600; text-transform:capitalize; }
+
+/* ── TV MODE ── */
+#tv-mode {
+  display:none; position:fixed; inset:0; z-index:999;
+  background:var(--bg); padding:1rem;
+  flex-direction:column;
+}
+#tv-mode.active { display:flex; }
+.tv-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.5rem 1rem 1rem; border-bottom:1px solid var(--border); margin-bottom:1rem;
+}
+.tv-header h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--gold); }
+.tv-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; flex:1; overflow:hidden; }
+.tv-col { background:var(--card); border:1px solid var(--border); border-top:3px solid var(--gold); display:flex; flex-direction:column; overflow:hidden; }
+.tv-col-header { padding:.8rem; text-align:center; border-bottom:1px solid var(--border); }
+.tv-col-name { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); }
+.tv-col-count { font-size:.6rem; color:rgba(255,255,255,0.4); letter-spacing:.1em; text-transform:uppercase; margin-top:.2rem; }
+.tv-col-body { flex:1; overflow-y:auto; padding:.5rem; display:flex; flex-direction:column; gap:.5rem; }
+.tv-card { background:var(--card2); border:1px solid var(--border); border-left:3px solid var(--teal); padding:.7rem; }
+.tv-card.cancelled { border-left-color:#ff5555; opacity:.5; }
+.tv-card-time { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); }
+.tv-card-name { font-size:.8rem; font-weight:600; margin-top:.2rem; }
+.tv-card-service { font-size:.65rem; color:rgba(255,255,255,0.5); margin-top:.15rem; }
+.tv-refresh-bar { height:3px; background:rgba(26,107,107,0.2); margin-top:.5rem; }
+.tv-refresh-progress { height:100%; background:var(--teal); transition: width 30s linear; width:0%; }
+
 @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
 @keyframes spin { to { transform:rotate(360deg); } }
 </style>
@@ -416,6 +453,10 @@ body {
   <!-- STEP 1: Service -->
   <div class="step-content active" id="step-1">
     <div class="services-list" id="services-list"></div>
+    <div style="margin-top:1.5rem">
+      <label class="form-label">Choisir le coiffeur | اختر الحلاق</label>
+      <div class="barbers-list" id="barbers-list"></div>
+    </div>
     <button class="btn-next" id="btn-next-1" disabled>Choisir la date →</button>
   </div>
 
@@ -455,6 +496,7 @@ body {
   <div class="step-content" id="step-4">
     <div class="summary-card">
       <div class="summary-row"><span class="summary-key">Service</span><span class="summary-val" id="sum-service">—</span></div>
+      <div class="summary-row"><span class="summary-key">Coiffeur</span><span class="summary-val" id="sum-barber">—</span></div>
       <div class="summary-row"><span class="summary-key">Date</span><span class="summary-val" id="sum-date">—</span></div>
       <div class="summary-row"><span class="summary-key">Heure</span><span class="summary-val" id="sum-time">—</span></div>
       <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="sum-name">—</span></div>
@@ -541,6 +583,7 @@ body {
         <h1>Dashboard</h1>
       </div>
       <div style="display:flex;gap:.8rem">
+        <button id="btn-tv-mode" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.5rem .8rem;cursor:pointer;font-size:.8rem">📺 TV</button>
         <button id="btn-admin-refresh" style="background:none;border:1px solid var(--border);color:var(--white);padding:.5rem .8rem;cursor:pointer;font-size:.8rem">↻</button>
         <button id="btn-admin-logout" style="background:none;border:1px solid rgba(255,100,100,0.3);color:#ff8080;padding:.5rem .8rem;cursor:pointer;font-size:.7rem">Quitter | خروج</button>
       </div>
@@ -579,6 +622,23 @@ body {
 
     <div id="admin-bookings" style="padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem"></div>
   </div>
+</div>
+
+<!-- TV MODE -->
+<div id="tv-mode">
+  <div class="tv-header">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--white)">BANGS</span>
+      <span style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase">Live Dashboard</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span id="tv-clock" style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)"></span>
+      <span id="tv-date" style="font-size:.7rem;color:rgba(255,255,255,0.4)"></span>
+      <button onclick="closeTVMode()" style="background:none;border:1px solid rgba(255,100,100,0.3);color:#ff8080;padding:.5rem 1rem;cursor:pointer;font-size:.75rem">✕ Fermer</button>
+    </div>
+  </div>
+  <div class="tv-grid" id="tv-grid"></div>
+  <div class="tv-refresh-bar"><div class="tv-refresh-progress" id="tv-progress"></div></div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -622,6 +682,14 @@ const SERVICES = [
   { id:6, name:'Coupe Enfant', emoji:'👦', duration:'20 min', price:'À confirmer' },
 ];
 
+// ── BARBERS ──
+const BARBERS = [
+  { id:1, name:'Younes', emoji:'💈' },
+  { id:2, name:'Mohamed', emoji:'✂️' },
+  { id:3, name:'Nadir', emoji:'🪒' },
+  { id:4, name:'Islem', emoji:'⭐' },
+];
+
 // ── TIME SLOTS ──
 const ALL_SLOTS = ['10:00','10:30','11:00','11:30','12:00','12:30',
   '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
@@ -632,6 +700,7 @@ let state = {
   page: 'home',
   step: 1,
   selectedService: null,
+  selectedBarber: null,
   selectedDate: null,
   selectedTime: null,
   calYear: new Date().getFullYear(),
@@ -690,12 +759,33 @@ function renderServices() {
       <div class="service-price">${s.price}</div>
     </div>
   `).join('');
+  renderBarbers();
 }
 
 function selectService(id) {
   state.selectedService = SERVICES.find(s => s.id === id);
   renderServices();
-  document.getElementById('btn-next-1').disabled = false;
+  checkStep1();
+}
+
+function renderBarbers() {
+  const list = document.getElementById('barbers-list');
+  list.innerHTML = BARBERS.map(b => `
+    <div class="barber-card ${state.selectedBarber?.id === b.id ? 'selected':''}" onclick="selectBarber(${b.id})">
+      <div class="barber-avatar">${b.emoji}</div>
+      <div class="barber-name">${b.name}</div>
+    </div>
+  `).join('');
+}
+
+function selectBarber(id) {
+  state.selectedBarber = BARBERS.find(b => b.id === id);
+  renderBarbers();
+  checkStep1();
+}
+
+function checkStep1() {
+  document.getElementById('btn-next-1').disabled = !(state.selectedService && state.selectedBarber);
 }
 
 // ── CALENDAR ──
@@ -743,7 +833,9 @@ async function selectDate(dateStr) {
   const slotsWrap = document.getElementById('slots-wrap');
   slotsWrap.style.display = 'block';
   document.getElementById('slots-grid').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  const { data } = await db.from('reservations').select('reservation_time').eq('reservation_date', dateStr);
+  const { data } = await db.from('reservations').select('reservation_time')
+    .eq('reservation_date', dateStr)
+    .eq('barber', state.selectedBarber?.name || '');
   state.bookedSlots = (data || []).map(r => r.reservation_time);
   renderSlots();
 }
@@ -781,6 +873,7 @@ function validateStep3() {
 // ── SUMMARY ──
 function renderSummary() {
   document.getElementById('sum-service').textContent = state.selectedService?.name || '—';
+  document.getElementById('sum-barber').textContent = state.selectedBarber?.name || '—';
   document.getElementById('sum-date').textContent = formatDate(state.selectedDate);
   document.getElementById('sum-time').textContent = state.selectedTime || '—';
   document.getElementById('sum-name').textContent = document.getElementById('inp-name').value;
@@ -803,6 +896,7 @@ async function confirmBooking() {
     client_name: document.getElementById('inp-name').value.trim(),
     client_phone: document.getElementById('inp-phone').value.trim(),
     service: state.selectedService?.name,
+    barber: state.selectedBarber?.name,
     reservation_date: state.selectedDate,
     reservation_time: state.selectedTime,
     status: 'confirmed'
@@ -819,6 +913,7 @@ async function confirmBooking() {
 
 function resetBooking() {
   state.selectedService = null;
+  state.selectedBarber = null;
   state.selectedDate = null;
   state.selectedTime = null;
   document.getElementById('inp-name').value = '';
@@ -948,7 +1043,7 @@ function renderAdminBookings(data) {
     <div class="admin-card" id="acard-${r.id}">
       <div class="admin-card-header">
         <div>
-          <div class="admin-service">${r.service}</div>
+          <div class="admin-service">${r.service} ${r.barber ? `<span style="color:var(--gold);font-size:.75rem">· ${r.barber}</span>` : ''}</div>
           <div class="admin-datetime">📅 ${formatDate(r.reservation_date)} · ⏰ ${r.reservation_time}</div>
         </div>
         <span class="bc-status ${r.status === 'cancelled' ? 'cancelled' : ''}">${r.status === 'cancelled' ? 'Annulé | ملغى' : 'Confirmé | مؤكد'}</span>
@@ -1004,10 +1099,88 @@ document.getElementById('btn-filter-reset').addEventListener('click', () => {
   renderAdminBookings(allAdminData);
 });
 
+// ── TV MODE ──
+let tvInterval = null;
+
+function openTVMode() {
+  document.getElementById('tv-mode').classList.add('active');
+  renderTVMode();
+  startTVRefresh();
+}
+
+function closeTVMode() {
+  document.getElementById('tv-mode').classList.remove('active');
+  if(tvInterval) clearInterval(tvInterval);
+}
+
+function startTVRefresh() {
+  if(tvInterval) clearInterval(tvInterval);
+  // Progress bar animation
+  const bar = document.getElementById('tv-progress');
+  bar.style.width = '0%';
+  setTimeout(() => { bar.style.width = '100%'; }, 100);
+  tvInterval = setInterval(() => {
+    renderTVMode();
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.transition = 'width 30s linear'; bar.style.width = '100%'; }, 100);
+  }, 30000);
+}
+
+async function renderTVMode() {
+  // Update clock
+  const now = new Date();
+  document.getElementById('tv-clock').textContent = now.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('tv-date').textContent = now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+
+  const today = now.toISOString().split('T')[0];
+  const { data } = await db.from('reservations').select('*')
+    .eq('reservation_date', today)
+    .order('reservation_time', {ascending: true});
+
+  const all = data || [];
+  const grid = document.getElementById('tv-grid');
+  grid.innerHTML = BARBERS.map(b => {
+    const rdvs = all.filter(r => r.barber === b.name);
+    return `
+      <div class="tv-col">
+        <div class="tv-col-header">
+          <div style="font-size:1.5rem">${b.emoji}</div>
+          <div class="tv-col-name">${b.name}</div>
+          <div class="tv-col-count">${rdvs.filter(r=>r.status!=='cancelled').length} RDV aujourd'hui</div>
+        </div>
+        <div class="tv-col-body">
+          ${rdvs.length === 0 
+            ? `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.2);font-size:.75rem">Aucun RDV</div>`
+            : rdvs.map(r => `
+              <div class="tv-card ${r.status === 'cancelled' ? 'cancelled' : ''}">
+                <div class="tv-card-time">${r.reservation_time}</div>
+                <div class="tv-card-name">👤 ${r.client_name}</div>
+                <div class="tv-card-service">${r.service}</div>
+              </div>
+            `).join('')
+          }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('btn-tv-mode').addEventListener('click', openTVMode);
+
+// Update TV clock every minute
+setInterval(() => {
+  if(document.getElementById('tv-mode').classList.contains('active')) {
+    const now = new Date();
+    document.getElementById('tv-clock').textContent = now.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  }
+}, 60000);
+
 // ── GLOBALS for onclick ──
 window.selectService = selectService;
 window.selectDate = selectDate;
 window.selectSlot = selectSlot;
+window.selectBarber = selectBarber;
 window.cancelBooking = cancelBooking;
 window.deleteBooking = deleteBooking;
 window.showPage = showPage;
@@ -1017,6 +1190,7 @@ window.resetBooking = resetBooking;
 window.validateStep3 = validateStep3;
 window.prevMonth = prevMonth;
 window.nextMonth = nextMonth;
+window.closeTVMode = closeTVMode;
 
 </script>
 </body>
