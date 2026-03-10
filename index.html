@@ -909,7 +909,7 @@ async function confirmBooking() {
     return;
   }
 
-  const { error } = await db.from('reservations').insert({
+  const { error: insertError } = await db.from('reservations').insert({
     client_name: document.getElementById('inp-name').value.trim(),
     client_phone: document.getElementById('inp-phone').value.trim(),
     service: state.selectedService?.name,
@@ -918,13 +918,15 @@ async function confirmBooking() {
     reservation_time: state.selectedTime,
     status: 'confirmed'
   });
-  if(error) {
-    if(error.code === '23505') {
-      showToast('Ce créneau vient d\'être pris! Choisissez un autre ⚠️', 'error');
-      goStep(2);
-    } else {
-      showToast('Erreur: ' + error.message, 'error');
-    }
+  if((insertError && insertError.code === '23505')) {
+    showToast('Ce créneau vient d\'être pris! Choisissez un autre ⚠️', 'error');
+    goStep(2);
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmer le rendez-vous';
+    return;
+  }
+  if(insertError) {
+    showToast('Erreur: ' + insertError.message, 'error');
     btn.disabled = false;
     btn.textContent = '✓ Confirmer le rendez-vous';
   } else {
