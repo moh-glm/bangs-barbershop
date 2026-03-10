@@ -892,6 +892,23 @@ async function confirmBooking() {
   const btn = document.getElementById('btn-confirm');
   btn.disabled = true;
   btn.textContent = 'Enregistrement...';
+
+  // Check double booking before insert
+  const { data: existing } = await db.from('reservations')
+    .select('id')
+    .eq('reservation_date', state.selectedDate)
+    .eq('reservation_time', state.selectedTime)
+    .eq('barber', state.selectedBarber?.name)
+    .neq('status', 'cancelled');
+
+  if((existing && existing.length > 0) || (error && error.code === '23505')) {
+    showToast('Ce créneau est déjà pris! Choisissez un autre ⚠️', 'error');
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmer le rendez-vous';
+    goStep(2);
+    return;
+  }
+
   const { error } = await db.from('reservations').insert({
     client_name: document.getElementById('inp-name').value.trim(),
     client_phone: document.getElementById('inp-phone').value.trim(),
@@ -902,7 +919,12 @@ async function confirmBooking() {
     status: 'confirmed'
   });
   if(error) {
-    showToast('Erreur: ' + error.message, 'error');
+    if(error.code === '23505') {
+      showToast('Ce créneau vient d\'être pris! Choisissez un autre ⚠️', 'error');
+      goStep(2);
+    } else {
+      showToast('Erreur: ' + error.message, 'error');
+    }
     btn.disabled = false;
     btn.textContent = '✓ Confirmer le rendez-vous';
   } else {
