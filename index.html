@@ -381,6 +381,7 @@ body {
 .tv-card-service { font-size:.65rem; color:rgba(255,255,255,0.5); margin-top:.15rem; }
 .tv-refresh-bar { height:3px; background:rgba(26,107,107,0.2); margin-top:.5rem; }
 .tv-refresh-progress { height:100%; background:var(--teal); transition: width 30s linear; width:0%; }
+.cal-day.blocked { background:rgba(255,80,80,0.08); color:#ff8080 !important; cursor:not-allowed; border-color:rgba(255,80,80,0.2); }
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
 @keyframes spin { to { transform:rotate(360deg); } }
@@ -519,15 +520,6 @@ body {
   </div>
 </div>
 
-<!-- PAGE: MY BOOKINGS -->
-<div class="page" id="page-mybookings">
-  <div class="page-header">
-    <div class="label">Historique</div>
-    <h1>Mes RDV</h1>
-  </div>
-  <div id="bookings-container"></div>
-</div>
-
 <!-- PAGE: HOURS/CONTACT -->
 <div class="page" id="page-hours">
   <div class="page-header">
@@ -602,7 +594,17 @@ body {
       </div>
     </div>
 
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:1rem">Réservations | الحجوزات</div>
+    <!-- Congés -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ff8080;text-transform:uppercase;margin-top:.5rem">🗓 Congés | أيام العطل</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:flex;gap:.7rem">
+        <input class="form-input" id="conge-date" type="date" style="font-size:.8rem;flex:1">
+        <button id="btn-add-conge" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-size:.8rem;white-space:nowrap">+ Bloquer</button>
+      </div>
+      <div id="conges-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:.5rem">Réservations | الحجوزات</div>
     
     <!-- Filtres -->
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
@@ -707,6 +709,7 @@ let state = {
   calYear: new Date().getFullYear(),
   calMonth: new Date().getMonth(),
   bookedSlots: [],
+  blockedDates: [],
 };
 
 // ── NAVIGATION ──
@@ -718,7 +721,7 @@ function showPage(p) {
   state.page = p;
   if (p === 'mybookings') loadMyBookings();
   if (p === 'booking' && state.step === 1) renderServices();
-  if (p === 'admin' && adminAuth) loadAdminBookings();
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); }
 }
 
 // ── STEPS ──
@@ -727,7 +730,7 @@ function goStep(n) {
   document.getElementById('step-' + n).classList.add('active');
   updateStepIndicators(n);
   state.step = n;
-  if (n === 2) { renderCalendar(); }
+  if (n === 2) { loadBlockedDates(); }
   if (n === 4) { renderSummary(); }
   window.scrollTo(0,0);
 }
@@ -789,6 +792,12 @@ function checkStep1() {
   document.getElementById('btn-next-1').disabled = !(state.selectedService && state.selectedBarber);
 }
 
+async function loadBlockedDates() {
+  const { data } = await db.from('blocked_dates').select('blocked_date');
+  state.blockedDates = (data || []).map(r => r.blocked_date);
+  renderCalendar();
+}
+
 // ── CALENDAR ──
 const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS = ['D','L','M','M','J','V','S'];
@@ -805,11 +814,12 @@ function renderCalendar() {
   for(let d=1;d<=days;d++) {
     const date = new Date(y,m,d);
     const isPast = date < today;
-    const isFri = date.getDay() === 5;
     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isSelected = state.selectedDate === dateStr;
-    grid.innerHTML += `<div class="cal-day ${isPast?'disabled':''} ${isSelected?'selected':''} ${date.getTime()===today.getTime()?'today':''}"
-      onclick="${isPast?'':'selectDate(\''+dateStr+'\')'}">${d}</div>`;
+    const isBlocked = state.blockedDates.includes(dateStr);
+    const isDisabled = isPast || isBlocked;
+    grid.innerHTML += `<div class="cal-day ${isDisabled?'disabled':''} ${isBlocked?'blocked':''} ${isSelected?'selected':''} ${date.getTime()===today.getTime()?'today':''}"
+      onclick="${isDisabled?'':'selectDate(\''+dateStr+'\')'}">${d}${isBlocked?'<span style="display:block;font-size:.4rem;color:#ff8080">Fermé</span>':''}</div>`;
   }
 }
 
@@ -952,6 +962,9 @@ async function confirmBooking() {
         </div>
       </div>
     `;
+    // Save phone locally for Mes RDV
+    localStorage.setItem('bangs_phone', document.getElementById('inp-phone').value.trim());
+    playNotificationSound();
     showToast('Réservation confirmée! ✓', 'success');
     goStep(5);
   }
@@ -971,18 +984,26 @@ function resetBooking() {
 // ── MY BOOKINGS ──
 async function loadMyBookings() {
   const container = document.getElementById('bookings-container');
+  const phone = localStorage.getItem('bangs_phone');
+  if(!phone) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucune réservation pour le moment.<br><span style="font-size:.75rem">Faites une réservation d'abord!</span></p></div>`;
+    return;
+  }
   container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  const { data, error } = await db.from('reservations').select('*').order('reservation_date', {ascending:false}).limit(20);
+  const { data } = await db.from('reservations').select('*')
+    .eq('client_phone', phone)
+    .order('reservation_date', {ascending: false})
+    .limit(20);
   if(!data || data.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucune réservation pour le moment</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucune réservation trouvée</p></div>`;
     return;
   }
   container.innerHTML = '<div class="bookings-list">' + data.map(r => `
     <div class="booking-card">
-      <div class="bc-service">${r.service}</div>
+      <div class="bc-service">${r.service} ${r.barber ? `<span style="color:var(--gold);font-size:.75rem">· ${r.barber}</span>` : ''}</div>
       <div class="bc-date">📅 ${formatDate(r.reservation_date)} à ${r.reservation_time}</div>
-      <div class="bc-name">👤 ${r.client_name} · 📞 ${r.client_phone}</div>
-      <span class="bc-status">${r.status}</span>
+      <div class="bc-name">👤 ${r.client_name}</div>
+      <span class="bc-status ${r.status === 'cancelled' ? 'cancelled' : ''}">${r.status === 'cancelled' ? 'Annulé' : 'Confirmé'}</span>
     </div>
   `).join('') + '</div>';
 }
@@ -1020,6 +1041,63 @@ document.getElementById('btn-next-month').addEventListener('click', nextMonth);
 document.getElementById('inp-name').addEventListener('input', validateStep3);
 document.getElementById('inp-phone').addEventListener('input', validateStep3);
 
+// ── SOUND ──
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523, 659, 784, 1047]; // Do Mi Sol Do
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.3);
+      osc.start(ctx.currentTime + i * 0.15);
+      osc.stop(ctx.currentTime + i * 0.15 + 0.3);
+    });
+  } catch(e) {}
+}
+
+// ── CONGÉS ──
+async function loadConges() {
+  const { data } = await db.from('blocked_dates').select('*').order('blocked_date');
+  const list = document.getElementById('conges-list');
+  if(!data || data.length === 0) {
+    list.innerHTML = '<div style="font-size:.75rem;color:rgba(255,255,255,0.3);padding:.5rem">Aucun congé programmé</div>';
+    return;
+  }
+  list.innerHTML = data.map(r => `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,80,80,0.05);border:1px solid rgba(255,80,80,0.2);padding:.7rem 1rem">
+      <span style="font-size:.85rem">🗓 ${formatDate(r.blocked_date)} ${r.reason ? `<span style="color:rgba(255,255,255,0.4);font-size:.7rem">· ${r.reason}</span>` : ''}</span>
+      <button onclick="deleteConge(${r.id})" style="background:none;border:none;color:#ff5555;cursor:pointer;font-size:.9rem">✕</button>
+    </div>
+  `).join('');
+}
+
+async function deleteConge(id) {
+  await db.from('blocked_dates').delete().eq('id', id);
+  showToast('Congé supprimé ✓', 'success');
+  loadConges();
+}
+
+document.getElementById('btn-add-conge').addEventListener('click', async () => {
+  const date = document.getElementById('conge-date').value;
+  if(!date) return;
+  const { error } = await db.from('blocked_dates').insert({ blocked_date: date });
+  if(error) {
+    showToast('Déjà bloqué!', 'error');
+  } else {
+    showToast('Jour bloqué ✓', 'success');
+    document.getElementById('conge-date').value = '';
+    loadConges();
+  }
+});
+
+window.deleteConge = deleteConge;
+
 // ── ADMIN ──
 const ADMIN_PASS = 'Bangs2024!';
 let adminAuth = false;
@@ -1031,6 +1109,7 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     document.getElementById('admin-login').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'block';
     loadAdminBookings();
+    loadConges();
   } else {
     document.getElementById('admin-error').style.display = 'block';
   }
@@ -1237,7 +1316,6 @@ window.resetBooking = resetBooking;
 window.validateStep3 = validateStep3;
 window.prevMonth = prevMonth;
 window.nextMonth = nextMonth;
-window.closeTVMode = closeTVMode;
 
 </script>
 </body>
