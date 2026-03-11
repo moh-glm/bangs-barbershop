@@ -516,6 +516,7 @@ body {
       <div id="success-details" style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1.2rem;margin-bottom:1.5rem;text-align:left;width:100%"></div>
       <p style="font-size:.8rem;color:rgba(255,255,255,0.4)">À bientôt chez BANGS! ✂️</p>
       <button class="btn-primary" id="btn-success" style="margin-top:1.5rem">Retour à l'accueil</button>
+      <button onclick="showPage('reviews')" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:.8rem 1.5rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:.1em;margin-top:.8rem;width:100%">⭐ Laisser un avis</button>
     </div>
   </div>
 </div>
@@ -605,6 +606,58 @@ body {
     </div>
 
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:.5rem">Réservations | الحجوزات</div>
+
+    <!-- Walk-in button -->
+    <div style="padding:0 1.5rem .8rem">
+      <button id="btn-walkin" style="width:100%;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.15em">
+        👤 + Walk-in (Client sans réservation)
+      </button>
+    </div>
+
+    <!-- Walk-in Modal -->
+    <div id="walkin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;padding:1.5rem;overflow-y:auto">
+      <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:1.5rem;max-width:500px;margin:2rem auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">👤 Walk-in</h2>
+          <button onclick="closeWalkin()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nom client</label>
+          <input class="form-input" id="wi-name" type="text" placeholder="Ex: Ahmed">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Téléphone (optionnel)</label>
+          <input class="form-input" id="wi-phone" type="tel" placeholder="Ex: 0551258141">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Coiffeur</label>
+          <select class="form-input" id="wi-barber">
+            <option value="">Choisir...</option>
+            <option>Younes</option>
+            <option>Mohamed</option>
+            <option>Nadir</option>
+            <option>Islem</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service</label>
+          <select class="form-input" id="wi-service">
+            <option value="">Choisir...</option>
+            <option>Coupe</option>
+            <option>Barbe</option>
+            <option>Coupe + Barbe</option>
+            <option>Coloration</option>
+            <option>Soin capillaire</option>
+            <option>Coupe Enfant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Heure</label>
+          <select class="form-input" id="wi-time"></select>
+        </div>
+        <button id="btn-walkin-confirm" class="btn-next" style="margin-top:.5rem">✓ Enregistrer</button>
+      </div>
+    </div>
     
     <!-- Filtres -->
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
@@ -624,6 +677,51 @@ body {
     <div id="filter-summary" style="display:none;margin:0 1.5rem .5rem;padding:.7rem 1rem;background:rgba(26,107,107,0.1);border:1px solid rgba(26,107,107,0.25);font-size:.75rem;color:rgba(255,255,255,0.6)"></div>
 
     <div id="admin-bookings" style="padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem"></div>
+  </div>
+</div>
+
+<!-- PAGE: REVIEWS -->
+<div class="page" id="page-reviews">
+  <div class="page-header">
+    <div class="label">Témoignages</div>
+    <h1>Avis clients ⭐</h1>
+  </div>
+  <div style="padding:1.2rem 1.5rem">
+    <!-- Form -->
+    <div style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;margin-bottom:1.5rem">
+      <p style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem">Laisser un avis | اترك تقييمك</p>
+      <div class="form-group">
+        <label class="form-label">Votre nom</label>
+        <input class="form-input" id="rev-name" type="text" placeholder="Ex: Ahmed">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Coiffeur</label>
+        <select class="form-input" id="rev-barber">
+          <option value="">Choisir...</option>
+          <option>Younes</option>
+          <option>Mohamed</option>
+          <option>Nadir</option>
+          <option>Islem</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note</label>
+        <div id="star-picker" style="display:flex;gap:.5rem;font-size:1.8rem;cursor:pointer">
+          <span onclick="setRating(1)" data-star="1">☆</span>
+          <span onclick="setRating(2)" data-star="2">☆</span>
+          <span onclick="setRating(3)" data-star="3">☆</span>
+          <span onclick="setRating(4)" data-star="4">☆</span>
+          <span onclick="setRating(5)" data-star="5">☆</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Commentaire (optionnel)</label>
+        <textarea class="form-input" id="rev-comment" rows="3" placeholder="Super coiffure..." style="resize:none"></textarea>
+      </div>
+      <button id="btn-submit-review" class="btn-next" style="margin-top:0">Envoyer ⭐</button>
+    </div>
+    <!-- Reviews list -->
+    <div id="reviews-list"></div>
   </div>
 </div>
 
@@ -654,9 +752,9 @@ body {
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
     Réserver
   </button>
-  <button class="nav-item" id="nav-mybookings">
-    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
-    Mes RDV
+  <button class="nav-item" id="nav-reviews">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+    Avis
   </button>
   <button class="nav-item" id="nav-hours">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -719,7 +817,8 @@ function showPage(p) {
   document.getElementById('page-' + p).classList.add('active');
   document.getElementById('nav-' + p).classList.add('active');
   state.page = p;
-  if (p === 'mybookings') loadMyBookings();
+  if (p === 'reviews') loadReviews();
+
   if (p === 'booking' && state.step === 1) renderServices();
   if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); }
 }
@@ -878,7 +977,7 @@ function selectSlot(time) {
 function validateStep3() {
   const name = document.getElementById('inp-name').value.trim();
   const phone = document.getElementById('inp-phone').value.trim();
-  const phoneValid = /^0[567]\d{8}$/.test(phone);
+  const phoneValid = /^0\d{9}$/.test(phone);
   document.getElementById('btn-next-3').disabled = !(name.length > 1 && phoneValid);
 }
 
@@ -1021,7 +1120,7 @@ renderServices();
 
 document.getElementById('nav-home').addEventListener('click', () => showPage('home'));
 document.getElementById('nav-booking').addEventListener('click', () => showPage('booking'));
-document.getElementById('nav-mybookings').addEventListener('click', () => showPage('mybookings'));
+
 document.getElementById('nav-hours').addEventListener('click', () => showPage('hours'));
 
 document.getElementById('btn-hero').addEventListener('click', () => showPage('booking'));
@@ -1040,6 +1139,135 @@ document.getElementById('btn-next-month').addEventListener('click', nextMonth);
 
 document.getElementById('inp-name').addEventListener('input', validateStep3);
 document.getElementById('inp-phone').addEventListener('input', validateStep3);
+
+// ── REVIEWS ──
+let selectedRating = 0;
+
+function setRating(n) {
+  selectedRating = n;
+  document.querySelectorAll('#star-picker span').forEach((s, i) => {
+    s.textContent = i < n ? '★' : '☆';
+    s.style.color = i < n ? 'var(--gold)' : 'rgba(255,255,255,0.3)';
+  });
+}
+
+async function loadReviews() {
+  const { data } = await db.from('reviews').select('*').order('created_at', {ascending: false}).limit(20);
+  const list = document.getElementById('reviews-list');
+  if(!data || data.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">⭐</div><p>Aucun avis pour le moment</p></div>`;
+    return;
+  }
+  list.innerHTML = data.map(r => `
+    <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1.2rem;margin-bottom:.8rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <span style="font-weight:600">${r.client_name}</span>
+        <span style="color:var(--gold);font-size:1rem">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+      </div>
+      ${r.barber ? `<div style="font-size:.7rem;color:rgba(255,255,255,0.4);margin-bottom:.4rem">💈 ${r.barber}</div>` : ''}
+      ${r.comment ? `<div style="font-size:.85rem;color:rgba(255,255,255,0.7)">${r.comment}</div>` : ''}
+      <div style="font-size:.65rem;color:rgba(255,255,255,0.3);margin-top:.5rem">${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('btn-submit-review').addEventListener('click', async () => {
+  const name = document.getElementById('rev-name').value.trim();
+  const barber = document.getElementById('rev-barber').value;
+  const comment = document.getElementById('rev-comment').value.trim();
+  if(!name || !selectedRating) {
+    showToast('Entrez votre nom et une note ⚠️', 'error');
+    return;
+  }
+  const btn = document.getElementById('btn-submit-review');
+  btn.disabled = true;
+  const { error } = await db.from('reviews').insert({
+    client_name: name,
+    rating: selectedRating,
+    barber: barber || null,
+    comment: comment || null
+  });
+  if(error) {
+    showToast('Erreur!', 'error');
+  } else {
+    showToast('Merci pour votre avis! ⭐', 'success');
+    document.getElementById('rev-name').value = '';
+    document.getElementById('rev-comment').value = '';
+    document.getElementById('rev-barber').value = '';
+    setRating(0);
+    loadReviews();
+  }
+  btn.disabled = false;
+});
+
+document.getElementById('nav-reviews').addEventListener('click', () => showPage('reviews'));
+window.setRating = setRating;
+
+// ── WALK-IN ──
+function openWalkin() {
+  // Fill time select with today's slots
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const isFri = now.getDay() === 5;
+  const timeSelect = document.getElementById('wi-time');
+  timeSelect.innerHTML = ALL_SLOTS
+    .filter(s => { const h = parseInt(s); return isFri ? h >= 15 : h >= 10; })
+    .map(s => `<option>${s}</option>`).join('');
+  // Set closest time
+  const hhmm = now.toTimeString().slice(0,5);
+  const closest = ALL_SLOTS.find(s => s >= hhmm) || ALL_SLOTS[ALL_SLOTS.length-1];
+  timeSelect.value = closest;
+  document.getElementById('walkin-modal').style.display = 'block';
+}
+
+function closeWalkin() {
+  document.getElementById('walkin-modal').style.display = 'none';
+  document.getElementById('wi-name').value = '';
+  document.getElementById('wi-phone').value = '';
+  document.getElementById('wi-barber').value = '';
+  document.getElementById('wi-service').value = '';
+}
+
+document.getElementById('btn-walkin').addEventListener('click', openWalkin);
+document.getElementById('btn-walkin-confirm').addEventListener('click', async () => {
+  const name = document.getElementById('wi-name').value.trim();
+  const phone = document.getElementById('wi-phone').value.trim() || 'Walk-in';
+  const barber = document.getElementById('wi-barber').value;
+  const service = document.getElementById('wi-service').value;
+  const time = document.getElementById('wi-time').value;
+  const today = new Date().toISOString().split('T')[0];
+
+  if(!name || !barber || !service) {
+    showToast('Remplissez tous les champs ⚠️', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-walkin-confirm');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  const { error } = await db.from('reservations').insert({
+    client_name: name,
+    client_phone: phone,
+    service: service,
+    barber: barber,
+    reservation_date: today,
+    reservation_time: time,
+    status: 'confirmed'
+  });
+
+  if(error) {
+    showToast(error.code === '23505' ? 'Créneau déjà pris! ⚠️' : 'Erreur!', 'error');
+  } else {
+    showToast('Walk-in enregistré! ✓', 'success');
+    closeWalkin();
+    loadAdminBookings();
+  }
+  btn.disabled = false;
+  btn.textContent = '✓ Enregistrer';
+});
+
+window.closeWalkin = closeWalkin;
 
 // ── SOUND ──
 function playNotificationSound() {
