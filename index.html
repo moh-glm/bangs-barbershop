@@ -608,9 +608,12 @@ body {
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:.5rem">Réservations | الحجوزات</div>
 
     <!-- Walk-in button -->
-    <div style="padding:0 1.5rem .8rem">
-      <button id="btn-walkin" style="width:100%;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.15em">
-        👤 + Walk-in (Client sans réservation)
+    <div style="padding:0 1.5rem .8rem;display:flex;gap:.7rem">
+      <button id="btn-walkin" style="flex:1;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.15em">
+        👤 + Walk-in
+      </button>
+      <button id="btn-delete-today" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;white-space:nowrap">
+        🗑 Supprimer tout aujourd'hui
       </button>
     </div>
 
@@ -952,13 +955,19 @@ async function selectDate(dateStr) {
 
 function renderSlots() {
   const grid = document.getElementById('slots-grid');
-  // Check if friday for late start
   const d = new Date(state.selectedDate);
   const isFri = d.getDay() === 5;
+  const now = new Date();
+  const isToday = state.selectedDate === now.toISOString().split('T')[0];
+  const currentHHMM = now.toTimeString().slice(0,5);
+
   const validSlots = ALL_SLOTS.filter(s => {
     const h = parseInt(s.split(':')[0]);
-    if(isFri) return h >= 15;
-    return h >= 10;
+    if(isFri && h < 15) return false;
+    if(!isFri && h < 10) return false;
+    // Hide past slots if today
+    if(isToday && s <= currentHHMM) return false;
+    return true;
   });
   grid.innerHTML = validSlots.map(s => {
     const isBooked = state.bookedSlots.includes(s);
@@ -1020,15 +1029,23 @@ async function confirmBooking() {
     return;
   }
 
-  const { error: insertError } = await db.from('reservations').insert({
+  // Get daily ticket number
+  const today = new Date().toISOString().split('T')[0];
+  const { count } = await db.from('reservations')
+    .select('*', { count: 'exact', head: true })
+    .eq('reservation_date', state.selectedDate);
+  const dailyTicket = (count || 0) + 1;
+
+  const { data: insertData, error: insertError } = await db.from('reservations').insert({
     client_name: document.getElementById('inp-name').value.trim(),
     client_phone: document.getElementById('inp-phone').value.trim(),
     service: state.selectedService?.name,
     barber: state.selectedBarber?.name,
     reservation_date: state.selectedDate,
     reservation_time: state.selectedTime,
-    status: 'confirmed'
-  });
+    status: 'confirmed',
+    daily_ticket: dailyTicket
+  }).select('id, daily_ticket').single();
 
   if(insertError) {
     if(insertError.code === '23505') {
@@ -1042,6 +1059,11 @@ async function confirmBooking() {
   } else {
     // Show success details
     document.getElementById('success-details').innerHTML = `
+      <div style="text-align:center;margin-bottom:1rem;padding:.8rem;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3)">
+        <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(255,255,255,0.4);text-transform:uppercase">Votre ticket</div>
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:700">#${insertData?.daily_ticket || insertData?.id || '—'}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,0.4)">Montrez ce numéro au barbier</div>
+      </div>
       <div style="display:flex;flex-direction:column;gap:.6rem">
         <div style="display:flex;justify-content:space-between">
           <span style="font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em">Coiffeur</span>
@@ -1203,6 +1225,18 @@ document.getElementById('btn-submit-review').addEventListener('click', async () 
 document.getElementById('nav-reviews').addEventListener('click', () => showPage('reviews'));
 window.setRating = setRating;
 
+document.getElementById('btn-delete-today').addEventListener('click', async () => {
+  const today = new Date().toISOString().split('T')[0];
+  if(!confirm(`Supprimer toutes les réservations de aujourd'hui (${today}) ?`)) return;
+  const { error } = await db.from('reservations').delete().eq('reservation_date', today);
+  if(error) {
+    showToast('Erreur! ' + error.message, 'error');
+  } else {
+    showToast('Toutes les réservations d\'aujourd\'hui supprimées ✓', 'success');
+    loadAdminBookings();
+  }
+});
+
 // ── WALK-IN ──
 function openWalkin() {
   // Fill time select with today's slots
@@ -1246,6 +1280,11 @@ document.getElementById('btn-walkin-confirm').addEventListener('click', async ()
   btn.disabled = true;
   btn.textContent = '...';
 
+  const { count: wiCount } = await db.from('reservations')
+    .select('*', { count: 'exact', head: true })
+    .eq('reservation_date', today);
+  const wiTicket = (wiCount || 0) + 1;
+
   const { error } = await db.from('reservations').insert({
     client_name: name,
     client_phone: phone,
@@ -1253,7 +1292,8 @@ document.getElementById('btn-walkin-confirm').addEventListener('click', async ()
     barber: barber,
     reservation_date: today,
     reservation_time: time,
-    status: 'confirmed'
+    status: 'confirmed',
+    daily_ticket: wiTicket
   });
 
   if(error) {
@@ -1396,7 +1436,7 @@ function renderAdminBookings(data) {
     <div class="admin-card" id="acard-${r.id}">
       <div class="admin-card-header">
         <div>
-          <div class="admin-service">${r.service} ${r.barber ? `<span style="color:var(--gold);font-size:.75rem">· ${r.barber}</span>` : ''}</div>
+          <div class="admin-service">${r.service} ${r.barber ? `<span style="color:var(--gold);font-size:.75rem">· ${r.barber}</span>` : ''} <span style="background:var(--gold);color:#000;font-size:.6rem;font-weight:700;padding:.1rem .4rem;margin-left:.3rem">#${r.daily_ticket || r.id}</span></div>
           <div class="admin-datetime">📅 ${formatDate(r.reservation_date)} · ⏰ ${r.reservation_time}</div>
           <div style="font-size:.65rem;color:rgba(255,255,255,0.3);margin-top:.2rem">🕐 Enregistré à ${r.created_at ? new Date(r.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit', timeZone:'Africa/Algiers'}) : '—'}</div>
         </div>
@@ -1508,7 +1548,10 @@ async function renderTVMode() {
             ? `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.2);font-size:.75rem">Aucun RDV</div>`
             : rdvs.map(r => `
               <div class="tv-card ${r.status === 'cancelled' ? 'cancelled' : ''}">
-                <div class="tv-card-time">${r.reservation_time}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="tv-card-time">${r.reservation_time}</div>
+                  <div style="background:var(--gold);color:#000;font-weight:700;font-size:.7rem;padding:.2rem .5rem">#${r.daily_ticket || r.id}</div>
+                </div>
                 <div class="tv-card-name">👤 ${r.client_name}</div>
                 <div class="tv-card-service">${r.service}</div>
               </div>
@@ -1545,6 +1588,71 @@ window.validateStep3 = validateStep3;
 window.prevMonth = prevMonth;
 window.nextMonth = nextMonth;
 
+// ── TICKET ALERT SYSTEM ──
+const alertedTickets = new Set();
+
+function speakTicket(num) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(`Ticket numéro ${num}`);
+  msg.lang = 'fr-FR';
+  msg.rate = 0.85;
+  msg.pitch = 1;
+  msg.volume = 1;
+  window.speechSynthesis.speak(msg);
+}
+
+function showTicketAlert(ticket, name, service, barber) {
+  const overlay = document.getElementById('ticket-alert-overlay');
+  document.getElementById('alert-ticket-num').textContent = '#' + ticket;
+  document.getElementById('alert-ticket-name').textContent = name;
+  document.getElementById('alert-ticket-info').textContent = service + (barber ? ' · ' + barber : '');
+  overlay.style.display = 'flex';
+  speakTicket(ticket);
+  // Auto close after 10s
+  setTimeout(() => closeTicketAlert(), 10000);
+}
+
+function closeTicketAlert() {
+  document.getElementById('ticket-alert-overlay').style.display = 'none';
+}
+window.closeTicketAlert = closeTicketAlert;
+
+async function checkUpcomingTickets() {
+  if (!adminAuth) return;
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const hhmm = now.toTimeString().slice(0,5);
+
+  const { data } = await db.from('reservations')
+    .select('*')
+    .eq('reservation_date', today)
+    .eq('reservation_time', hhmm)
+    .eq('status', 'confirmed');
+
+  if (!data) return;
+  data.forEach(r => {
+    const key = r.id + '-' + hhmm;
+    if (!alertedTickets.has(key)) {
+      alertedTickets.add(key);
+      showTicketAlert(r.daily_ticket || r.id, r.client_name, r.service, r.barber);
+    }
+  });
+}
+
+// Check every 30 seconds
+setInterval(checkUpcomingTickets, 30000);
+
 </script>
+
+<!-- Ticket Alert Overlay -->
+<div id="ticket-alert-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem" onclick="closeTicketAlert()">
+  <div style="font-size:.8rem;letter-spacing:.4em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:1rem">C'est l'heure du client</div>
+  <div style="font-family:'Playfair Display',serif;font-size:8rem;font-weight:700;color:var(--gold);line-height:1" id="alert-ticket-num">#1</div>
+  <div style="font-size:1.6rem;font-weight:600;color:white;margin-top:1rem" id="alert-ticket-name">Ahmed</div>
+  <div style="font-size:1rem;color:rgba(255,255,255,0.5);margin-top:.5rem" id="alert-ticket-info">Coupe · Younes</div>
+  <div style="margin-top:3rem;font-size:.75rem;color:rgba(255,255,255,0.25)">Appuyer pour fermer</div>
+</div>
+
 </body>
 </html>
