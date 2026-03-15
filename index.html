@@ -605,6 +605,31 @@ body {
       <div id="conges-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
 
+    <!-- Horaires Custom -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#80cfff;text-transform:uppercase;margin-top:.5rem">⏰ Horaires Custom | أوقات مخصصة</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="ch-date" type="date" style="font-size:.8rem">
+        <select class="form-input" id="ch-type" style="font-size:.8rem;cursor:pointer">
+          <option value="block">🔴 Bloquer heures</option>
+          <option value="extra">🟢 Ajouter heures</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <div>
+          <label style="font-size:.65rem;color:rgba(255,255,255,0.4);display:block;margin-bottom:.3rem">De</label>
+          <input class="form-input" id="ch-start" type="time" style="font-size:.8rem">
+        </div>
+        <div>
+          <label style="font-size:.65rem;color:rgba(255,255,255,0.4);display:block;margin-bottom:.3rem">À</label>
+          <input class="form-input" id="ch-end" type="time" style="font-size:.8rem">
+        </div>
+      </div>
+      <button id="btn-add-ch" style="background:rgba(128,207,255,0.1);border:1px solid rgba(128,207,255,0.3);color:#80cfff;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Appliquer</button>
+      <div style="font-size:.65rem;color:rgba(255,255,255,0.3);padding:.3rem .2rem">💡 Pour bloquer une nuit entière: faites 2 lignes — ex: 22:00→23:30 pour le jour 1, puis 00:00→03:00 pour le jour suivant</div>
+      <div id="ch-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:.5rem">Réservations | الحجوزات</div>
 
     <!-- Walk-in button -->
@@ -797,7 +822,9 @@ const BARBERS = [
 // ── TIME SLOTS ──
 const ALL_SLOTS = ['10:00','10:30','11:00','11:30','12:00','12:30',
   '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
-  '17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30'];
+  '17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30',
+  '21:00','21:30','22:00','22:30','23:00','23:30',
+  '00:00','00:30','01:00','01:30','02:00','02:30','03:00','03:30'];
 
 // ── STATE ──
 let state = {
@@ -811,6 +838,7 @@ let state = {
   calMonth: new Date().getMonth(),
   bookedSlots: [],
   blockedDates: [],
+  customHours: [],
 };
 
 // ── NAVIGATION ──
@@ -822,8 +850,8 @@ function showPage(p) {
   state.page = p;
   if (p === 'reviews') loadReviews();
 
-  if (p === 'booking' && state.step === 1) renderServices();
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); }
+  if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); }
 }
 
 // ── STEPS ──
@@ -832,7 +860,7 @@ function goStep(n) {
   document.getElementById('step-' + n).classList.add('active');
   updateStepIndicators(n);
   state.step = n;
-  if (n === 2) { loadBlockedDates(); }
+  if (n === 2) { loadBlockedDates(); loadAndRenderSlots(); }
   if (n === 4) { renderSummary(); }
   window.scrollTo(0,0);
 }
@@ -942,14 +970,26 @@ async function selectDate(dateStr) {
   state.selectedTime = null;
   document.getElementById('btn-next-2').disabled = true;
   renderCalendar();
-  // Load booked slots
   const slotsWrap = document.getElementById('slots-wrap');
   slotsWrap.style.display = 'block';
   document.getElementById('slots-grid').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  const { data } = await db.from('reservations').select('reservation_time')
-    .eq('reservation_date', dateStr)
-    .eq('barber', state.selectedBarber?.name || '');
-  state.bookedSlots = (data || []).map(r => r.reservation_time);
+  // Load booked slots + custom hours together
+  const [slotsRes, chRes] = await Promise.all([
+    db.from('reservations').select('reservation_time')
+      .eq('reservation_date', dateStr)
+      .eq('barber', state.selectedBarber?.name || '')
+      .neq('status', 'cancelled'),
+    db.from('custom_hours').select('*').eq('date', dateStr)
+  ]);
+  state.bookedSlots = (slotsRes.data || []).map(r => r.reservation_time);
+  state.customHours = chRes.data || [];
+  renderSlots();
+}
+
+async function loadAndRenderSlots() {
+  // Load custom hours for selected date
+  const { data: chData } = await db.from('custom_hours').select('*').eq('date', state.selectedDate);
+  state.customHours = chData || [];
   renderSlots();
 }
 
@@ -961,12 +1001,41 @@ function renderSlots() {
   const isToday = state.selectedDate === now.toISOString().split('T')[0];
   const currentHHMM = now.toTimeString().slice(0,5);
 
-  const validSlots = ALL_SLOTS.filter(s => {
+  const blocked = (state.customHours || []).filter(h => h.type === 'block');
+  const extra = (state.customHours || []).filter(h => h.type === 'extra');
+
+  // Generate extra slots
+  const extraSlots = [];
+  extra.forEach(h => {
+    let [sh, sm] = h.time_start.slice(0,5).split(':').map(Number);
+    const [eh, em] = h.time_end.slice(0,5).split(':').map(Number);
+    // Round start to nearest 30min
+    if (sm < 15) sm = 0;
+    else if (sm < 45) sm = 30;
+    else { sh++; sm = 0; }
+    while (sh * 60 + sm < eh * 60 + em) {
+      const slot = `${String(sh % 24).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;
+      extraSlots.push(slot);
+      sm += 30; if (sm >= 60) { sh++; sm -= 60; }
+    }
+  });
+
+  const allSlots = [...new Set([...ALL_SLOTS, ...extraSlots])].sort();
+
+  const validSlots = allSlots.filter(s => {
     const h = parseInt(s.split(':')[0]);
-    if(isFri && h < 15) return false;
-    if(!isFri && h < 10) return false;
-    // Hide past slots if today
-    if(isToday && s <= currentHHMM) return false;
+    const isNight = h >= 21 || h < 4; // 21:00 → 03:30
+    if (isFri && h < 15 && !extraSlots.includes(s)) return false;
+    if (!isFri && h < 10 && !extraSlots.includes(s)) return false;
+    if (isNight && !extraSlots.includes(s)) return false;
+    if (isToday && s <= currentHHMM) return false;
+    const isBlocked = blocked.some(b => {
+      const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
+      const startMins = parseInt(b.time_start.slice(0,2)) * 60 + parseInt(b.time_start.slice(3,5));
+      const endMins = parseInt(b.time_end.slice(0,2)) * 60 + parseInt(b.time_end.slice(3,5));
+      return slotMins >= startMins && slotMins < endMins;
+    });
+    if (isBlocked) return false;
     return true;
   });
   grid.innerHTML = validSlots.map(s => {
@@ -1346,9 +1415,14 @@ async function loadConges() {
 }
 
 async function deleteConge(id) {
-  await db.from('blocked_dates').delete().eq('id', id);
+  const { error } = await db.from('blocked_dates').delete().eq('id', id);
+  if(error) {
+    showToast('Erreur: ' + error.message, 'error');
+    return;
+  }
   showToast('Congé supprimé ✓', 'success');
-  loadConges();
+  await loadConges();
+  await loadBlockedDates();
 }
 
 document.getElementById('btn-add-conge').addEventListener('click', async () => {
@@ -1361,10 +1435,77 @@ document.getElementById('btn-add-conge').addEventListener('click', async () => {
     showToast('Jour bloqué ✓', 'success');
     document.getElementById('conge-date').value = '';
     loadConges();
+    loadBlockedDates();
   }
 });
 
 window.deleteConge = deleteConge;
+
+// ── CUSTOM HOURS ──
+async function loadCustomHours() {
+  const { data } = await db.from('custom_hours').select('*').order('date').order('time_start');
+  const list = document.getElementById('ch-list');
+  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(255,255,255,0.3);text-align:center;padding:.5rem">Aucun horaire custom</div>'; return; }
+  list.innerHTML = data.map(r => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;background:rgba(128,207,255,0.05);border:1px solid rgba(128,207,255,0.15)">
+      <span style="font-size:.8rem">${r.type === 'block' ? '🔴' : '🟢'} ${formatDate(r.date)} — ${r.time_start.slice(0,5)} → ${r.time_end.slice(0,5)}</span>
+      <button onclick="deleteCustomHour(${r.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:1rem">×</button>
+    </div>
+  `).join('');
+}
+
+async function deleteCustomHour(id) {
+  const { error } = await db.from('custom_hours').delete().eq('id', id);
+  if (error) { showToast('Erreur!', 'error'); return; }
+  showToast('Supprimé ✓', 'success');
+  loadCustomHours();
+}
+window.deleteCustomHour = deleteCustomHour;
+
+document.getElementById('btn-add-ch').addEventListener('click', async () => {
+  const date = document.getElementById('ch-date').value;
+  const type = document.getElementById('ch-type').value;
+  const startRaw = document.getElementById('ch-start').value;
+  const endRaw = document.getElementById('ch-end').value;
+  if (!date || !startRaw || !endRaw) { showToast('Remplissez tous les champs ⚠️', 'error'); return; }
+
+  function toTime24(val) {
+    if (!val) return null;
+    if (/^\d{2}:\d{2}/.test(val)) return val.slice(0,5) + ':00';
+    const [time, period] = val.split(' ');
+    let [h, m] = time.split(':').map(Number);
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`;
+  }
+
+  const start = toTime24(startRaw);
+  const end = toTime24(endRaw);
+
+  // Handle overnight: start > end = spans midnight
+  if (start >= end) {
+    // Split into 2 inserts: date→23:59 + next day 00:00→end
+    const nextDay = new Date(date);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const nextDayStr = nextDay.toISOString().split('T')[0];
+
+    const [r1, r2] = await Promise.all([
+      db.from('custom_hours').insert({ date, type, time_start: start, time_end: '23:59:00' }),
+      db.from('custom_hours').insert({ date: nextDayStr, type, time_start: '00:00:00', time_end: end })
+    ]);
+    if (r1.error || r2.error) { showToast('Erreur!', 'error'); return; }
+    showToast('Horaire overnight appliqué ✓ (2 jours)', 'success');
+  } else {
+    const { error } = await db.from('custom_hours').insert({ date, type, time_start: start, time_end: end });
+    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
+    showToast('Horaire appliqué ✓', 'success');
+  }
+
+  document.getElementById('ch-date').value = '';
+  document.getElementById('ch-start').value = '';
+  document.getElementById('ch-end').value = '';
+  loadCustomHours();
+});
 
 // ── ADMIN ──
 const ADMIN_PASS = 'Bangs2024!';
