@@ -606,6 +606,13 @@ body {
     <!-- Congés -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ff8080;text-transform:uppercase;margin-top:.5rem">🗓 Congés | أيام العطل</div>
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <select class="form-input" id="conge-barber" style="font-size:.8rem">
+        <option value="">Tous les coiffeurs</option>
+        <option>Younes</option>
+        <option>Mohamed</option>
+        <option>Nadir</option>
+        <option>Islem</option>
+      </select>
       <div style="display:flex;gap:.7rem">
         <input class="form-input" id="conge-date" type="date" style="font-size:.8rem;flex:1">
         <button id="btn-add-conge" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-size:.8rem;white-space:nowrap">+ Bloquer</button>
@@ -623,6 +630,13 @@ body {
           <option value="extra">🟢 Ajouter heures</option>
         </select>
       </div>
+      <select class="form-input" id="ch-barber" style="font-size:.8rem">
+        <option value="">Tous les coiffeurs</option>
+        <option>Younes</option>
+        <option>Mohamed</option>
+        <option>Nadir</option>
+        <option>Islem</option>
+      </select>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <div>
           <label style="font-size:.65rem;color:rgba(255,255,255,0.4);display:block;margin-bottom:.3rem">De</label>
@@ -1052,8 +1066,12 @@ function checkStep1() {
 }
 
 async function loadBlockedDates() {
-  const { data } = await db.from('blocked_dates').select('blocked_date');
-  state.blockedDates = (data || []).map(r => r.blocked_date);
+  const { data } = await db.from('blocked_dates').select('blocked_date, barber');
+  const selectedBarber = state.selectedBarber?.name;
+  // Block date if: barber=null (all) OR barber matches selected
+  state.blockedDates = (data || [])
+    .filter(r => !r.barber || !selectedBarber || r.barber === selectedBarber)
+    .map(r => r.blocked_date);
   renderCalendar();
 }
 
@@ -1108,7 +1126,7 @@ async function selectDate(dateStr) {
       .eq('reservation_date', dateStr)
       .eq('barber', state.selectedBarber?.name || '')
       .neq('status', 'cancelled'),
-    db.from('custom_hours').select('*').eq('date', dateStr)
+    db.from('custom_hours').select('*').eq('date', dateStr).or(`barber.is.null,barber.eq.${state.selectedBarber?.name || ''}`)
   ]);
 
   // Build all blocked slots considering duration
@@ -1810,7 +1828,7 @@ async function loadConges() {
   }
   list.innerHTML = data.map(r => `
     <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,80,80,0.05);border:1px solid rgba(255,80,80,0.2);padding:.7rem 1rem">
-      <span style="font-size:.85rem">🗓 ${formatDate(r.blocked_date)} ${r.reason ? `<span style="color:rgba(255,255,255,0.4);font-size:.7rem">· ${r.reason}</span>` : ''}</span>
+      <span style="font-size:.85rem">🗓 ${formatDate(r.blocked_date)} ${r.barber ? `<span style="color:var(--gold);font-size:.7rem">· ${r.barber}</span>` : '<span style="color:rgba(255,255,255,0.4);font-size:.7rem">· Tous</span>'}</span>
       <button onclick="deleteConge(${r.id})" style="background:none;border:none;color:#ff5555;cursor:pointer;font-size:.9rem">✕</button>
     </div>
   `).join('');
@@ -1829,8 +1847,9 @@ async function deleteConge(id) {
 
 document.getElementById('btn-add-conge').addEventListener('click', async () => {
   const date = document.getElementById('conge-date').value;
+  const barber = document.getElementById('conge-barber').value;
   if(!date) return;
-  const { error } = await db.from('blocked_dates').insert({ blocked_date: date });
+  const { error } = await db.from('blocked_dates').insert({ blocked_date: date, barber: barber || null });
   if(error) {
     showToast('Déjà bloqué!', 'error');
   } else {
@@ -1850,7 +1869,7 @@ async function loadCustomHours() {
   if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(255,255,255,0.3);text-align:center;padding:.5rem">Aucun horaire custom</div>'; return; }
   list.innerHTML = data.map(r => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;background:rgba(128,207,255,0.05);border:1px solid rgba(128,207,255,0.15)">
-      <span style="font-size:.8rem">${r.type === 'block' ? '🔴' : '🟢'} ${formatDate(r.date)} — ${r.time_start.slice(0,5)} → ${r.time_end.slice(0,5)}</span>
+      <span style="font-size:.8rem">${r.type === 'block' ? '🔴' : '🟢'} ${formatDate(r.date)} — ${r.time_start.slice(0,5)} → ${r.time_end.slice(0,5)} ${r.barber ? `<span style="color:var(--gold);font-size:.7rem">· ${r.barber}</span>` : '<span style="color:rgba(255,255,255,0.3);font-size:.7rem">· Tous</span>'}</span>
       <button onclick="deleteCustomHour(${r.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:1rem">×</button>
     </div>
   `).join('');
@@ -1883,22 +1902,20 @@ document.getElementById('btn-add-ch').addEventListener('click', async () => {
 
   const start = toTime24(startRaw);
   const end = toTime24(endRaw);
+  const chBarber = document.getElementById('ch-barber').value || null;
 
-  // Handle overnight: start > end = spans midnight
   if (start >= end) {
-    // Split into 2 inserts: date→23:59 + next day 00:00→end
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
     const nextDayStr = nextDay.toISOString().split('T')[0];
-
     const [r1, r2] = await Promise.all([
-      db.from('custom_hours').insert({ date, type, time_start: start, time_end: '23:59:00' }),
-      db.from('custom_hours').insert({ date: nextDayStr, type, time_start: '00:00:00', time_end: end })
+      db.from('custom_hours').insert({ date, type, time_start: start, time_end: '23:59:00', barber: chBarber }),
+      db.from('custom_hours').insert({ date: nextDayStr, type, time_start: '00:00:00', time_end: end, barber: chBarber })
     ]);
     if (r1.error || r2.error) { showToast('Erreur!', 'error'); return; }
     showToast('Horaire overnight appliqué ✓ (2 jours)', 'success');
   } else {
-    const { error } = await db.from('custom_hours').insert({ date, type, time_start: start, time_end: end });
+    const { error } = await db.from('custom_hours').insert({ date, type, time_start: start, time_end: end, barber: chBarber });
     if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
     showToast('Horaire appliqué ✓', 'success');
   }
