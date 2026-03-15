@@ -133,7 +133,7 @@ body {
 .nav-item svg { width:20px; height:20px; }
 
 /* ── BOOKING PAGE ── */
-#page-booking, #page-mybookings, #page-hours { background:var(--bg); padding-bottom:calc(8rem + env(safe-area-inset-bottom)); }
+#page-booking, #page-mybookings, #page-hours, #page-boutique { background:var(--bg); padding-bottom:calc(8rem + env(safe-area-inset-bottom)); }
 
 .page-header {
   padding:2.5rem 1.5rem 1.5rem;
@@ -419,9 +419,13 @@ body {
       </div>
     </div>
   </div>
-</div>
 
-<!-- PAGE: BOOKING -->
+  <!-- Products Section -->
+  <div style="padding:1.5rem;width:100%;box-sizing:border-box">
+    <div style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;text-align:center">🛍 Nos Produits | منتجاتنا</div>
+    <div id="products-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"></div>
+  </div>
+</div>
 <div class="page" id="page-booking">
   <div class="page-header">
     <div class="label">Nouveau rendez-vous</div>
@@ -455,7 +459,7 @@ body {
   <div class="step-content active" id="step-1">
     <div class="services-list" id="services-list"></div>
     <div style="margin-top:1.5rem">
-      <label class="form-label">Choisir le coiffeur | اختر الحلاق</label>
+      <label class="form-label" style="color:var(--gold);font-size:.65rem;letter-spacing:.25em;text-transform:uppercase">Choisir le coiffeur | اختر الحلاق</label>
       <div class="barbers-list" id="barbers-list"></div>
     </div>
     <button class="btn-next" id="btn-next-1" disabled>Choisir la date →</button>
@@ -545,13 +549,17 @@ body {
         <div class="contact-icon">📞</div>
         <div><div class="contact-lbl">Téléphone</div><div class="contact-val">0551 258 141</div></div>
       </a>
-      <a href="https://instagram.com/barber_bangs_dz" target="_blank" class="contact-card">
+      <a href="https://www.instagram.com/barber_bangs_dz?igsh=Y3dmNm9wZTM4cG1q" target="_blank" class="contact-card">
         <div class="contact-icon">📸</div>
         <div><div class="contact-lbl">Instagram</div><div class="contact-val">@barber_bangs_dz</div></div>
       </a>
-      <a href="https://facebook.com/barber_bangs_dz" target="_blank" class="contact-card">
+      <a href="https://facebook.com/profile.php?id=100054530256562&mibextid=LQQJ4d" target="_blank" class="contact-card">
         <div class="contact-icon">👥</div>
-        <div><div class="contact-lbl">Facebook</div><div class="contact-val">@barber_bangs_dz</div></div>
+        <div><div class="contact-lbl">Facebook</div><div class="contact-val">BANGS Barber Shop</div></div>
+      </a>
+      <a href="https://maps.app.goo.gl/JEtZ6weUBzZep1VP6" target="_blank" class="contact-card">
+        <div class="contact-icon">📍</div>
+        <div><div class="contact-lbl">Google Maps</div><div class="contact-val">Notre adresse</div></div>
       </a>
     </div>
   </div>
@@ -705,6 +713,26 @@ body {
     <div id="filter-summary" style="display:none;margin:0 1.5rem .5rem;padding:.7rem 1rem;background:rgba(26,107,107,0.1);border:1px solid rgba(26,107,107,0.25);font-size:.75rem;color:rgba(255,255,255,0.6)"></div>
 
     <div id="admin-bookings" style="padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem"></div>
+
+    <!-- Admin Products -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#b0f0b0;text-transform:uppercase;margin-top:1rem">🛍 Produits | المنتجات</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="prod-name" type="text" placeholder="Nom produit" style="font-size:.8rem">
+        <input class="form-input" id="prod-price" type="number" placeholder="Prix (DA)" style="font-size:.8rem">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="prod-stock" type="number" placeholder="Stock" style="font-size:.8rem">
+        <input class="form-input" id="prod-desc" type="text" placeholder="Description (opt)" style="font-size:.8rem">
+      </div>
+      <input class="form-input" id="prod-img" type="text" placeholder="URL image (optionnel)" style="font-size:.8rem">
+      <button id="btn-add-product" style="background:rgba(176,240,176,0.1);border:1px solid rgba(176,240,176,0.3);color:#b0f0b0;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter produit</button>
+      <div id="admin-products-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
+    <!-- Admin Orders -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ffd580;text-transform:uppercase;margin-top:.5rem">📦 Commandes | الطلبات</div>
+    <div id="admin-orders-list" style="padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.7rem"></div>
   </div>
 </div>
 
@@ -753,6 +781,41 @@ body {
   </div>
 </div>
 
+<!-- BOUTIQUE PAGE -->
+<div class="page" id="page-boutique">
+  <div style="padding:1.5rem 1.5rem .5rem;display:flex;justify-content:space-between;align-items:center">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.8rem">Boutique 🛍️</h1>
+  </div>
+  <div id="products-list" style="padding:0 1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem"></div>
+</div>
+
+<!-- ORDER MODAL -->
+<div id="order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;padding:1.5rem;overflow-y:auto">
+  <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:1.5rem;max-width:500px;margin:2rem auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)" id="order-product-name">Commander</h2>
+      <button onclick="closeOrderModal()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nom</label>
+      <input class="form-input" id="order-name" type="text" placeholder="Votre nom">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Téléphone</label>
+      <input class="form-input" id="order-phone" type="tel" placeholder="Ex: 0551258141">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantité</label>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <button onclick="changeQty(-1)" style="background:var(--card2);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.2rem">−</button>
+        <span id="order-qty" style="font-size:1.2rem;font-weight:600;min-width:2rem;text-align:center">1</span>
+        <button onclick="changeQty(1)" style="background:var(--card2);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.2rem">+</button>
+      </div>
+    </div>
+    <button id="btn-order-confirm" class="btn-next" style="margin-top:.5rem">✓ Commander</button>
+  </div>
+</div>
+
 <!-- TV MODE -->
 <div id="tv-mode">
   <div class="tv-header">
@@ -788,6 +851,10 @@ body {
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     Horaires
   </button>
+  <button class="nav-item" id="nav-boutique">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+    Boutique
+  </button>
   <button class="nav-item" id="nav-admin">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
     Admin
@@ -803,28 +870,32 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── SERVICES ──
 const SERVICES = [
-  { id:1, name:'Coupe', emoji:'✂️', duration:'30 min', price:'À confirmer' },
-  { id:2, name:'Barbe', emoji:'🪒', duration:'20 min', price:'À confirmer' },
-  { id:3, name:'Coupe + Barbe', emoji:'💈', duration:'45 min', price:'À confirmer' },
-  { id:4, name:'Coloration', emoji:'⚡', duration:'60 min', price:'À confirmer' },
-  { id:5, name:'Soin capillaire', emoji:'🧴', duration:'30 min', price:'À confirmer' },
-  { id:6, name:'Coupe Enfant', emoji:'👦', duration:'20 min', price:'À confirmer' },
+  { id:1, name:'Wolf Cut', emoji:'🐺', duration:'45 min', price:'À confirmer', category:'Coupe', img:'https://i.imgur.com/rxXR2UB.jpeg' },
+  { id:2, name:'Fade', emoji:'✂️', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:3, name:'Low Fade', emoji:'💈', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:4, name:'Dégradé', emoji:'⚡', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:9, name:'Coupe Enfant', emoji:'👦', duration:'30 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:5, name:'Barbe', emoji:'🪒', duration:'20 min', price:'À confirmer', category:'Barbe', img:null },
+  { id:6, name:'Coupe + Barbe', emoji:'💇', duration:'60 min', price:'À confirmer', category:'Combo', img:null },
+  { id:7, name:'Coloration', emoji:'🎨', duration:'60 min', price:'À confirmer', category:'Soin', img:null },
+  { id:8, name:'Protéine', emoji:'💊', duration:'1h 30min', price:'À confirmer', category:'Soin', durationMins:90, img:null },
 ];
 
 // ── BARBERS ──
 const BARBERS = [
-  { id:1, name:'Younes', emoji:'💈' },
-  { id:2, name:'Mohamed', emoji:'✂️' },
-  { id:3, name:'Nadir', emoji:'🪒' },
-  { id:4, name:'Islem', emoji:'⭐' },
+  { id:1, name:'Younes', emoji:'💈', photo:'https://i.imgur.com/BuWVZzL.jpg', instagram:'barber_bangs_dz', speciality:'Dégradé & Barbe' },
+  { id:2, name:'Mohamed', emoji:'✂️', photo:'https://i.imgur.com/4QjEuQu.jpg', instagram:'barber_bangs_dz', speciality:'Wolf Cut & Fade' },
+  { id:3, name:'Nadir', emoji:'🪒', photo:null, instagram:'barber_bangs_dz', speciality:'Low Fade & Coupe' },
+  { id:4, name:'Islem', emoji:'⭐', photo:'https://i.imgur.com/yj5gxRx.jpg', instagram:'barber_bangs_dz', speciality:'Coupe & Soin' },
 ];
 
 // ── TIME SLOTS ──
-const ALL_SLOTS = ['10:00','10:30','11:00','11:30','12:00','12:30',
-  '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30',
-  '17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30',
-  '21:00','21:30','22:00','22:30','23:00','23:30',
-  '00:00','00:30','01:00','01:30','02:00','02:30','03:00','03:30'];
+const ALL_SLOTS = [
+  '10:00','10:45','11:30','12:15','13:00','13:45',
+  '14:30','15:15','16:00','16:45','17:30','18:15',
+  '19:00','19:45','20:30',
+  '21:15','22:00','22:45','23:30','00:15','01:00','01:45','02:30','03:15'
+];
 
 // ── STATE ──
 let state = {
@@ -849,9 +920,10 @@ function showPage(p) {
   document.getElementById('nav-' + p).classList.add('active');
   state.page = p;
   if (p === 'reviews') loadReviews();
-
+  if (p === 'boutique') loadProducts();
   if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); }
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); }
+  if (p === 'home') loadProducts();
 }
 
 // ── STEPS ──
@@ -879,22 +951,76 @@ function updateStepIndicators(current) {
 }
 
 // ── SERVICES ──
+let openCategory = null;
+let expandedService = null;
+
 function renderServices() {
   const list = document.getElementById('services-list');
-  list.innerHTML = SERVICES.map(s => `
-    <div class="service-card ${state.selectedService?.id === s.id ? 'selected':''}" onclick="selectService(${s.id})">
-      <div class="service-info">
-        <span class="service-emoji">${s.emoji}</span>
-        <div>
-          <div class="service-name">${s.name}</div>
-          <div class="service-duration">⏱ ${s.duration}</div>
+  const categoryOrder = ['Coupe', 'Barbe', 'Combo', 'Soin'];
+  list.innerHTML = categoryOrder.map(cat => {
+    const services = SERVICES.filter(s => s.category === cat);
+    if (!services.length) return '';
+    const isOpen = openCategory === cat;
+    return `
+      <div style="border:1px solid var(--border);overflow:hidden;margin-bottom:.5rem">
+        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:var(--card);user-select:none">
+          <div style="display:flex;align-items:center;gap:.7rem">
+            <span style="color:var(--gold);font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
+            <span style="font-weight:600;font-size:.95rem">${cat}</span>
+          </div>
         </div>
+        ${isOpen ? `
+          <div style="background:var(--card2);display:flex;flex-direction:column;gap:.5rem;padding:.7rem">
+            ${services.map(s => {
+              const isExpanded = expandedService === s.id;
+              const isSelected = state.selectedService?.id === s.id;
+              return `
+                <div style="border:1px solid ${isSelected?'var(--gold)':'var(--border)'};overflow:hidden;background:var(--card)">
+                  <div onclick="toggleService(${s.id})" style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;cursor:pointer">
+                    <div style="display:flex;align-items:center;gap:.7rem">
+                      <span style="font-size:1.2rem">${s.emoji}</span>
+                      <span style="font-size:.85rem;font-weight:500">${s.name}</span>
+                    </div>
+                    <span style="color:var(--gold);font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
+                  </div>
+                  ${isExpanded ? `
+                    <div style="border-top:1px solid var(--border)">
+                      ${s.img ? `<img src="${s.img}" style="width:100%;height:380px;object-fit:cover;object-position:top;display:block">` : ''}
+                      <div style="padding:.8rem 1rem;display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                          <div style="font-size:.7rem;color:rgba(255,255,255,0.4)">⏱ ${s.duration}</div>
+                          <div style="font-size:.9rem;color:var(--gold);font-weight:700;margin-top:.2rem">${s.price}</div>
+                        </div>
+                        <button onclick="selectService(${s.id})" style="background:${isSelected?'var(--gold)':'rgba(201,168,76,0.15)'};border:1px solid var(--gold);color:${isSelected?'#000':'var(--gold)'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
+                          ${isSelected?'✓ Sélectionné':'Choisir'}
+                        </button>
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : ''}
       </div>
-      <div class="service-price">${s.price}</div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
   renderBarbers();
 }
+
+function toggleCategory(cat) {
+  openCategory = openCategory === cat ? null : cat;
+  expandedService = null;
+  renderServices();
+}
+
+function toggleService(id) {
+  expandedService = expandedService === id ? null : id;
+  renderServices();
+}
+
+window.toggleCategory = toggleCategory;
+window.toggleService = toggleService;
 
 function selectService(id) {
   state.selectedService = SERVICES.find(s => s.id === id);
@@ -906,8 +1032,11 @@ function renderBarbers() {
   const list = document.getElementById('barbers-list');
   list.innerHTML = BARBERS.map(b => `
     <div class="barber-card ${state.selectedBarber?.id === b.id ? 'selected':''}" onclick="selectBarber(${b.id})">
-      <div class="barber-avatar">${b.emoji}</div>
+      ${b.photo 
+        ? `<div class="barber-avatar" style="padding:0;overflow:hidden"><img src="${b.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
+        : `<div class="barber-avatar">${b.emoji}</div>`}
       <div class="barber-name">${b.name}</div>
+      ${b.speciality ? `<div style="font-size:.6rem;color:rgba(255,255,255,0.4);text-align:center;margin-top:.2rem">${b.speciality}</div>` : ''}
     </div>
   `).join('');
 }
@@ -975,13 +1104,29 @@ async function selectDate(dateStr) {
   document.getElementById('slots-grid').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
   // Load booked slots + custom hours together
   const [slotsRes, chRes] = await Promise.all([
-    db.from('reservations').select('reservation_time')
+    db.from('reservations').select('reservation_time, service')
       .eq('reservation_date', dateStr)
       .eq('barber', state.selectedBarber?.name || '')
       .neq('status', 'cancelled'),
     db.from('custom_hours').select('*').eq('date', dateStr)
   ]);
-  state.bookedSlots = (slotsRes.data || []).map(r => r.reservation_time);
+
+  // Build all blocked slots considering duration
+  const bookedSet = new Set();
+  (slotsRes.data || []).forEach(r => {
+    const svc = SERVICES.find(s => s.name === r.service);
+    const dur = svc?.durationMins || 45;
+    const slots = Math.ceil(dur / 45);
+    const [h, m] = r.reservation_time.split(':').map(Number);
+    const startMins = h * 60 + m;
+    for (let i = 0; i < slots; i++) {
+      const mins = startMins + i * 45;
+      const sh = String(Math.floor(mins / 60) % 24).padStart(2,'0');
+      const sm = String(mins % 60).padStart(2,'0');
+      bookedSet.add(`${sh}:${sm}`);
+    }
+  });
+  state.bookedSlots = [...bookedSet];
   state.customHours = chRes.data || [];
   renderSlots();
 }
@@ -1038,8 +1183,19 @@ function renderSlots() {
     if (isBlocked) return false;
     return true;
   });
+  const serviceDuration = state.selectedService?.durationMins || 45;
+  const slotsNeeded = Math.ceil(serviceDuration / 45);
+
   grid.innerHTML = validSlots.map(s => {
-    const isBooked = state.bookedSlots.includes(s);
+    const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
+    // Check if this slot AND next required slots are all free
+    let isBooked = false;
+    for (let i = 0; i < slotsNeeded; i++) {
+      const checkMins = slotMins + i * 45;
+      const checkH = String(Math.floor(checkMins / 60) % 24).padStart(2,'0');
+      const checkM = String(checkMins % 60).padStart(2,'0');
+      if (state.bookedSlots.includes(`${checkH}:${checkM}`)) { isBooked = true; break; }
+    }
     const isSelected = state.selectedTime === s;
     return `<div class="slot ${isBooked?'booked':''} ${isSelected?'selected':''}" onclick="${isBooked?'':'selectSlot(\''+s+'\')'}">${s}</div>`;
   }).join('');
@@ -1208,6 +1364,7 @@ function showToast(msg, type='success') {
 
 // ── INIT ──
 renderServices();
+loadProducts();
 
 document.getElementById('nav-home').addEventListener('click', () => showPage('home'));
 document.getElementById('nav-booking').addEventListener('click', () => showPage('booking'));
@@ -1306,6 +1463,86 @@ document.getElementById('btn-delete-today').addEventListener('click', async () =
   }
 });
 
+// ── BOUTIQUE ──
+let currentProduct = null;
+let orderQty = 1;
+
+async function loadProducts() {
+  const container = document.getElementById('products-list');
+  container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+  const { data } = await db.from('products').select('*').order('id');
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:span 2"><div class="icon">🛍️</div><p>Aucun produit disponible</p></div>';
+    return;
+  }
+  container.innerHTML = data.map(p => `
+    <div style="background:var(--card);border:1px solid var(--border);overflow:hidden">
+      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:140px;object-fit:cover">` : `<div style="width:100%;height:140px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🛍️</div>`}
+      <div style="padding:.8rem">
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.3rem">${p.name}</div>
+        ${p.description ? `<div style="font-size:.7rem;color:rgba(255,255,255,0.4);margin-bottom:.5rem">${p.description}</div>` : ''}
+        <div style="color:var(--gold);font-weight:700;font-size:.9rem;margin-bottom:.5rem">${p.price} DA</div>
+        <div style="font-size:.65rem;color:${p.stock > 0 ? '#7fffaa' : '#ff8080'};margin-bottom:.7rem">${p.stock > 0 ? `✓ En stock (${p.stock})` : '✗ Rupture'}</div>
+        ${p.stock > 0 ? `<button onclick="openOrderModal(${p.id}, '${p.name.replace(/'/g,"\\'")}', ${p.stock})" style="width:100%;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.6rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">Commander</button>` : `<button disabled style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:rgba(255,255,255,0.2);padding:.6rem;font-size:.75rem;font-family:'DM Sans',sans-serif;cursor:not-allowed">Indisponible</button>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+function openOrderModal(id, name, stock) {
+  currentProduct = { id, name, stock };
+  orderQty = 1;
+  document.getElementById('order-product-name').textContent = '🛍️ ' + name;
+  document.getElementById('order-qty').textContent = '1';
+  document.getElementById('order-name').value = '';
+  document.getElementById('order-phone').value = '';
+  document.getElementById('order-modal').style.display = 'block';
+}
+
+function closeOrderModal() {
+  document.getElementById('order-modal').style.display = 'none';
+  currentProduct = null;
+}
+
+function changeQty(delta) {
+  orderQty = Math.max(1, Math.min(currentProduct?.stock || 1, orderQty + delta));
+  document.getElementById('order-qty').textContent = orderQty;
+}
+
+document.getElementById('btn-order-confirm').addEventListener('click', async () => {
+  const name = document.getElementById('order-name').value.trim();
+  const phone = document.getElementById('order-phone').value.trim();
+  if (!name || !phone) { showToast('Remplissez tous les champs ⚠️', 'error'); return; }
+  if (!/^0\d{9}$/.test(phone)) { showToast('Numéro invalide ⚠️', 'error'); return; }
+
+  const btn = document.getElementById('btn-order-confirm');
+  btn.disabled = true; btn.textContent = '...';
+
+  const { error } = await db.from('orders').insert({
+    client_name: name,
+    client_phone: phone,
+    product_id: currentProduct.id,
+    product_name: currentProduct.name,
+    quantity: orderQty
+  });
+
+  if (error) {
+    showToast('Erreur!', 'error');
+  } else {
+    // Decrease stock
+    await db.rpc('decrement_stock', { product_id: currentProduct.id, qty: orderQty });
+    showToast('Commande envoyée! ✓', 'success');
+    closeOrderModal();
+    loadProducts();
+  }
+  btn.disabled = false; btn.textContent = '✓ Commander';
+});
+
+document.getElementById('nav-boutique').addEventListener('click', () => showPage('boutique'));
+window.openOrderModal = openOrderModal;
+window.closeOrderModal = closeOrderModal;
+window.changeQty = changeQty;
+
 // ── WALK-IN ──
 function openWalkin() {
   // Fill time select with today's slots
@@ -1377,6 +1614,171 @@ document.getElementById('btn-walkin-confirm').addEventListener('click', async ()
 });
 
 window.closeWalkin = closeWalkin;
+
+// ── PRODUCTS ──
+let currentOrderProduct = null;
+
+async function loadProducts() {
+  const { data } = await db.from('products').select('*').order('id');
+  const grid = document.getElementById('products-grid');
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);font-size:.8rem;padding:1rem">Aucun produit disponible</div>';
+    return;
+  }
+  grid.innerHTML = data.map(p => `
+    <div style="background:var(--card);border:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;gap:.5rem">
+      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:120px;object-fit:cover;border-radius:2px">` : '<div style="width:100%;height:80px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:2rem">🛍</div>'}
+      <div style="font-weight:600;font-size:.85rem">${p.name}</div>
+      ${p.description ? `<div style="font-size:.7rem;color:rgba(255,255,255,0.4)">${p.description}</div>` : ''}
+      <div style="color:var(--gold);font-weight:700;font-size:.9rem">${p.price.toLocaleString()} DA</div>
+      <div style="font-size:.65rem;color:${p.stock > 0 ? '#7fffaa' : '#ff8080'}">${p.stock > 0 ? `✓ En stock (${p.stock})` : '✗ Rupture de stock'}</div>
+      ${p.stock > 0 ? `<button onclick="openOrderModal(${p.id},'${p.name.replace(/'/g,"\\'")}',${p.price},${p.stock})" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.6rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">Commander</button>` : ''}
+    </div>
+  `).join('');
+}
+
+function openOrderModal(id, name, price, stock) {
+  currentOrderProduct = { id, name, price, stock };
+  orderQty = 1;
+  document.getElementById('order-qty').textContent = 1;
+  document.getElementById('order-product-info').innerHTML = `<strong>${name}</strong> — <span style="color:var(--gold)">${price.toLocaleString()} DA</span>`;
+  document.getElementById('order-name').value = '';
+  document.getElementById('order-phone').value = '';
+  document.getElementById('order-modal').style.display = 'block';
+}
+
+function closeOrderModal() {
+  document.getElementById('order-modal').style.display = 'none';
+  currentOrderProduct = null;
+}
+window.closeOrderModal = closeOrderModal;
+
+function changeQty(delta) {
+  orderQty = Math.max(1, Math.min(currentOrderProduct?.stock || 1, orderQty + delta));
+  document.getElementById('order-qty').textContent = orderQty;
+}
+window.changeQty = changeQty;
+
+document.getElementById('btn-order-confirm').addEventListener('click', async () => {
+  const name = document.getElementById('order-name').value.trim();
+  const phone = document.getElementById('order-phone').value.trim();
+  if (!name || !phone) { showToast('Remplissez tous les champs ⚠️', 'error'); return; }
+  if (!/^0\d{9}$/.test(phone)) { showToast('Numéro invalide ⚠️', 'error'); return; }
+
+  const btn = document.getElementById('btn-order-confirm');
+  btn.disabled = true;
+
+  const { error } = await db.from('orders').insert({
+    client_name: name,
+    client_phone: phone,
+    product_id: currentOrderProduct.id,
+    product_name: currentOrderProduct.name,
+    quantity: orderQty,
+    status: 'pending'
+  });
+
+  if (error) { showToast('Erreur!', 'error'); btn.disabled = false; return; }
+
+  // Decrease stock
+  await db.from('products').update({ stock: currentOrderProduct.stock - orderQty }).eq('id', currentOrderProduct.id);
+
+  showToast('Commande envoyée! ✓', 'success');
+  closeOrderModal();
+  loadProducts();
+  btn.disabled = false;
+});
+
+// ── ADMIN ORDERS ──
+async function loadAdminOrders() {
+  const { data } = await db.from('orders').select('*').order('created_at', { ascending: false });
+  const container = document.getElementById('admin-orders-list');
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:.8rem;padding:1rem">Aucune commande</div>';
+    return;
+  }
+  container.innerHTML = data.map(o => `
+    <div style="background:var(--card2);border:1px solid var(--border);border-left:3px solid ${o.status === 'done' ? '#7fffaa' : 'var(--gold)'};padding:1rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem">
+      <div>
+        <div style="font-weight:600;font-size:.85rem">${o.product_name} × ${o.quantity}</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,0.5)">${o.client_name} · ${o.client_phone}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,0.3)">${new Date(o.created_at).toLocaleString('fr-FR')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+        <span style="font-size:.65rem;padding:.2rem .5rem;background:${o.status === 'done' ? 'rgba(127,255,170,0.1)' : 'rgba(201,168,76,0.1)'};color:${o.status === 'done' ? '#7fffaa' : 'var(--gold)'}">${o.status === 'done' ? '✓ Livré' : '⏳ En attente'}</span>
+        ${o.status !== 'done' ? `<button onclick="markOrderDone(${o.id})" style="background:rgba(127,255,170,0.1);border:1px solid rgba(127,255,170,0.3);color:#7fffaa;padding:.3rem .6rem;cursor:pointer;font-size:.65rem">✓ Livré</button>` : ''}
+        <button onclick="deleteOrder(${o.id})" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.65rem">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function markOrderDone(id) {
+  await db.from('orders').update({ status: 'done' }).eq('id', id);
+  loadAdminOrders();
+}
+window.markOrderDone = markOrderDone;
+
+async function deleteOrder(id) {
+  await db.from('orders').delete().eq('id', id);
+  loadAdminOrders();
+}
+window.deleteOrder = deleteOrder;
+
+// ── ADMIN PRODUCTS ──
+async function loadAdminProducts() {
+  const { data } = await db.from('products').select('*').order('id');
+  const container = document.getElementById('admin-products-list');
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:.8rem;padding:.5rem">Aucun produit</div>';
+    return;
+  }
+  container.innerHTML = data.map(p => `
+    <div style="background:var(--card2);border:1px solid var(--border);padding:.8rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem">
+      <div>
+        <div style="font-weight:600;font-size:.85rem">${p.name}</div>
+        <div style="font-size:.75rem;color:var(--gold)">${p.price.toLocaleString()} DA · Stock: <span style="color:${p.stock > 0 ? '#7fffaa' : '#ff8080'}">${p.stock}</span></div>
+      </div>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <button onclick="updateStock(${p.id},${p.stock},-1)" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;width:2rem;height:2rem;cursor:pointer;font-size:1rem">−</button>
+        <button onclick="updateStock(${p.id},${p.stock},1)" style="background:rgba(127,255,170,0.1);border:1px solid rgba(127,255,170,0.3);color:#7fffaa;width:2rem;height:2rem;cursor:pointer;font-size:1rem">+</button>
+        <button onclick="deleteProduct(${p.id})" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .5rem;cursor:pointer;font-size:.7rem">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updateStock(id, current, delta) {
+  const newStock = Math.max(0, current + delta);
+  await db.from('products').update({ stock: newStock }).eq('id', id);
+  loadAdminProducts();
+}
+window.updateStock = updateStock;
+
+async function deleteProduct(id) {
+  if (!confirm('Supprimer ce produit?')) return;
+  await db.from('products').delete().eq('id', id);
+  loadAdminProducts();
+}
+window.deleteProduct = deleteProduct;
+
+document.getElementById('btn-add-product').addEventListener('click', async () => {
+  const name = document.getElementById('prod-name').value.trim();
+  const price = parseInt(document.getElementById('prod-price').value);
+  const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+  const desc = document.getElementById('prod-desc').value.trim();
+  const img = document.getElementById('prod-img').value.trim();
+  if (!name || !price) { showToast('Nom et prix obligatoires ⚠️', 'error'); return; }
+  const { error } = await db.from('products').insert({ name, price, stock, description: desc || null, image_url: img || null });
+  if (error) { showToast('Erreur!', 'error'); return; }
+  showToast('Produit ajouté ✓', 'success');
+  document.getElementById('prod-name').value = '';
+  document.getElementById('prod-price').value = '';
+  document.getElementById('prod-stock').value = '';
+  document.getElementById('prod-desc').value = '';
+  document.getElementById('prod-img').value = '';
+  loadAdminProducts();
+  loadProducts();
+});
 
 // ── SOUND ──
 function playNotificationSound() {
@@ -1680,7 +2082,9 @@ async function renderTVMode() {
     return `
       <div class="tv-col">
         <div class="tv-col-header">
-          <div style="font-size:1.5rem">${b.emoji}</div>
+          ${b.photo 
+            ? `<img src="${b.photo}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;margin:0 auto .3rem;display:block;border:2px solid var(--gold)">`
+            : `<div style="font-size:1.5rem">${b.emoji}</div>`}
           <div class="tv-col-name">${b.name}</div>
           <div class="tv-col-count">${rdvs.filter(r=>r.status!=='cancelled').length} RDV aujourd'hui</div>
         </div>
@@ -1785,6 +2189,34 @@ async function checkUpcomingTickets() {
 setInterval(checkUpcomingTickets, 30000);
 
 </script>
+
+<!-- Order Modal -->
+<div id="order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;padding:1.5rem;overflow-y:auto">
+  <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:1.5rem;max-width:500px;margin:2rem auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">🛍 Commander</h2>
+      <button onclick="closeOrderModal()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div id="order-product-info" style="padding:.8rem;background:rgba(201,168,76,0.05);border:1px solid var(--border);margin-bottom:1rem;font-size:.85rem"></div>
+    <div class="form-group">
+      <label class="form-label">Votre nom</label>
+      <input class="form-input" id="order-name" type="text" placeholder="Ex: Ahmed">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Téléphone</label>
+      <input class="form-input" id="order-phone" type="tel" placeholder="Ex: 0551258141">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantité</label>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <button onclick="changeQty(-1)" style="background:rgba(255,255,255,0.1);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;font-size:1.2rem;cursor:pointer">−</button>
+        <span id="order-qty" style="font-size:1.2rem;font-weight:600;min-width:2rem;text-align:center">1</span>
+        <button onclick="changeQty(1)" style="background:rgba(255,255,255,0.1);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;font-size:1.2rem;cursor:pointer">+</button>
+      </div>
+    </div>
+    <button id="btn-order-confirm" class="btn-next" style="margin-top:.5rem">✓ Confirmer la commande</button>
+  </div>
+</div>
 
 <!-- Ticket Alert Overlay -->
 <div id="ticket-alert-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem" onclick="closeTicketAlert()">
