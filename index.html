@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<link rel="manifest" href="/manifest.json">
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c9a84c">
 <title>BANGS Barber Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -2339,15 +2340,17 @@ async function requestPushPermission(reservationId) {
 
 function setupRealtimeListener(reservationId) {
   if (!reservationId) return;
-  db.channel('reservation-' + reservationId)
+  // Store reservation ID for this session
+  window._myReservationId = reservationId;
+  
+  db.channel('bangs-calling')
     .on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
-      table: 'reservations',
-      filter: `id=eq.${reservationId}`
+      table: 'reservations'
     }, payload => {
-      if (payload.new?.status === 'calling') {
-        // Vibrate + sound + alert
+      // Check if this update is for MY reservation
+      if (payload.new?.id === window._myReservationId && payload.new?.status === 'calling') {
         if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
         playNotificationSound();
         showTicketAlert(
@@ -2358,7 +2361,9 @@ function setupRealtimeListener(reservationId) {
         );
       }
     })
-    .subscribe();
+    .subscribe((status) => {
+      console.log('Realtime status:', status);
+    });
 }
 
 // Admin: Appeler suivant
