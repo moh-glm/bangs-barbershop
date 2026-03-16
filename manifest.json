@@ -1,0 +1,15 @@
+{
+  "name": "BANGS Barber Shop",
+  "short_name": "BANGS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080f0f",
+  "theme_color": "#c9a84c",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/TM7bCGmD/5888968061031747260-1.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    }
+  ]
+}
