@@ -1364,6 +1364,11 @@ async function confirmBooking() {
         <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:700">#${insertData?.daily_ticket || insertData?.id || '—'}</div>
         <div style="font-size:.7rem;color:rgba(255,255,255,0.4)">Montrez ce numéro au barbier</div>
       </div>
+      <div id="notif-btn-wrap" style="margin-bottom:1rem">
+        <button onclick="activateAlerts()" style="width:100%;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.4);color:#34d399;padding:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">
+          🔔 Activer les alertes — je veux être notifié quand c'est mon tour
+        </button>
+      </div>
       <div style="display:flex;flex-direction:column;gap:.6rem">
         <div style="display:flex;justify-content:space-between">
           <span style="font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em">Coiffeur</span>
@@ -1387,8 +1392,8 @@ async function confirmBooking() {
     localStorage.setItem('bangs_phone', document.getElementById('inp-phone').value.trim());
     playNotificationSound();
     showToast('Réservation confirmée! ✓', 'success');
-    // Request push notification permission
-    await requestPushPermission(insertData?.id);
+    // Setup realtime listener
+    setupRealtimeListener(insertData?.id);
     goStep(5);
   }
 }
@@ -2305,6 +2310,22 @@ async function loadStats() {
 
 document.getElementById('btn-stats-mode').addEventListener('click', openStatsMode);
 
+async function activateAlerts() {
+  if (!('Notification' in window)) {
+    showToast('Notifications non supportées sur ce navigateur', 'error');
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    document.getElementById('notif-btn-wrap').innerHTML = 
+      '<div style="text-align:center;color:#34d399;font-size:.8rem;padding:.5rem">✓ Alertes activées — vous serez notifié!</div>';
+    showToast('Alertes activées! ✓', 'success');
+  } else {
+    showToast('Permission refusée — restez sur la page pour recevoir les alertes', 'error');
+  }
+}
+window.activateAlerts = activateAlerts;
+
 // ── PUSH NOTIFICATIONS ──
 const VAPID_PUBLIC = 'BERMiRT5JXwFxZDo2pp2rjcfKfo7f464g9znXrNLr2Bn0etaigEL-JPDD1YwLigsozK2QAodpCOrbz5gu1FvpPo';
 
@@ -2359,6 +2380,14 @@ function setupRealtimeListener(reservationId) {
           payload.new.service,
           payload.new.barber
         );
+        // Browser notification if permission granted
+        if (Notification.permission === 'granted') {
+          new Notification('BANGS Barber Shop 💈', {
+            body: `C'est votre tour! Ticket #${payload.new.daily_ticket || payload.new.id}`,
+            icon: 'https://i.ibb.co/TM7bCGmD/5888968061031747260-1.jpg',
+            vibrate: [300, 100, 300]
+          });
+        }
       }
     })
     .subscribe((status) => {
