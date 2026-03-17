@@ -4,29 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#c9a84c">
+<meta name="theme-color" content="#000000">
 <title>BANGS Barber Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
-  --teal: #1a6b6b;
-  --teal-dark: #0f4444;
-  --teal-light: #2a9090;
-  --gold: #c9a84c;
-  --gold-light: #e8c870;
-  --white: #f5f0e8;
-  --bg: #080f0f;
-  --card: #0f1f1f;
-  --card2: #162828;
-  --border: rgba(26,107,107,0.25);
+  --teal: #222222;
+  --teal-dark: #111111;
+  --teal-light: #444444;
+  --gold: #111111;
+  --gold-light: #333333;
+  --white: #111111;
+  --bg: #f5f5f5;
+  --card: #ffffff;
+  --card2: #f0f0f0;
+  --border: rgba(0,0,0,0.12);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
-  background: var(--bg);
-  color: var(--white);
+  background: #f5f5f5;
+  color: #111111;
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
@@ -38,7 +38,7 @@ body {
 
 /* ── HERO ── */
 #page-home {
-  background: linear-gradient(160deg, #0d3535 0%, #080f0f 55%, #0a1a12 100%);
+  background: linear-gradient(160deg, #e8e8e8 0%, #f5f5f5 55%, #eeeeee 100%);
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -50,15 +50,15 @@ body {
 #page-home::before {
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(ellipse at 60% 20%, rgba(26,107,107,0.2) 0%, transparent 60%),
-              radial-gradient(ellipse at 20% 80%, rgba(201,168,76,0.06) 0%, transparent 50%);
+  background: radial-gradient(ellipse at 60% 20%, rgba(0,0,0,0.03) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(0,0,0,0.02) 0%, transparent 50%);
 }
 
 .hero-stars { display:flex; gap:.4rem; justify-content:center; margin-bottom:.8rem; }
-.hero-stars span { color:var(--gold); font-size:.9rem; }
+.hero-stars span { color:#111111; font-size:.9rem; }
 
 .hero-label {
-  font-size:.6rem; letter-spacing:.4em; color:rgba(245,240,232,0.4);
+  font-size:.6rem; letter-spacing:.4em; color:rgba(0,0,0,0.5);
   text-transform:uppercase; margin-bottom:1rem;
 }
 
@@ -66,27 +66,27 @@ body {
   font-family:'Playfair Display',serif;
   font-size: clamp(5rem, 24vw, 8rem);
   font-weight:900; line-height:.85;
-  color:var(--white);
-  text-shadow: 0 0 80px rgba(26,107,107,0.5), 0 4px 30px rgba(0,0,0,0.6);
+  color:#111111;
+  text-shadow: none;
   letter-spacing:-.02em;
   animation: popIn .8s cubic-bezier(.175,.885,.32,1.275) both;
 }
 
 .hero-sub {
-  font-size:.65rem; letter-spacing:.55em; color:var(--gold);
+  font-size:.65rem; letter-spacing:.55em; color:#111111;
   text-transform:uppercase; margin-top:.5rem;
   animation: fadeUp .7s .3s ease both;
 }
 
 .hero-divider {
   width:50px; height:1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, #000000, transparent);
   margin:1.5rem auto;
   animation: fadeUp .7s .4s ease both;
 }
 
 .hero-desc {
-  font-size:.8rem; color:rgba(245,240,232,0.5);
+  font-size:.8rem; color:rgba(0,0,0,0.5);
   letter-spacing:.05em; margin-bottom:2.5rem;
   animation: fadeUp .7s .5s ease both;
 }
@@ -94,31 +94,31 @@ body {
 .btn-primary {
   display:inline-flex; align-items:center; gap:.6rem;
   padding:1rem 2.2rem;
-  background: var(--teal);
-  color:var(--white); text-decoration:none;
+  background: #111111;
+  color:#ffffff; text-decoration:none;
   font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
   border:none; cursor:pointer;
-  border:1px solid rgba(255,255,255,0.1);
+  border:1px solid rgba(0,0,0,0.1);
   transition: all .3s;
   animation: fadeUp .7s .6s ease both;
   font-family:'DM Sans',sans-serif;
 }
-.btn-primary:hover { background:var(--teal-light); transform:translateY(-2px); box-shadow:0 12px 35px rgba(26,107,107,0.4); }
+.btn-primary:hover { background:#444444; transform:translateY(-2px); box-shadow:0 12px 35px rgba(0,0,0,0.1); }
 
 .hero-info {
   display:flex; gap:2rem; justify-content:center; margin-top:3rem;
   animation: fadeUp .7s .7s ease both;
 }
 .hero-info-item { text-align:center; }
-.hero-info-item .val { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--gold); }
-.hero-info-item .lbl { font-size:.55rem; letter-spacing:.15em; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-top:.2rem; }
+.hero-info-item .val { font-family:'Playfair Display',serif; font-size:1.3rem; color:#111111; }
+.hero-info-item .lbl { font-size:.55rem; letter-spacing:.15em; color:rgba(0,0,0,0.3); text-transform:uppercase; margin-top:.2rem; }
 
 /* ── NAV ── */
 .bottom-nav {
   position:fixed; bottom:0; left:0; right:0; z-index:100;
-  background: rgba(8,15,15,0.95);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(20px);
-  border-top:1px solid var(--border);
+  border-top:1px solid rgba(0,0,0,0.1);
   display:flex; justify-content:space-around; align-items:center;
   padding:.8rem 0 calc(1.5rem + env(safe-area-inset-bottom));
   min-height: 80px;
@@ -126,23 +126,23 @@ body {
 
 .nav-item {
   display:flex; flex-direction:column; align-items:center; gap:.3rem;
-  background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.35);
+  background:none; border:none; cursor:pointer; color:rgba(0,0,0,0.3);
   font-family:'DM Sans',sans-serif; font-size:.55rem; letter-spacing:.1em;
   text-transform:uppercase; transition: color .2s;
   padding:.2rem .8rem;
 }
-.nav-item.active { color:var(--gold); }
+.nav-item.active { color:#111111; }
 .nav-item svg { width:20px; height:20px; }
 
 /* ── BOOKING PAGE ── */
-#page-booking, #page-mybookings, #page-hours, #page-boutique { background:var(--bg); padding-bottom:calc(8rem + env(safe-area-inset-bottom)); }
+#page-booking, #page-mybookings, #page-hours, #page-boutique { background:#f5f5f5; padding-bottom:calc(8rem + env(safe-area-inset-bottom)); }
 
 .page-header {
   padding:2.5rem 1.5rem 1.5rem;
   border-bottom:1px solid var(--border);
-  background: linear-gradient(180deg, #0d2a2a, var(--bg));
+  background: #f5f5f5;
 }
-.page-header .label { font-size:.6rem; letter-spacing:.35em; color:var(--gold); text-transform:uppercase; margin-bottom:.4rem; }
+.page-header .label { font-size:.6rem; letter-spacing:.35em; color:#111111; text-transform:uppercase; margin-bottom:.4rem; }
 .page-header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; }
 
 /* Steps */
@@ -156,17 +156,17 @@ body {
 }
 .step-circle {
   width:32px; height:32px; border-radius:50%;
-  border:2px solid rgba(255,255,255,0.15);
+  border:2px solid rgba(0,0,0,0.15);
   display:flex; align-items:center; justify-content:center;
-  font-size:.7rem; font-weight:600; color:rgba(255,255,255,0.3);
+  font-size:.7rem; font-weight:600; color:rgba(0,0,0,0.3);
   transition: all .3s;
 }
-.step.active .step-circle { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,0.1); }
-.step.done .step-circle { border-color:var(--teal); background:var(--teal); color:white; }
-.step-label { font-size:.55rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); }
-.step.active .step-label { color:var(--gold); }
-.step-line { flex:1; height:1px; background:rgba(255,255,255,0.1); margin-bottom:1.2rem; }
-.step-line.done { background:var(--teal); }
+.step.active .step-circle { border-color:#111111; color:#111111; background:rgba(0,0,0,0.05); }
+.step.done .step-circle { border-color:#222222; background:#222222; color:white; }
+.step-label { font-size:.55rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(0,0,0,0.3); }
+.step.active .step-label { color:#111111; }
+.step-line { flex:1; height:1px; background:rgba(0,0,0,0.1); margin-bottom:1.2rem; }
+.step-line.done { background:#222222; }
 
 /* Step content */
 .step-content { padding:0 1.5rem; display:none; }
@@ -178,95 +178,95 @@ body {
 .service-card {
   display:flex; align-items:center; justify-content:space-between;
   padding:1.2rem;
-  background:var(--card);
+  background:#ffffff;
   border:1px solid var(--border);
   cursor:pointer; transition: all .2s;
 }
 .service-card:hover, .service-card.selected {
-  border-color:var(--teal-light);
-  background:var(--card2);
+  border-color:#444444;
+  background:#eeeeee;
 }
-.service-card.selected { border-color:var(--gold); }
+.service-card.selected { border-color:#111111; }
 
 .service-info { display:flex; align-items:center; gap:.9rem; }
 .service-emoji { font-size:1.4rem; }
 .service-name { font-size:.85rem; font-weight:600; }
-.service-duration { font-size:.65rem; color:rgba(255,255,255,0.4); margin-top:.15rem; }
-.service-price { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); }
+.service-duration { font-size:.65rem; color:rgba(0,0,0,0.4); margin-top:.15rem; }
+.service-price { font-family:'Playfair Display',serif; font-size:1.1rem; color:#111111; }
 
 /* Calendar */
 .calendar-wrap { margin-top:1rem; }
 .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
-.cal-nav button { background:none; border:1px solid var(--border); color:var(--white); width:36px; height:36px; cursor:pointer; font-size:.9rem; transition:.2s; }
-.cal-nav button:hover { border-color:var(--teal); }
+.cal-nav button { background:none; border:1px solid var(--border); color:#111111; width:36px; height:36px; cursor:pointer; font-size:.9rem; transition:.2s; }
+.cal-nav button:hover { border-color:#222222; }
 .cal-month { font-family:'Playfair Display',serif; font-size:1.1rem; }
 
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-.cal-day-name { text-align:center; font-size:.55rem; letter-spacing:.1em; color:rgba(255,255,255,0.3); text-transform:uppercase; padding:.4rem 0; }
+.cal-day-name { text-align:center; font-size:.55rem; letter-spacing:.1em; color:rgba(0,0,0,0.3); text-transform:uppercase; padding:.4rem 0; }
 
 .cal-day {
   aspect-ratio:1; display:flex; align-items:center; justify-content:center;
   font-size:.8rem; cursor:pointer; border:1px solid transparent;
   transition: all .2s; border-radius:2px;
 }
-.cal-day:hover:not(.disabled):not(.empty) { border-color:var(--teal); background:rgba(26,107,107,0.15); }
-.cal-day.selected { background:var(--teal); border-color:var(--teal-light); color:white; }
-.cal-day.today { color:var(--gold); font-weight:600; }
-.cal-day.disabled { color:rgba(255,255,255,0.15); cursor:not-allowed; }
+.cal-day:hover:not(.disabled):not(.empty) { border-color:#222222; background:rgba(0,0,0,0.07); }
+.cal-day.selected { background:#222222; border-color:#444444; color:white; }
+.cal-day.today { color:#111111; font-weight:600; }
+.cal-day.disabled { color:rgba(0,0,0,0.15); cursor:not-allowed; }
 .cal-day.empty { cursor:default; }
 
 /* Time slots */
 .slots-wrap { margin-top:1.5rem; }
-.slots-title { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:.8rem; }
+.slots-title { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(0,0,0,0.4); margin-bottom:.8rem; }
 .slots-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; }
 .slot {
-  padding:.7rem; text-align:center; font-size:.8rem;
-  background:var(--card); border:1px solid var(--border);
+  padding:.7rem; text-align:center; font-size:.8rem; color:#111111;
+  background:#f0f0f0; border:1px solid var(--border);
   cursor:pointer; transition: all .2s;
 }
-.slot:hover:not(.booked) { border-color:var(--teal); }
-.slot.selected { background:var(--teal); border-color:var(--teal-light); }
-.slot.booked { background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.2); cursor:not-allowed; text-decoration:line-through; }
+.slot:hover:not(.booked) { border-color:#111111; background:#e5e5e5; }
+.slot.selected { background:#111111; border-color:#000; color:#ffffff; }
+.slot.booked { background:#e8e8e8; color:rgba(0,0,0,0.2); cursor:not-allowed; text-decoration:line-through; }
 
 /* Form */
 .form-group { margin-bottom:1.2rem; }
-.form-label { font-size:.65rem; letter-spacing:.15em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:.5rem; display:block; }
+.form-label { font-size:.65rem; letter-spacing:.15em; text-transform:uppercase; color:rgba(0,0,0,0.5); margin-bottom:.5rem; display:block; }
 .form-input {
   width:100%; padding:.9rem 1rem;
-  background:var(--card); border:1px solid var(--border);
-  color:var(--white); font-family:'DM Sans',sans-serif; font-size:.9rem;
+  background:#ffffff; border:1px solid var(--border);
+  color:#111111; font-family:'DM Sans',sans-serif; font-size:.9rem;
   outline:none; transition: border .2s;
   -webkit-appearance:none;
 }
-.form-input:focus { border-color:var(--teal-light); }
+.form-input:focus { border-color:#444444; }
 
 /* Summary card */
 .summary-card {
-  background:var(--card); border:1px solid var(--border);
+  background:#ffffff; border:1px solid var(--border);
   padding:1.5rem; margin-bottom:1.5rem;
 }
-.summary-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.summary-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid rgba(0,0,0,0.05); }
 .summary-row:last-child { border-bottom:none; }
-.summary-key { font-size:.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.1em; }
+.summary-key { font-size:.7rem; color:rgba(0,0,0,0.4); text-transform:uppercase; letter-spacing:.1em; }
 .summary-val { font-size:.85rem; font-weight:500; }
 
 /* Next btn */
 .btn-next {
   width:100%; padding:1rem;
-  background:var(--teal); color:var(--white);
+  background:#111111; color:#ffffff;
   border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
   font-size:.8rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
   margin-top:1.5rem; transition: all .3s;
 }
-.btn-next:hover { background:var(--teal-light); }
-.btn-next:disabled { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.3); cursor:not-allowed; }
+.btn-next:hover { background:#333333; }
+.btn-next:disabled { background:rgba(0,0,0,0.1); color:rgba(0,0,0,0.3); cursor:not-allowed; }
 
 .btn-back {
-  background:none; border:1px solid var(--border); color:rgba(255,255,255,0.5);
+  background:none; border:1px solid var(--border); color:rgba(0,0,0,0.5);
   padding:.7rem 1.5rem; cursor:pointer; font-family:'DM Sans',sans-serif;
   font-size:.75rem; letter-spacing:.1em; margin-top:.8rem; transition:.2s;
 }
-.btn-back:hover { border-color:var(--teal); color:var(--white); }
+.btn-back:hover { border-color:#222222; color:#111111; }
 
 /* Success */
 .success-wrap {
@@ -275,50 +275,50 @@ body {
 }
 .success-icon { font-size:3.5rem; margin-bottom:1.5rem; animation: popIn .6s ease both; }
 .success-wrap h2 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:.8rem; }
-.success-wrap p { font-size:.85rem; color:rgba(255,255,255,0.5); margin-bottom:2rem; }
+.success-wrap p { font-size:.85rem; color:rgba(0,0,0,0.5); margin-bottom:2rem; }
 
 /* ── MY BOOKINGS ── */
 .bookings-list { padding:1rem 1.5rem; display:flex; flex-direction:column; gap:1rem; }
 .booking-card {
-  background:var(--card); border:1px solid var(--border); padding:1.2rem;
-  border-left:3px solid var(--teal);
+  background:#ffffff; border:1px solid var(--border); padding:1.2rem;
+  border-left:3px solid #222222;
 }
 .booking-card .bc-service { font-weight:600; font-size:.95rem; margin-bottom:.4rem; }
-.booking-card .bc-date { font-size:.75rem; color:var(--gold); margin-bottom:.3rem; }
-.booking-card .bc-name { font-size:.7rem; color:rgba(255,255,255,0.4); }
+.booking-card .bc-date { font-size:.75rem; color:#111111; margin-bottom:.3rem; }
+.booking-card .bc-name { font-size:.7rem; color:rgba(0,0,0,0.4); }
 .booking-card .bc-status {
   display:inline-block; margin-top:.6rem;
   padding:.2rem .7rem; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase;
-  background:rgba(26,107,107,0.2); border:1px solid rgba(26,107,107,0.4); color:var(--teal-light);
+  background:rgba(0,0,0,0.08); border:1px solid rgba(0,0,0,0.2); color:#444444;
 }
-.empty-state { text-align:center; padding:4rem 2rem; color:rgba(255,255,255,0.3); }
+.empty-state { text-align:center; padding:4rem 2rem; color:rgba(0,0,0,0.3); }
 .empty-state .icon { font-size:3rem; margin-bottom:1rem; }
 
 /* ── HOURS PAGE ── */
 .hours-content { padding:1.5rem; }
 .hours-card {
-  background:var(--card); border:1px solid var(--border); padding:1.5rem;
-  border-left:3px solid var(--gold); margin-bottom:1.5rem;
+  background:#ffffff; border:1px solid var(--border); padding:1.5rem;
+  border-left:3px solid #000000; margin-bottom:1.5rem;
 }
-.hours-row { display:flex; justify-content:space-between; padding:.8rem 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.hours-row { display:flex; justify-content:space-between; padding:.8rem 0; border-bottom:1px solid rgba(0,0,0,0.05); }
 .hours-row:last-child { border-bottom:none; }
-.hours-day { font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,0.5); }
-.hours-time { font-family:'Playfair Display',serif; font-size:1rem; color:var(--gold); }
+.hours-day { font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:rgba(0,0,0,0.5); }
+.hours-time { font-family:'Playfair Display',serif; font-size:1rem; color:#111111; }
 
 .contact-list { display:flex; flex-direction:column; gap:.8rem; }
 .contact-card {
   display:flex; align-items:center; gap:1rem;
-  background:var(--card); border:1px solid var(--border); padding:1.1rem;
-  text-decoration:none; color:var(--white); transition:.2s;
+  background:#ffffff; border:1px solid var(--border); padding:1.1rem;
+  text-decoration:none; color:#111111; transition:.2s;
 }
-.contact-card:hover { border-color:var(--teal); }
-.contact-icon { width:38px; height:38px; background:rgba(26,107,107,0.2); border:1px solid rgba(26,107,107,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.contact-card:hover { border-color:#222222; }
+.contact-icon { width:38px; height:38px; background:rgba(0,0,0,0.08); border:1px solid rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
 .contact-lbl { font-size:.6rem; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:.1em; margin-bottom:.2rem; }
 .contact-val { font-size:.85rem; font-weight:500; }
 
 /* ── LOADER ── */
 .loader { display:flex; justify-content:center; padding:2rem; }
-.spinner { width:28px; height:28px; border:2px solid rgba(255,255,255,0.1); border-top-color:var(--teal); border-radius:50%; animation:spin .7s linear infinite; }
+.spinner { width:28px; height:28px; border:2px solid rgba(0,0,0,0.1); border-top-color:#222222; border-radius:50%; animation:spin .7s linear infinite; }
 
 /* ── TOAST ── */
 .toast {
@@ -329,18 +329,18 @@ body {
   pointer-events:none;
 }
 .toast.show { transform:translateY(0); opacity:1; }
-.toast.success { background:#1a4a2a; border:1px solid #2a7a4a; color:#7fffaa; }
+.toast.success { background:#1a4a2a; border:1px solid #2a7a4a; color:#cccccc; }
 .toast.error { background:#4a1a1a; border:1px solid #7a2a2a; color:#ffaaaa; }
 
 /* ── ADMIN CARDS ── */
 .admin-card {
-  background:var(--card); border:1px solid var(--border); padding:1.2rem;
-  border-left:3px solid var(--gold);
+  background:#ffffff; border:1px solid var(--border); padding:1.2rem;
+  border-left:3px solid #000000;
 }
 .admin-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.8rem; }
 .admin-service { font-weight:600; font-size:.95rem; margin-bottom:.3rem; }
-.admin-datetime { font-size:.7rem; color:var(--gold); }
-.admin-client { display:flex; justify-content:space-between; font-size:.75rem; color:rgba(255,255,255,0.5); margin-bottom:.8rem; }
+.admin-datetime { font-size:.7rem; color:#111111; }
+.admin-client { display:flex; justify-content:space-between; font-size:.75rem; color:rgba(0,0,0,0.5); margin-bottom:.8rem; }
 .admin-actions { display:flex; gap:.6rem; }
 .btn-cancel { flex:1; padding:.6rem; background:rgba(255,100,100,0.1); border:1px solid rgba(255,100,100,0.3); color:#ff8080; font-size:.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
 .btn-delete { flex:1; padding:.6rem; background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.3); color:#ff5555; font-size:.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
@@ -350,18 +350,18 @@ body {
 .barbers-list { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:.6rem; }
 .barber-card {
   display:flex; flex-direction:column; align-items:center; gap:.5rem;
-  padding:1rem; background:var(--card); border:1px solid var(--border);
+  padding:1rem; background:#ffffff; border:1px solid var(--border);
   cursor:pointer; transition: all .2s;
 }
-.barber-card:hover, .barber-card.selected { border-color:var(--gold); background:var(--card2); }
-.barber-avatar { width:48px; height:48px; border-radius:50%; background:rgba(26,107,107,0.3); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
-.barber-card.selected .barber-avatar { border-color:var(--gold); }
+.barber-card:hover, .barber-card.selected { border-color:#111111; background:#eeeeee; }
+.barber-avatar { width:48px; height:48px; border-radius:50%; background:rgba(0,0,0,0.15); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+.barber-card.selected .barber-avatar { border-color:#111111; }
 .barber-name { font-size:.8rem; font-weight:600; text-transform:capitalize; }
 
 /* ── TV MODE ── */
 #tv-mode {
   display:none; position:fixed; inset:0; z-index:999;
-  background:var(--bg); padding:1rem;
+  background:#f5f5f5; padding:1rem;
   flex-direction:column;
 }
 #tv-mode.active { display:flex; }
@@ -369,20 +369,20 @@ body {
   display:flex; justify-content:space-between; align-items:center;
   padding:.5rem 1rem 1rem; border-bottom:1px solid var(--border); margin-bottom:1rem;
 }
-.tv-header h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--gold); }
+.tv-header h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:#111111; }
 .tv-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; flex:1; overflow:hidden; }
-.tv-col { background:var(--card); border:1px solid var(--border); border-top:3px solid var(--gold); display:flex; flex-direction:column; overflow:hidden; }
+.tv-col { background:#ffffff; border:1px solid var(--border); border-top:3px solid #000000; display:flex; flex-direction:column; overflow:hidden; }
 .tv-col-header { padding:.8rem; text-align:center; border-bottom:1px solid var(--border); }
-.tv-col-name { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); }
-.tv-col-count { font-size:.6rem; color:rgba(255,255,255,0.4); letter-spacing:.1em; text-transform:uppercase; margin-top:.2rem; }
+.tv-col-name { font-family:'Playfair Display',serif; font-size:1.1rem; color:#111111; }
+.tv-col-count { font-size:.6rem; color:rgba(0,0,0,0.4); letter-spacing:.1em; text-transform:uppercase; margin-top:.2rem; }
 .tv-col-body { flex:1; overflow-y:auto; padding:.5rem; display:flex; flex-direction:column; gap:.5rem; }
-.tv-card { background:var(--card2); border:1px solid var(--border); border-left:3px solid var(--teal); padding:.7rem; }
+.tv-card { background:#eeeeee; border:1px solid var(--border); border-left:3px solid #222222; padding:.7rem; }
 .tv-card.cancelled { border-left-color:#ff5555; opacity:.5; }
-.tv-card-time { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); }
+.tv-card-time { font-family:'Playfair Display',serif; font-size:1.1rem; color:#111111; }
 .tv-card-name { font-size:.8rem; font-weight:600; margin-top:.2rem; }
-.tv-card-service { font-size:.65rem; color:rgba(255,255,255,0.5); margin-top:.15rem; }
-.tv-refresh-bar { height:3px; background:rgba(26,107,107,0.2); margin-top:.5rem; }
-.tv-refresh-progress { height:100%; background:var(--teal); transition: width 30s linear; width:0%; }
+.tv-card-service { font-size:.65rem; color:rgba(0,0,0,0.5); margin-top:.15rem; }
+.tv-refresh-bar { height:3px; background:rgba(0,0,0,0.08); margin-top:.5rem; }
+.tv-refresh-progress { height:100%; background:#222222; transition: width 30s linear; width:0%; }
 .cal-day.blocked { background:rgba(255,80,80,0.08); color:#ff8080 !important; cursor:not-allowed; border-color:rgba(255,80,80,0.2); }
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
@@ -392,12 +392,12 @@ body {
 <body>
 
 <!-- SPLASH SCREEN -->
-<div id="splash" style="position:fixed;inset:0;background:#080f0f;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem">
+<div id="splash" style="position:fixed;inset:0;background:#f5f5f5;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem">
   <div id="splash-logo" style="opacity:0;transform:scale(0.6);transition:opacity .6s ease, transform .6s cubic-bezier(0.34,1.56,0.64,1)">
-    <div style="font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;letter-spacing:.15em;background:linear-gradient(135deg,#c9a84c,#f0d080,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center">BANGS</div>
-    <div style="text-align:center;letter-spacing:.5em;font-size:.6rem;color:rgba(201,168,76,0.6);text-transform:uppercase;margin-top:.3rem">Barber Shop</div>
+    <div style="font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;letter-spacing:.15em;background:linear-gradient(135deg,#000000,#444444,#000000);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center">BANGS</div>
+    <div style="text-align:center;letter-spacing:.5em;font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.3rem">Barber Shop</div>
   </div>
-  <div id="splash-bar" style="width:0px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transition:width 1.2s ease;margin-top:1rem"></div>
+  <div id="splash-bar" style="width:0px;height:1px;background:linear-gradient(90deg,transparent,#000000,transparent);transition:width 1.2s ease;margin-top:1rem"></div>
 </div>
 
 <style>
@@ -426,9 +426,10 @@ body {
 
     <!-- LIVE QUEUE -->
     <div id="live-queue" style="width:100%;padding:0 1.5rem;margin-top:1rem;box-sizing:border-box">
-      <div style="background:rgba(26,107,107,0.08);border:1px solid rgba(26,107,107,0.2);padding:1rem">
-        <div style="font-size:.55rem;letter-spacing:.3em;color:var(--teal);text-transform:uppercase;margin-bottom:.8rem;text-align:center">🔴 Live — File d'attente</div>
-        <div id="queue-content" style="display:flex;flex-direction:column;gap:.6rem"></div>
+      <div style="background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);padding:1rem">
+        <div style="font-size:.55rem;letter-spacing:.3em;color:#222222;text-transform:uppercase;margin-bottom:.8rem;text-align:center">🔴 Live — File d'attente</div>
+        <div id="my-ticket-banner"></div>
+        <div id="queue-content" style="display:flex;flex-direction:column;gap:.5rem"></div>
       </div>
     </div>
     <div class="hero-info">
@@ -449,7 +450,7 @@ body {
 
   <!-- Products Section -->
   <div style="padding:1.5rem;width:100%;box-sizing:border-box">
-    <div style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;text-align:center">🛍 Nos Produits | منتجاتنا</div>
+    <div style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-bottom:1rem;text-align:center">🛍 Nos Produits | منتجاتنا</div>
     <div id="products-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"></div>
   </div>
 </div>
@@ -486,7 +487,7 @@ body {
   <div class="step-content active" id="step-1">
     <div class="services-list" id="services-list"></div>
     <div style="margin-top:1.5rem">
-      <label class="form-label" style="color:var(--gold);font-size:.65rem;letter-spacing:.25em;text-transform:uppercase">Choisir le coiffeur | اختر الحلاق</label>
+      <label class="form-label" style="color:#111111;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase">Choisir le coiffeur | اختر الحلاق</label>
       <div class="barbers-list" id="barbers-list"></div>
     </div>
     <button class="btn-next" id="btn-next-1" disabled>Choisir la date →</button>
@@ -533,7 +534,7 @@ body {
       <div class="summary-row"><span class="summary-key">Heure</span><span class="summary-val" id="sum-time">—</span></div>
       <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="sum-name">—</span></div>
       <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="sum-phone">—</span></div>
-      <div class="summary-row"><span class="summary-key">Prix</span><span class="summary-val" id="sum-price" style="color:var(--gold)">—</span></div>
+      <div class="summary-row"><span class="summary-key">Prix</span><span class="summary-val" id="sum-price" style="color:#000000">—</span></div>
     </div>
     <button class="btn-next" id="btn-confirm">✓ Confirmer le rendez-vous</button>
     <br><button class="btn-back" id="btn-back-4">← Retour</button>
@@ -544,10 +545,10 @@ body {
     <div class="success-wrap">
       <div class="success-icon">✅</div>
       <h2>Réservé!</h2>
-      <div id="success-details" style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1.2rem;margin-bottom:1.5rem;text-align:left;width:100%"></div>
-      <p style="font-size:.8rem;color:rgba(255,255,255,0.4)">À bientôt chez BANGS! ✂️</p>
+      <div id="success-details" style="background:#ffffff;border:1px solid var(--border);border-left:3px solid #000000;padding:1.2rem;margin-bottom:1.5rem;text-align:left;width:100%"></div>
+      <p style="font-size:.8rem;color:rgba(0,0,0,0.4)">À bientôt chez BANGS! ✂️</p>
       <button class="btn-primary" id="btn-success" style="margin-top:1.5rem">Retour à l'accueil</button>
-      <button onclick="showPage('reviews')" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:.8rem 1.5rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:.1em;margin-top:.8rem;width:100%">⭐ Laisser un avis</button>
+      <button onclick="showPage('reviews')" style="background:none;border:1px solid #000000;color:#111111;padding:.8rem 1.5rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:.1em;margin-top:.8rem;width:100%">⭐ Laisser un avis</button>
     </div>
   </div>
 </div>
@@ -559,7 +560,7 @@ body {
     <h1>Horaires & Contact</h1>
   </div>
   <div class="hours-content">
-    <p style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:.8rem">Horaires d'ouverture</p>
+    <p style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-bottom:.8rem">Horaires d'ouverture</p>
     <div class="hours-card">
       <div class="hours-row">
         <span class="hours-day">Samedi — Jeudi</span>
@@ -570,7 +571,7 @@ body {
         <span class="hours-time">15:00 – 21:00</span>
       </div>
     </div>
-    <p style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:.8rem">Contact</p>
+    <p style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-bottom:.8rem">Contact</p>
     <div class="contact-list">
       <a href="tel:0551258141" class="contact-card">
         <div class="contact-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.47 11.47 0 003.58.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.47 11.47 0 00.57 3.58 1 1 0 01-.25 1.01z"/></svg></div>
@@ -597,7 +598,7 @@ body {
   <!-- Login -->
   <div id="admin-login" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center">
     <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
-    <p style="font-size:.6rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:.5rem">Admin | إدارة</p>
+    <p style="font-size:.6rem;letter-spacing:.35em;color:#111111;text-transform:uppercase;margin-bottom:.5rem">Admin | إدارة</p>
     <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:2rem">BANGS Dashboard</h2>
     <input class="form-input" id="inp-admin-pass" type="password" placeholder="Mot de passe | كلمة المرور" style="max-width:300px;margin-bottom:1rem;text-align:center">
     <div id="admin-error" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:1rem">❌ Mot de passe incorrect | كلمة المرور خاطئة</div>
@@ -612,22 +613,22 @@ body {
         <h1>Dashboard</h1>
       </div>
       <div style="display:flex;gap:.8rem">
-        <button id="btn-tv-mode" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.5rem .8rem;cursor:pointer;font-size:.8rem">📺 TV</button>
+        <button id="btn-tv-mode" style="background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.2);color:#111111;padding:.5rem .8rem;cursor:pointer;font-size:.8rem">📺 TV</button>
         <button id="btn-stats-mode" style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.4);color:#a78bfa;padding:.5rem .8rem;cursor:pointer;font-size:.8rem">📊 Stats</button>
-        <button id="btn-admin-refresh" style="background:none;border:1px solid var(--border);color:var(--white);padding:.5rem .8rem;cursor:pointer;font-size:.8rem">↻</button>
+        <button id="btn-admin-refresh" style="background:none;border:1px solid var(--border);color:#111111;padding:.5rem .8rem;cursor:pointer;font-size:.8rem">↻</button>
         <button id="btn-admin-logout" style="background:none;border:1px solid rgba(255,100,100,0.3);color:#ff8080;padding:.5rem .8rem;cursor:pointer;font-size:.7rem">Quitter | خروج</button>
       </div>
     </div>
 
     <!-- Stats -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.5rem 1.5rem 0">
-      <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;text-align:center;border-top:2px solid var(--gold)">
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold)" id="stat-today">0</div>
-        <div style="font-size:.6rem;letter-spacing:.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-top:.3rem">Aujourd'hui | اليوم</div>
+      <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem;text-align:center;border-top:2px solid #000000">
+        <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#000000" id="stat-today">0</div>
+        <div style="font-size:.6rem;letter-spacing:.1em;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.3rem">Aujourd'hui | اليوم</div>
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;text-align:center;border-top:2px solid var(--teal)">
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--teal-light)" id="stat-total">0</div>
-        <div style="font-size:.6rem;letter-spacing:.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-top:.3rem">Total | الكل</div>
+      <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem;text-align:center;border-top:2px solid #222222">
+        <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#444444" id="stat-total">0</div>
+        <div style="font-size:.6rem;letter-spacing:.1em;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.3rem">Total | الكل</div>
       </div>
     </div>
 
@@ -667,27 +668,27 @@ body {
       </select>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <div>
-          <label style="font-size:.65rem;color:rgba(255,255,255,0.4);display:block;margin-bottom:.3rem">De</label>
+          <label style="font-size:.65rem;color:rgba(0,0,0,0.4);display:block;margin-bottom:.3rem">De</label>
           <input class="form-input" id="ch-start" type="time" style="font-size:.8rem">
         </div>
         <div>
-          <label style="font-size:.65rem;color:rgba(255,255,255,0.4);display:block;margin-bottom:.3rem">À</label>
+          <label style="font-size:.65rem;color:rgba(0,0,0,0.4);display:block;margin-bottom:.3rem">À</label>
           <input class="form-input" id="ch-end" type="time" style="font-size:.8rem">
         </div>
       </div>
       <button id="btn-add-ch" style="background:rgba(128,207,255,0.1);border:1px solid rgba(128,207,255,0.3);color:#80cfff;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Appliquer</button>
-      <div style="font-size:.65rem;color:rgba(255,255,255,0.3);padding:.3rem .2rem">💡 Pour bloquer une nuit entière: faites 2 lignes — ex: 22:00→23:30 pour le jour 1, puis 00:00→03:00 pour le jour suivant</div>
+      <div style="font-size:.65rem;color:rgba(0,0,0,0.3);padding:.3rem .2rem">💡 Pour bloquer une nuit entière: faites 2 lignes — ex: 22:00→23:30 pour le jour 1, puis 00:00→03:00 pour le jour suivant</div>
       <div id="ch-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
 
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-top:.5rem">Réservations | الحجوزات</div>
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-top:.5rem">Réservations | الحجوزات</div>
 
     <!-- Walk-in button -->
     <div style="padding:0 1.5rem .8rem;display:flex;gap:.7rem;flex-wrap:wrap">
-      <button id="btn-walkin" style="flex:1;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.15em">
+      <button id="btn-walkin" style="flex:1;background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.2);color:#111111;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.15em">
         👤 + Walk-in
       </button>
-      <button id="btn-appeler-suivant" style="flex:1;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:#34d399;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">
+      <button id="btn-appeler-suivant" style="flex:1;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:#444444;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">
         🔔 Appeler suivant
       </button>
       <button id="btn-delete-today" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;white-space:nowrap">
@@ -697,10 +698,10 @@ body {
 
     <!-- Walk-in Modal -->
     <div id="walkin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;padding:1.5rem;overflow-y:auto">
-      <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:1.5rem;max-width:500px;margin:2rem auto">
+      <div style="background:#ffffff;border:1px solid var(--border);border-top:3px solid #000000;padding:1.5rem;max-width:500px;margin:2rem auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-          <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">👤 Walk-in</h2>
-          <button onclick="closeWalkin()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#000000">👤 Walk-in</h2>
+          <button onclick="closeWalkin()" style="background:none;border:none;color:rgba(0,0,0,0.5);font-size:1.2rem;cursor:pointer">✕</button>
         </div>
         <div class="form-group">
           <label class="form-label">Nom client</label>
@@ -752,16 +753,16 @@ body {
           <option value="cancelled">Annulé | ملغى</option>
         </select>
       </div>
-      <button id="btn-filter-reset" style="background:none;border:1px solid var(--border);color:rgba(255,255,255,0.4);padding:.5rem;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.1em">✕ Réinitialiser | إعادة تعيين</button>
+      <button id="btn-filter-reset" style="background:none;border:1px solid var(--border);color:rgba(0,0,0,0.4);padding:.5rem;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.1em">✕ Réinitialiser | إعادة تعيين</button>
     </div>
 
     <!-- Summary -->
-    <div id="filter-summary" style="display:none;margin:0 1.5rem .5rem;padding:.7rem 1rem;background:rgba(26,107,107,0.1);border:1px solid rgba(26,107,107,0.25);font-size:.75rem;color:rgba(255,255,255,0.6)"></div>
+    <div id="filter-summary" style="display:none;margin:0 1.5rem .5rem;padding:.7rem 1rem;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.15);font-size:.75rem;color:rgba(255,255,255,0.6)"></div>
 
     <div id="admin-bookings" style="padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem"></div>
 
     <!-- Admin Products -->
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#b0f0b0;text-transform:uppercase;margin-top:1rem">🛍 Produits | المنتجات</div>
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-top:1rem">🛍 Produits | المنتجات</div>
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <input class="form-input" id="prod-name" type="text" placeholder="Nom produit" style="font-size:.8rem">
@@ -772,7 +773,7 @@ body {
         <input class="form-input" id="prod-desc" type="text" placeholder="Description (opt)" style="font-size:.8rem">
       </div>
       <input class="form-input" id="prod-img" type="text" placeholder="URL image (optionnel)" style="font-size:.8rem">
-      <button id="btn-add-product" style="background:rgba(176,240,176,0.1);border:1px solid rgba(176,240,176,0.3);color:#b0f0b0;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter produit</button>
+      <button id="btn-add-product" style="background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.15);color:#111111;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter produit</button>
       <div id="admin-products-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
 
@@ -790,8 +791,8 @@ body {
   </div>
   <div style="padding:1.2rem 1.5rem">
     <!-- Form -->
-    <div style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;margin-bottom:1.5rem">
-      <p style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem">Laisser un avis | اترك تقييمك</p>
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #000000;padding:1.2rem;margin-bottom:1.5rem">
+      <p style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-bottom:1rem">Laisser un avis | اترك تقييمك</p>
       <div class="form-group">
         <label class="form-label">Votre nom</label>
         <input class="form-input" id="rev-name" type="text" placeholder="Ex: Ahmed">
@@ -837,10 +838,10 @@ body {
 
 <!-- ORDER MODAL -->
 <div id="order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;padding:1.5rem;overflow-y:auto">
-  <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:1.5rem;max-width:500px;margin:2rem auto">
+  <div style="background:#ffffff;border:1px solid var(--border);border-top:3px solid #000000;padding:1.5rem;max-width:500px;margin:2rem auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)" id="order-product-name">Commander</h2>
-      <button onclick="closeOrderModal()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#000000" id="order-product-name">Commander</h2>
+      <button onclick="closeOrderModal()" style="background:none;border:none;color:rgba(0,0,0,0.5);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div class="form-group">
       <label class="form-label">Nom</label>
@@ -853,9 +854,9 @@ body {
     <div class="form-group">
       <label class="form-label">Quantité</label>
       <div style="display:flex;align-items:center;gap:1rem">
-        <button onclick="changeQty(-1)" style="background:var(--card2);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.2rem">−</button>
+        <button onclick="changeQty(-1)" style="background:#eeeeee;border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.2rem">−</button>
         <span id="order-qty" style="font-size:1.2rem;font-weight:600;min-width:2rem;text-align:center">1</span>
-        <button onclick="changeQty(1)" style="background:var(--card2);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.2rem">+</button>
+        <button onclick="changeQty(1)" style="background:#eeeeee;border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;cursor:pointer;font-size:1.2rem">+</button>
       </div>
     </div>
     <button id="btn-order-confirm" class="btn-next" style="margin-top:.5rem">✓ Commander</button>
@@ -863,7 +864,7 @@ body {
 </div>
 
 <!-- STATS MODE -->
-<div id="stats-mode" style="display:none;position:fixed;inset:0;background:#080f0f;z-index:400;overflow-y:auto;padding:1.5rem">
+<div id="stats-mode" style="display:none;position:fixed;inset:0;background:#f5f5f5;z-index:400;overflow-y:auto;padding:1.5rem">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
     <div>
       <div style="font-size:.6rem;letter-spacing:.3em;color:#a78bfa;text-transform:uppercase">Statistiques</div>
@@ -876,21 +877,21 @@ body {
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:1.5rem" id="stats-kpis"></div>
 
   <!-- Rdv par jour -->
-  <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
+  <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
     <div style="font-size:.6rem;letter-spacing:.2em;color:#a78bfa;text-transform:uppercase;margin-bottom:1rem">📈 Rdv — 7 derniers jours</div>
     <div id="stats-chart" style="display:flex;align-items:flex-end;gap:.4rem;height:100px"></div>
     <div id="stats-chart-labels" style="display:flex;gap:.4rem;margin-top:.4rem"></div>
   </div>
 
   <!-- Services populaires -->
-  <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
-    <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem">🏆 Services populaires</div>
+  <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
+    <div style="font-size:.6rem;letter-spacing:.2em;color:#111111;text-transform:uppercase;margin-bottom:1rem">🏆 Services populaires</div>
     <div id="stats-services" style="display:flex;flex-direction:column;gap:.6rem"></div>
   </div>
 
   <!-- Coiffeurs -->
-  <div style="background:var(--card);border:1px solid var(--border);padding:1.2rem">
-    <div style="font-size:.6rem;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;margin-bottom:1rem">💈 Performance coiffeurs</div>
+  <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem">
+    <div style="font-size:.6rem;letter-spacing:.2em;color:#222222;text-transform:uppercase;margin-bottom:1rem">💈 Performance coiffeurs</div>
     <div id="stats-barbers" style="display:flex;flex-direction:column;gap:.6rem"></div>
   </div>
 </div>
@@ -899,12 +900,12 @@ body {
 <div id="tv-mode">
   <div class="tv-header">
     <div style="display:flex;align-items:center;gap:1rem">
-      <span style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--white)">BANGS</span>
-      <span style="font-size:.6rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase">Live Dashboard</span>
+      <span style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#111111">BANGS</span>
+      <span style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase">Live Dashboard</span>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
-      <span id="tv-clock" style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)"></span>
-      <span id="tv-date" style="font-size:.7rem;color:rgba(255,255,255,0.4)"></span>
+      <span id="tv-clock" style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#000000"></span>
+      <span id="tv-date" style="font-size:.7rem;color:rgba(0,0,0,0.4)"></span>
       <button onclick="closeTVMode()" style="background:none;border:1px solid rgba(255,100,100,0.3);color:#ff8080;padding:.5rem 1rem;cursor:pointer;font-size:.75rem">✕ Fermer</button>
     </div>
   </div>
@@ -1042,35 +1043,35 @@ function renderServices() {
     const isOpen = openCategory === cat;
     return `
       <div style="border:1px solid var(--border);overflow:hidden;margin-bottom:.5rem">
-        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:var(--card);user-select:none">
+        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:#ffffff;user-select:none">
           <div style="display:flex;align-items:center;gap:.7rem">
-            <span style="color:var(--gold);font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
+            <span style="color:#111111;font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
             <span style="font-weight:600;font-size:.95rem">${cat}</span>
           </div>
         </div>
         ${isOpen ? `
-          <div style="background:var(--card2);display:flex;flex-direction:column;gap:.5rem;padding:.7rem">
+          <div style="background:#eeeeee;display:flex;flex-direction:column;gap:.5rem;padding:.7rem">
             ${services.map(s => {
               const isExpanded = expandedService === s.id;
               const isSelected = state.selectedService?.id === s.id;
               return `
-                <div style="border:1px solid ${isSelected?'var(--gold)':'var(--border)'};overflow:hidden;background:var(--card)">
+                <div style="border:1px solid ${isSelected?'#000000':'var(--border)'};overflow:hidden;background:#ffffff">
                   <div onclick="toggleService(${s.id})" style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;cursor:pointer">
                     <div style="display:flex;align-items:center;gap:.7rem">
                       <span style="font-size:1.2rem">${s.emoji}</span>
                       <span style="font-size:.85rem;font-weight:500">${s.name}</span>
                     </div>
-                    <span style="color:var(--gold);font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
+                    <span style="color:#111111;font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
                   </div>
                   ${isExpanded ? `
                     <div style="border-top:1px solid var(--border)">
                       ${s.img ? `<img src="${s.img}" style="width:100%;height:380px;object-fit:cover;object-position:top;display:block">` : ''}
                       <div style="padding:.8rem 1rem;display:flex;justify-content:space-between;align-items:center">
                         <div>
-                          <div style="font-size:.7rem;color:rgba(255,255,255,0.4)">⏱ ${s.duration}</div>
-                          <div style="font-size:.9rem;color:var(--gold);font-weight:700;margin-top:.2rem">${s.price}</div>
+                          <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">⏱ ${s.duration}</div>
+                          <div style="font-size:.9rem;color:#111111;font-weight:700;margin-top:.2rem">${s.price}</div>
                         </div>
-                        <button onclick="selectService(${s.id})" style="background:${isSelected?'var(--gold)':'rgba(201,168,76,0.15)'};border:1px solid var(--gold);color:${isSelected?'#000':'var(--gold)'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
+                        <button onclick="selectService(${s.id})" style="background:${isSelected?'#111111':'rgba(0,0,0,0.08)'};border:1px solid #111111;color:${isSelected?'#ffffff':'#111111'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
                           ${isSelected?'✓ Sélectionné':'Choisir'}
                         </button>
                       </div>
@@ -1115,7 +1116,7 @@ function renderBarbers() {
         ? `<div class="barber-avatar" style="padding:0;overflow:hidden"><img src="${b.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
         : `<div class="barber-avatar">${b.emoji}</div>`}
       <div class="barber-name">${b.name}</div>
-      ${b.speciality ? `<div style="font-size:.6rem;color:rgba(255,255,255,0.4);text-align:center;margin-top:.2rem">${b.speciality}</div>` : ''}
+      ${b.speciality ? `<div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-align:center;margin-top:.2rem">${b.speciality}</div>` : ''}
     </div>
   `).join('');
 }
@@ -1384,40 +1385,47 @@ async function confirmBooking() {
   } else {
     // Show success details
     document.getElementById('success-details').innerHTML = `
-      <div style="text-align:center;margin-bottom:1rem;padding:.8rem;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3)">
-        <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(255,255,255,0.4);text-transform:uppercase">Votre ticket</div>
-        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:700">#${insertData?.daily_ticket || insertData?.id || '—'}</div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,0.4)">Montrez ce numéro au barbier</div>
+      <div style="text-align:center;margin-bottom:1rem;padding:.8rem;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.15)">
+        <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(0,0,0,0.4);text-transform:uppercase">Votre ticket</div>
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:#111111;font-weight:700">#${insertData?.daily_ticket || insertData?.id || '—'}</div>
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">Montrez ce numéro au barbier</div>
       </div>
       <div id="notif-btn-wrap" style="margin-bottom:1rem">
-        <button onclick="activateAlerts()" style="width:100%;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.4);color:#34d399;padding:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">
+        <button onclick="activateAlerts()" style="width:100%;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.4);color:#444444;padding:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">
           🔔 Activer les alertes — je veux être notifié quand c'est mon tour
         </button>
       </div>
       <div style="display:flex;flex-direction:column;gap:.6rem">
         <div style="display:flex;justify-content:space-between">
-          <span style="font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em">Coiffeur</span>
-          <span style="font-weight:600;color:var(--gold)">${state.selectedBarber?.name}</span>
+          <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Coiffeur</span>
+          <span style="font-weight:600;color:#000000">${state.selectedBarber?.name}</span>
         </div>
         <div style="display:flex;justify-content:space-between">
-          <span style="font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em">Service</span>
+          <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Service</span>
           <span style="font-weight:600">${state.selectedService?.name}</span>
         </div>
         <div style="display:flex;justify-content:space-between">
-          <span style="font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em">Date</span>
+          <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Date</span>
           <span style="font-weight:600">${formatDate(state.selectedDate)}</span>
         </div>
         <div style="display:flex;justify-content:space-between">
-          <span style="font-size:.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em">Heure</span>
-          <span style="font-weight:600;color:var(--gold)">${state.selectedTime}</span>
+          <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Heure</span>
+          <span style="font-weight:600;color:#000000">${state.selectedTime}</span>
         </div>
       </div>
     `;
     // Save phone locally for Mes RDV
     localStorage.setItem('bangs_phone', document.getElementById('inp-phone').value.trim());
+    // Save my ticket info
+    localStorage.setItem('my_ticket', JSON.stringify({
+      ticket: insertData?.daily_ticket || insertData?.id,
+      barber: state.selectedBarber?.name,
+      time: state.selectedTime,
+      date: state.selectedDate,
+      id: insertData?.id
+    }));
     playNotificationSound();
     showToast('Réservation confirmée! ✓', 'success');
-    // Setup realtime listener
     setupRealtimeListener(insertData?.id);
     goStep(5);
   }
@@ -1453,7 +1461,7 @@ async function loadMyBookings() {
   }
   container.innerHTML = '<div class="bookings-list">' + data.map(r => `
     <div class="booking-card">
-      <div class="bc-service">${r.service} ${r.barber ? `<span style="color:var(--gold);font-size:.75rem">· ${r.barber}</span>` : ''}</div>
+      <div class="bc-service">${r.service} ${r.barber ? `<span style="color:#111111;font-size:.75rem">· ${r.barber}</span>` : ''}</div>
       <div class="bc-date">📅 ${formatDate(r.reservation_date)} à ${r.reservation_time}</div>
       <div class="bc-name">👤 ${r.client_name}</div>
       <span class="bc-status ${r.status === 'cancelled' ? 'cancelled' : ''}">${r.status === 'cancelled' ? 'Annulé' : 'Confirmé'}</span>
@@ -1502,7 +1510,7 @@ function setRating(n) {
   selectedRating = n;
   document.querySelectorAll('#star-picker span').forEach((s, i) => {
     s.textContent = i < n ? '★' : '☆';
-    s.style.color = i < n ? 'var(--gold)' : 'rgba(255,255,255,0.3)';
+    s.style.color = i < n ? '#000000' : 'rgba(0,0,0,0.3)';
   });
 }
 
@@ -1514,14 +1522,14 @@ async function loadReviews() {
     return;
   }
   list.innerHTML = data.map(r => `
-    <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1.2rem;margin-bottom:.8rem">
+    <div style="background:#ffffff;border:1px solid var(--border);border-left:3px solid #000000;padding:1.2rem;margin-bottom:.8rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
         <span style="font-weight:600">${r.client_name}</span>
-        <span style="color:var(--gold);font-size:1rem">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+        <span style="color:#111111;font-size:1rem">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
       </div>
-      ${r.barber ? `<div style="font-size:.7rem;color:rgba(255,255,255,0.4);margin-bottom:.4rem">💈 ${r.barber}</div>` : ''}
+      ${r.barber ? `<div style="font-size:.7rem;color:rgba(0,0,0,0.4);margin-bottom:.4rem">💈 ${r.barber}</div>` : ''}
       ${r.comment ? `<div style="font-size:.85rem;color:rgba(255,255,255,0.7)">${r.comment}</div>` : ''}
-      <div style="font-size:.65rem;color:rgba(255,255,255,0.3);margin-top:.5rem">${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>
+      <div style="font-size:.65rem;color:rgba(0,0,0,0.3);margin-top:.5rem">${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>
     </div>
   `).join('');
 }
@@ -1583,14 +1591,14 @@ async function loadProducts() {
     return;
   }
   container.innerHTML = data.map(p => `
-    <div style="background:var(--card);border:1px solid var(--border);overflow:hidden">
-      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:140px;object-fit:cover">` : `<div style="width:100%;height:140px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🛍️</div>`}
+    <div style="background:#ffffff;border:1px solid var(--border);overflow:hidden">
+      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:140px;object-fit:cover">` : `<div style="width:100%;height:140px;background:#eeeeee;display:flex;align-items:center;justify-content:center;font-size:2.5rem">🛍️</div>`}
       <div style="padding:.8rem">
         <div style="font-weight:600;font-size:.85rem;margin-bottom:.3rem">${p.name}</div>
-        ${p.description ? `<div style="font-size:.7rem;color:rgba(255,255,255,0.4);margin-bottom:.5rem">${p.description}</div>` : ''}
-        <div style="color:var(--gold);font-weight:700;font-size:.9rem;margin-bottom:.5rem">${p.price} DA</div>
-        <div style="font-size:.65rem;color:${p.stock > 0 ? '#7fffaa' : '#ff8080'};margin-bottom:.7rem">${p.stock > 0 ? `✓ En stock (${p.stock})` : '✗ Rupture'}</div>
-        ${p.stock > 0 ? `<button onclick="openOrderModal(${p.id}, '${p.name.replace(/'/g,"\\'")}', ${p.stock})" style="width:100%;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.6rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">Commander</button>` : `<button disabled style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:rgba(255,255,255,0.2);padding:.6rem;font-size:.75rem;font-family:'DM Sans',sans-serif;cursor:not-allowed">Indisponible</button>`}
+        ${p.description ? `<div style="font-size:.7rem;color:rgba(0,0,0,0.4);margin-bottom:.5rem">${p.description}</div>` : ''}
+        <div style="color:#111111;font-weight:700;font-size:.9rem;margin-bottom:.5rem">${p.price} DA</div>
+        <div style="font-size:.65rem;color:${p.stock > 0 ? '#cccccc' : '#ff8080'};margin-bottom:.7rem">${p.stock > 0 ? `✓ En stock (${p.stock})` : '✗ Rupture'}</div>
+        ${p.stock > 0 ? `<button onclick="openOrderModal(${p.id}, '${p.name.replace(/'/g,"\\'")}', ${p.stock})" style="width:100%;background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.2);color:#111111;padding:.6rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">Commander</button>` : `<button disabled style="width:100%;background:rgba(0,0,0,0.05);border:1px solid var(--border);color:rgba(0,0,0,0.2);padding:.6rem;font-size:.75rem;font-family:'DM Sans',sans-serif;cursor:not-allowed">Indisponible</button>`}
       </div>
     </div>
   `).join('');
@@ -1729,17 +1737,17 @@ async function loadProducts() {
   const { data } = await db.from('products').select('*').order('id');
   const grid = document.getElementById('products-grid');
   if (!data || data.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);font-size:.8rem;padding:1rem">Aucun produit disponible</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(0,0,0,0.3);font-size:.8rem;padding:1rem">Aucun produit disponible</div>';
     return;
   }
   grid.innerHTML = data.map(p => `
-    <div style="background:var(--card);border:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;gap:.5rem">
-      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:120px;object-fit:cover;border-radius:2px">` : '<div style="width:100%;height:80px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:2rem">🛍</div>'}
+    <div style="background:#ffffff;border:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;gap:.5rem">
+      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:120px;object-fit:cover;border-radius:2px">` : '<div style="width:100%;height:80px;background:rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:center;font-size:2rem">🛍</div>'}
       <div style="font-weight:600;font-size:.85rem">${p.name}</div>
-      ${p.description ? `<div style="font-size:.7rem;color:rgba(255,255,255,0.4)">${p.description}</div>` : ''}
-      <div style="color:var(--gold);font-weight:700;font-size:.9rem">${p.price.toLocaleString()} DA</div>
-      <div style="font-size:.65rem;color:${p.stock > 0 ? '#7fffaa' : '#ff8080'}">${p.stock > 0 ? `✓ En stock (${p.stock})` : '✗ Rupture de stock'}</div>
-      ${p.stock > 0 ? `<button onclick="openOrderModal(${p.id},'${p.name.replace(/'/g,"\\'")}',${p.price},${p.stock})" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);padding:.6rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">Commander</button>` : ''}
+      ${p.description ? `<div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${p.description}</div>` : ''}
+      <div style="color:#111111;font-weight:700;font-size:.9rem">${p.price.toLocaleString()} DA</div>
+      <div style="font-size:.65rem;color:${p.stock > 0 ? '#cccccc' : '#ff8080'}">${p.stock > 0 ? `✓ En stock (${p.stock})` : '✗ Rupture de stock'}</div>
+      ${p.stock > 0 ? `<button onclick="openOrderModal(${p.id},'${p.name.replace(/'/g,"\\'")}',${p.price},${p.stock})" style="background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.2);color:#111111;padding:.6rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">Commander</button>` : ''}
     </div>
   `).join('');
 }
@@ -1748,7 +1756,7 @@ function openOrderModal(id, name, price, stock) {
   currentOrderProduct = { id, name, price, stock };
   orderQty = 1;
   document.getElementById('order-qty').textContent = 1;
-  document.getElementById('order-product-info').innerHTML = `<strong>${name}</strong> — <span style="color:var(--gold)">${price.toLocaleString()} DA</span>`;
+  document.getElementById('order-product-info').innerHTML = `<strong>${name}</strong> — <span style="color:#000000">${price.toLocaleString()} DA</span>`;
   document.getElementById('order-name').value = '';
   document.getElementById('order-phone').value = '';
   document.getElementById('order-modal').style.display = 'block';
@@ -1800,19 +1808,19 @@ async function loadAdminOrders() {
   const { data } = await db.from('orders').select('*').order('created_at', { ascending: false });
   const container = document.getElementById('admin-orders-list');
   if (!data || data.length === 0) {
-    container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:.8rem;padding:1rem">Aucune commande</div>';
+    container.innerHTML = '<div style="text-align:center;color:rgba(0,0,0,0.3);font-size:.8rem;padding:1rem">Aucune commande</div>';
     return;
   }
   container.innerHTML = data.map(o => `
-    <div style="background:var(--card2);border:1px solid var(--border);border-left:3px solid ${o.status === 'done' ? '#7fffaa' : 'var(--gold)'};padding:1rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem">
+    <div style="background:#eeeeee;border:1px solid var(--border);border-left:3px solid ${o.status === 'done' ? '#cccccc' : '#000000'};padding:1rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem">
       <div>
         <div style="font-weight:600;font-size:.85rem">${o.product_name} × ${o.quantity}</div>
-        <div style="font-size:.75rem;color:rgba(255,255,255,0.5)">${o.client_name} · ${o.client_phone}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,0.3)">${new Date(o.created_at).toLocaleString('fr-FR')}</div>
+        <div style="font-size:.75rem;color:rgba(0,0,0,0.5)">${o.client_name} · ${o.client_phone}</div>
+        <div style="font-size:.65rem;color:rgba(0,0,0,0.3)">${new Date(o.created_at).toLocaleString('fr-FR')}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
-        <span style="font-size:.65rem;padding:.2rem .5rem;background:${o.status === 'done' ? 'rgba(127,255,170,0.1)' : 'rgba(201,168,76,0.1)'};color:${o.status === 'done' ? '#7fffaa' : 'var(--gold)'}">${o.status === 'done' ? '✓ Livré' : '⏳ En attente'}</span>
-        ${o.status !== 'done' ? `<button onclick="markOrderDone(${o.id})" style="background:rgba(127,255,170,0.1);border:1px solid rgba(127,255,170,0.3);color:#7fffaa;padding:.3rem .6rem;cursor:pointer;font-size:.65rem">✓ Livré</button>` : ''}
+        <span style="font-size:.65rem;padding:.2rem .5rem;background:${o.status === 'done' ? 'rgba(127,255,170,0.1)' : 'rgba(0,0,0,0.05)'};color:${o.status === 'done' ? '#cccccc' : '#000000'}">${o.status === 'done' ? '✓ Livré' : '⏳ En attente'}</span>
+        ${o.status !== 'done' ? `<button onclick="markOrderDone(${o.id})" style="background:rgba(127,255,170,0.1);border:1px solid rgba(127,255,170,0.3);color:#cccccc;padding:.3rem .6rem;cursor:pointer;font-size:.65rem">✓ Livré</button>` : ''}
         <button onclick="deleteOrder(${o.id})" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.65rem">🗑</button>
       </div>
     </div>
@@ -1836,18 +1844,18 @@ async function loadAdminProducts() {
   const { data } = await db.from('products').select('*').order('id');
   const container = document.getElementById('admin-products-list');
   if (!data || data.length === 0) {
-    container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:.8rem;padding:.5rem">Aucun produit</div>';
+    container.innerHTML = '<div style="text-align:center;color:rgba(0,0,0,0.3);font-size:.8rem;padding:.5rem">Aucun produit</div>';
     return;
   }
   container.innerHTML = data.map(p => `
-    <div style="background:var(--card2);border:1px solid var(--border);padding:.8rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem">
+    <div style="background:#eeeeee;border:1px solid var(--border);padding:.8rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem">
       <div>
         <div style="font-weight:600;font-size:.85rem">${p.name}</div>
-        <div style="font-size:.75rem;color:var(--gold)">${p.price.toLocaleString()} DA · Stock: <span style="color:${p.stock > 0 ? '#7fffaa' : '#ff8080'}">${p.stock}</span></div>
+        <div style="font-size:.75rem;color:#000000">${p.price.toLocaleString()} DA · Stock: <span style="color:${p.stock > 0 ? '#cccccc' : '#ff8080'}">${p.stock}</span></div>
       </div>
       <div style="display:flex;gap:.4rem;align-items:center">
         <button onclick="updateStock(${p.id},${p.stock},-1)" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;width:2rem;height:2rem;cursor:pointer;font-size:1rem">−</button>
-        <button onclick="updateStock(${p.id},${p.stock},1)" style="background:rgba(127,255,170,0.1);border:1px solid rgba(127,255,170,0.3);color:#7fffaa;width:2rem;height:2rem;cursor:pointer;font-size:1rem">+</button>
+        <button onclick="updateStock(${p.id},${p.stock},1)" style="background:rgba(127,255,170,0.1);border:1px solid rgba(127,255,170,0.3);color:#cccccc;width:2rem;height:2rem;cursor:pointer;font-size:1rem">+</button>
         <button onclick="deleteProduct(${p.id})" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .5rem;cursor:pointer;font-size:.7rem">🗑</button>
       </div>
     </div>
@@ -1912,12 +1920,12 @@ async function loadConges() {
   const { data } = await db.from('blocked_dates').select('*').order('blocked_date');
   const list = document.getElementById('conges-list');
   if(!data || data.length === 0) {
-    list.innerHTML = '<div style="font-size:.75rem;color:rgba(255,255,255,0.3);padding:.5rem">Aucun congé programmé</div>';
+    list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucun congé programmé</div>';
     return;
   }
   list.innerHTML = data.map(r => `
     <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,80,80,0.05);border:1px solid rgba(255,80,80,0.2);padding:.7rem 1rem">
-      <span style="font-size:.85rem">🗓 ${formatDate(r.blocked_date)} ${r.barber ? `<span style="color:var(--gold);font-size:.7rem">· ${r.barber}</span>` : '<span style="color:rgba(255,255,255,0.4);font-size:.7rem">· Tous</span>'}</span>
+      <span style="font-size:.85rem">🗓 ${formatDate(r.blocked_date)} ${r.barber ? `<span style="color:#111111;font-size:.7rem">· ${r.barber}</span>` : '<span style="color:rgba(0,0,0,0.4);font-size:.7rem">· Tous</span>'}</span>
       <button onclick="deleteConge(${r.id})" style="background:none;border:none;color:#ff5555;cursor:pointer;font-size:.9rem">✕</button>
     </div>
   `).join('');
@@ -1955,10 +1963,10 @@ window.deleteConge = deleteConge;
 async function loadCustomHours() {
   const { data } = await db.from('custom_hours').select('*').order('date').order('time_start');
   const list = document.getElementById('ch-list');
-  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(255,255,255,0.3);text-align:center;padding:.5rem">Aucun horaire custom</div>'; return; }
+  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);text-align:center;padding:.5rem">Aucun horaire custom</div>'; return; }
   list.innerHTML = data.map(r => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;background:rgba(128,207,255,0.05);border:1px solid rgba(128,207,255,0.15)">
-      <span style="font-size:.8rem">${r.type === 'block' ? '🔴' : '🟢'} ${formatDate(r.date)} — ${r.time_start.slice(0,5)} → ${r.time_end.slice(0,5)} ${r.barber ? `<span style="color:var(--gold);font-size:.7rem">· ${r.barber}</span>` : '<span style="color:rgba(255,255,255,0.3);font-size:.7rem">· Tous</span>'}</span>
+      <span style="font-size:.8rem">${r.type === 'block' ? '🔴' : '🟢'} ${formatDate(r.date)} — ${r.time_start.slice(0,5)} → ${r.time_end.slice(0,5)} ${r.barber ? `<span style="color:#111111;font-size:.7rem">· ${r.barber}</span>` : '<span style="color:rgba(0,0,0,0.3);font-size:.7rem">· Tous</span>'}</span>
       <button onclick="deleteCustomHour(${r.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:1rem">×</button>
     </div>
   `).join('');
@@ -2062,9 +2070,9 @@ function renderAdminBookings(data) {
   if(data.length > 0) {
     summaryEl.style.display = 'block';
     summaryEl.innerHTML = `
-      <span style="color:var(--white);font-weight:600">${data.length} résultat${data.length > 1 ? 's' : ''}</span>
+      <span style="color:#111111;font-weight:600">${data.length} résultat${data.length > 1 ? 's' : ''}</span>
       &nbsp;·&nbsp;
-      <span style="color:#7fffaa">✓ ${confirmed} confirmé${confirmed > 1 ? 'es' : 'e'}</span>
+      <span style="color:#cccccc">✓ ${confirmed} confirmé${confirmed > 1 ? 'es' : 'e'}</span>
       ${cancelled > 0 ? `&nbsp;·&nbsp;<span style="color:#ff8080">✗ ${cancelled} annulé${cancelled > 1 ? 'es' : 'e'}</span>` : ''}
     `;
   } else {
@@ -2085,15 +2093,15 @@ function renderAdminBookings(data) {
     <div class="admin-card" id="acard-${r.id}">
       <div class="admin-card-header">
         <div>
-          <div class="admin-service">${r.service} ${r.barber ? `<span style="color:var(--gold);font-size:.75rem">· ${r.barber}</span>` : ''} <span style="background:var(--gold);color:#000;font-size:.6rem;font-weight:700;padding:.1rem .4rem;margin-left:.3rem">#${r.daily_ticket || r.id}</span></div>
+          <div class="admin-service">${r.service} ${r.barber ? `<span style="color:#111111;font-size:.75rem">· ${r.barber}</span>` : ''} <span style="background:#ffffff;color:#000;font-size:.6rem;font-weight:700;padding:.1rem .4rem;margin-left:.3rem">#${r.daily_ticket || r.id}</span></div>
           <div class="admin-datetime">📅 ${formatDate(r.reservation_date)} · ⏰ ${r.reservation_time}</div>
-          <div style="font-size:.65rem;color:rgba(255,255,255,0.3);margin-top:.2rem">🕐 Enregistré à ${r.created_at ? new Date(r.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit', timeZone:'Africa/Algiers'}) : '—'}</div>
+          <div style="font-size:.65rem;color:rgba(0,0,0,0.3);margin-top:.2rem">🕐 Enregistré à ${r.created_at ? new Date(r.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit', timeZone:'Africa/Algiers'}) : '—'}</div>
         </div>
         <span class="bc-status ${r.status === 'cancelled' ? 'cancelled' : ''}">${r.status === 'cancelled' ? 'Annulé | ملغى' : 'Confirmé | مؤكد'}</span>
       </div>
       <div class="admin-client">
         <span>👤 ${r.client_name}</span>
-        <a href="tel:${r.client_phone}" style="color:var(--gold);text-decoration:none">📞 ${r.client_phone}</a>
+        <a href="tel:${r.client_phone}" style="color:#111111;text-decoration:none">📞 ${r.client_phone}</a>
       </div>
       <div class="admin-actions">
         ${r.status !== 'cancelled' ? `<button class="btn-cancel" onclick="cancelBooking(${r.id})">✗ Annuler | إلغاء</button>` : ''}
@@ -2189,19 +2197,19 @@ async function renderTVMode() {
       <div class="tv-col">
         <div class="tv-col-header">
           ${b.photo 
-            ? `<img src="${b.photo}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;margin:0 auto .3rem;display:block;border:2px solid var(--gold)">`
+            ? `<img src="${b.photo}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;margin:0 auto .3rem;display:block;border:2px solid #000000">`
             : `<div style="font-size:1.5rem">${b.emoji}</div>`}
           <div class="tv-col-name">${b.name}</div>
           <div class="tv-col-count">${rdvs.filter(r=>r.status!=='cancelled').length} RDV aujourd'hui</div>
         </div>
         <div class="tv-col-body">
           ${rdvs.length === 0 
-            ? `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.2);font-size:.75rem">Aucun RDV</div>`
+            ? `<div style="text-align:center;padding:2rem;color:rgba(0,0,0,0.2);font-size:.75rem">Aucun RDV</div>`
             : rdvs.map(r => `
               <div class="tv-card ${r.status === 'cancelled' ? 'cancelled' : ''}">
                 <div style="display:flex;justify-content:space-between;align-items:center">
                   <div class="tv-card-time">${r.reservation_time}</div>
-                  <div style="background:var(--gold);color:#000;font-weight:700;font-size:.7rem;padding:.2rem .5rem">#${r.daily_ticket || r.id}</div>
+                  <div style="background:#ffffff;color:#000;font-weight:700;font-size:.7rem;padding:.2rem .5rem">#${r.daily_ticket || r.id}</div>
                 </div>
                 <div class="tv-card-name">👤 ${r.client_name}</div>
                 <div class="tv-card-service">${r.service}</div>
@@ -2264,17 +2272,17 @@ async function loadStats() {
   const totalRdv = data.length;
 
   document.getElementById('stats-kpis').innerHTML = `
-    <div style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1rem;text-align:center">
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold)">${todayRdv}</div>
-      <div style="font-size:.6rem;color:rgba(255,255,255,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Aujourd'hui</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #000000;padding:1rem;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#000000">${todayRdv}</div>
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Aujourd'hui</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-top:2px solid #a78bfa;padding:1rem;text-align:center">
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #a78bfa;padding:1rem;text-align:center">
       <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#a78bfa">${weekRdv}</div>
-      <div style="font-size:.6rem;color:rgba(255,255,255,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">7 jours</div>
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">7 jours</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--teal);padding:1rem;text-align:center">
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--teal-light)">${totalRdv}</div>
-      <div style="font-size:.6rem;color:rgba(255,255,255,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Total</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #222222;padding:1rem;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#444444">${totalRdv}</div>
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Total</div>
     </div>
   `;
 
@@ -2289,12 +2297,12 @@ async function loadStats() {
   const maxCount = Math.max(...days.map(d => d.count), 1);
   document.getElementById('stats-chart').innerHTML = days.map(d => `
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem">
-      <div style="font-size:.65rem;color:rgba(255,255,255,0.5)">${d.count || ''}</div>
-      <div style="width:100%;background:${d.str===todayStr?'var(--gold)':'rgba(167,139,250,0.6)'};height:${Math.max(4, (d.count/maxCount)*80)}px;transition:height .5s"></div>
+      <div style="font-size:.65rem;color:rgba(0,0,0,0.5)">${d.count || ''}</div>
+      <div style="width:100%;background:${d.str===todayStr?'#000000':'rgba(167,139,250,0.6)'};height:${Math.max(4, (d.count/maxCount)*80)}px;transition:height .5s"></div>
     </div>
   `).join('');
   document.getElementById('stats-chart-labels').innerHTML = days.map(d => `
-    <div style="flex:1;text-align:center;font-size:.6rem;color:rgba(255,255,255,0.4)">${d.label}</div>
+    <div style="flex:1;text-align:center;font-size:.6rem;color:rgba(0,0,0,0.4)">${d.label}</div>
   `).join('');
 
   // Services
@@ -2305,10 +2313,10 @@ async function loadStats() {
   document.getElementById('stats-services').innerHTML = sortedServices.map(([name, count]) => `
     <div>
       <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.3rem">
-        <span>${name}</span><span style="color:var(--gold);font-weight:600">${count}</span>
+        <span>${name}</span><span style="color:#111111;font-weight:600">${count}</span>
       </div>
-      <div style="background:rgba(255,255,255,0.05);height:6px;border-radius:3px">
-        <div style="background:var(--gold);height:100%;border-radius:3px;width:${(count/maxSvc)*100}%;transition:width .5s"></div>
+      <div style="background:rgba(0,0,0,0.05);height:6px;border-radius:3px">
+        <div style="background:#ffffff;height:100%;border-radius:3px;width:${(count/maxSvc)*100}%;transition:width .5s"></div>
       </div>
     </div>
   `).join('');
@@ -2323,10 +2331,10 @@ async function loadStats() {
       <div style="font-size:.9rem">${['🥇','🥈','🥉','4️⃣'][i] || '•'}</div>
       <div style="flex:1">
         <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.3rem">
-          <span>${name}</span><span style="color:var(--teal-light);font-weight:600">${count} rdv</span>
+          <span>${name}</span><span style="color:#444444;font-weight:600">${count} rdv</span>
         </div>
-        <div style="background:rgba(255,255,255,0.05);height:6px;border-radius:3px">
-          <div style="background:var(--teal);height:100%;border-radius:3px;width:${(count/maxBar)*100}%;transition:width .5s"></div>
+        <div style="background:rgba(0,0,0,0.05);height:6px;border-radius:3px">
+          <div style="background:#222222;height:100%;border-radius:3px;width:${(count/maxBar)*100}%;transition:width .5s"></div>
         </div>
       </div>
     </div>
@@ -2343,7 +2351,7 @@ async function activateAlerts() {
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {
     document.getElementById('notif-btn-wrap').innerHTML = 
-      '<div style="text-align:center;color:#34d399;font-size:.8rem;padding:.5rem">✓ Alertes activées — vous serez notifié!</div>';
+      '<div style="text-align:center;color:#444444;font-size:.8rem;padding:.5rem">✓ Alertes activées — vous serez notifié!</div>';
     showToast('Alertes activées! ✓', 'success');
   } else {
     showToast('Permission refusée — restez sur la page pour recevoir les alertes', 'error');
@@ -2363,6 +2371,43 @@ async function loadLiveQueue() {
   const container = document.getElementById('queue-content');
   const allData = data || [];
 
+  // Show my ticket banner
+  const myTicketBanner = document.getElementById('my-ticket-banner');
+  try {
+    const stored = localStorage.getItem('my_ticket');
+    if (stored) {
+      const mt = JSON.parse(stored);
+      if (mt.date === today) {
+        // Find my position in barber's queue
+        const barberData = allData.filter(r => r.barber === mt.barber);
+        const myIdx = barberData.findIndex(r => r.id === mt.id);
+        const position = myIdx >= 0 ? myIdx : null;
+        myTicketBanner.innerHTML = `
+          <div style="background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.2);padding:.7rem 1rem;margin-bottom:.8rem;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:.55rem;color:rgba(0,0,0,0.4);letter-spacing:.15em;text-transform:uppercase">Mon ticket · ${mt.barber}</div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:#111111;font-weight:700">#${mt.ticket}</div>
+              <div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${mt.time}</div>
+            </div>
+            <div style="text-align:right">
+              ${position === 0 ? `<div style="color:#444444;font-weight:600;font-size:.85rem">C'est votre tour! 🔔</div>` :
+                position > 0 ? `<div style="color:rgba(0,0,0,0.5);font-size:.75rem">${position} client${position > 1 ? 's' : ''} avant vous</div><div style="color:rgba(0,0,0,0.3);font-size:.65rem">~${position * 45}min</div>` :
+                `<div style="color:rgba(0,0,0,0.3);font-size:.7rem">Terminé ✓</div>`}
+              <button onclick="localStorage.removeItem('my_ticket');loadLiveQueue()" style="background:none;border:none;color:rgba(0,0,0,0.2);cursor:pointer;font-size:.65rem;margin-top:.3rem">✕ effacer</button>
+            </div>
+          </div>
+        `;
+      } else {
+        localStorage.removeItem('my_ticket');
+        myTicketBanner.innerHTML = '';
+      }
+    } else {
+      myTicketBanner.innerHTML = '';
+    }
+  } catch(e) {
+    myTicketBanner.innerHTML = '';
+  }
+
   container.innerHTML = BARBERS.map(b => {
     const barberData = allData.filter(r => r.barber === b.name);
     const current = barberData.find(r => r.status === 'calling') || barberData[0];
@@ -2372,17 +2417,17 @@ async function loadLiveQueue() {
     return `
       <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:.7rem .9rem;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:.7rem">
-          ${b.photo ? `<img src="${b.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--gold)">` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1rem">${b.emoji}</div>`}
+          ${b.photo ? `<img src="${b.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #000000">` : `<div style="width:36px;height:36px;border-radius:50%;background:#eeeeee;display:flex;align-items:center;justify-content:center;font-size:1rem">${b.emoji}</div>`}
           <div>
             <div style="font-weight:600;font-size:.85rem">${b.name}</div>
-            <div style="font-size:.65rem;color:rgba(255,255,255,0.4)">${total === 0 ? 'Disponible' : `${total} client${total > 1 ? 's' : ''} · ~${total * 45}min`}</div>
+            <div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${total === 0 ? 'Disponible' : `${total} client${total > 1 ? 's' : ''} · ~${total * 45}min`}</div>
           </div>
         </div>
         <div style="text-align:right">
           ${current ? `
-            <div style="font-size:.55rem;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.1em">En cours</div>
-            <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);font-weight:700">#${current.daily_ticket || current.id}</div>
-          ` : `<div style="font-size:.75rem;color:#34d399">✓ Libre</div>`}
+            <div style="font-size:.55rem;color:rgba(0,0,0,0.3);text-transform:uppercase;letter-spacing:.1em">En cours</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#111111;font-weight:700">#${current.daily_ticket || current.id}</div>
+          ` : `<div style="font-size:.75rem;color:#444444">✓ Libre</div>`}
         </div>
       </div>
     `;
@@ -2591,12 +2636,12 @@ setInterval(checkUpcomingTickets, 30000);
 
 <!-- Order Modal -->
 <div id="order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;padding:1.5rem;overflow-y:auto">
-  <div style="background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);padding:1.5rem;max-width:500px;margin:2rem auto">
+  <div style="background:#ffffff;border:1px solid var(--border);border-top:3px solid #000000;padding:1.5rem;max-width:500px;margin:2rem auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">🛍 Commander</h2>
-      <button onclick="closeOrderModal()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#000000">🛍 Commander</h2>
+      <button onclick="closeOrderModal()" style="background:none;border:none;color:rgba(0,0,0,0.5);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
-    <div id="order-product-info" style="padding:.8rem;background:rgba(201,168,76,0.05);border:1px solid var(--border);margin-bottom:1rem;font-size:.85rem"></div>
+    <div id="order-product-info" style="padding:.8rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);margin-bottom:1rem;font-size:.85rem"></div>
     <div class="form-group">
       <label class="form-label">Votre nom</label>
       <input class="form-input" id="order-name" type="text" placeholder="Ex: Ahmed">
@@ -2608,9 +2653,9 @@ setInterval(checkUpcomingTickets, 30000);
     <div class="form-group">
       <label class="form-label">Quantité</label>
       <div style="display:flex;align-items:center;gap:1rem">
-        <button onclick="changeQty(-1)" style="background:rgba(255,255,255,0.1);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;font-size:1.2rem;cursor:pointer">−</button>
+        <button onclick="changeQty(-1)" style="background:rgba(0,0,0,0.1);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;font-size:1.2rem;cursor:pointer">−</button>
         <span id="order-qty" style="font-size:1.2rem;font-weight:600;min-width:2rem;text-align:center">1</span>
-        <button onclick="changeQty(1)" style="background:rgba(255,255,255,0.1);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;font-size:1.2rem;cursor:pointer">+</button>
+        <button onclick="changeQty(1)" style="background:rgba(0,0,0,0.1);border:1px solid var(--border);color:white;width:2.5rem;height:2.5rem;font-size:1.2rem;cursor:pointer">+</button>
       </div>
     </div>
     <button id="btn-order-confirm" class="btn-next" style="margin-top:.5rem">✓ Confirmer la commande</button>
@@ -2619,10 +2664,10 @@ setInterval(checkUpcomingTickets, 30000);
 
 <!-- Ticket Alert Overlay -->
 <div id="ticket-alert-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem" onclick="closeTicketAlert()">
-  <div style="font-size:.8rem;letter-spacing:.4em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:1rem">C'est l'heure du client</div>
-  <div style="font-family:'Playfair Display',serif;font-size:8rem;font-weight:700;color:var(--gold);line-height:1" id="alert-ticket-num">#1</div>
+  <div style="font-size:.8rem;letter-spacing:.4em;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-bottom:1rem">C'est l'heure du client</div>
+  <div style="font-family:'Playfair Display',serif;font-size:8rem;font-weight:700;color:#111111;line-height:1" id="alert-ticket-num">#1</div>
   <div style="font-size:1.6rem;font-weight:600;color:white;margin-top:1rem" id="alert-ticket-name">Ahmed</div>
-  <div style="font-size:1rem;color:rgba(255,255,255,0.5);margin-top:.5rem" id="alert-ticket-info">Coupe · Younes</div>
+  <div style="font-size:1rem;color:rgba(0,0,0,0.5);margin-top:.5rem" id="alert-ticket-info">Coupe · Younes</div>
   <div style="margin-top:3rem;font-size:.75rem;color:rgba(255,255,255,0.25)">Appuyer pour fermer</div>
 </div>
 
