@@ -1321,7 +1321,7 @@ async function confirmBooking() {
   btn.disabled = true;
   btn.textContent = 'Enregistrement...';
 
-  // Check double booking
+  // Check double booking same slot
   const { data: existing } = await db.from('reservations')
     .select('id')
     .eq('reservation_date', state.selectedDate)
@@ -1337,11 +1337,28 @@ async function confirmBooking() {
     return;
   }
 
-  // Get daily ticket number
-  const today = new Date().toISOString().split('T')[0];
+  // Check client already booked today with same barber
+  const clientPhone = document.getElementById('inp-phone').value.trim();
+  const { data: alreadyBooked } = await db.from('reservations')
+    .select('id')
+    .eq('reservation_date', state.selectedDate)
+    .eq('barber', state.selectedBarber?.name)
+    .eq('client_phone', clientPhone)
+    .neq('status', 'cancelled');
+
+  if(alreadyBooked && alreadyBooked.length > 0) {
+    showToast('Vous avez déjà une réservation avec ce coiffeur aujourd\'hui! ⚠️', 'error');
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmer le rendez-vous';
+    return;
+  }
+
+  // Get daily ticket number PER BARBER
   const { count } = await db.from('reservations')
     .select('*', { count: 'exact', head: true })
-    .eq('reservation_date', state.selectedDate);
+    .eq('reservation_date', state.selectedDate)
+    .eq('barber', state.selectedBarber?.name)
+    .neq('status', 'cancelled');
   const dailyTicket = (count || 0) + 1;
 
   const { data: insertData, error: insertError } = await db.from('reservations').insert({
@@ -2344,40 +2361,32 @@ async function loadLiveQueue() {
     .order('reservation_time', { ascending: true });
 
   const container = document.getElementById('queue-content');
-  if (!data || data.length === 0) {
-    container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:.78rem;padding:.5rem">Aucun client en attente aujourd\'hui</div>';
-    return;
-  }
+  const allData = data || [];
 
-  // Current = first confirmed or calling
-  const current = data.find(r => r.status === 'calling') || data[0];
-  const waiting = data.filter(r => r.status === 'confirmed');
+  container.innerHTML = BARBERS.map(b => {
+    const barberData = allData.filter(r => r.barber === b.name);
+    const current = barberData.find(r => r.status === 'calling') || barberData[0];
+    const waiting = current ? barberData.filter(r => r.id !== current.id) : [];
+    const total = barberData.length;
 
-  container.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);margin-bottom:.5rem">
-      <div>
-        <div style="font-size:.55rem;color:rgba(255,255,255,0.4);letter-spacing:.15em;text-transform:uppercase">Ticket en cours ✂️</div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);font-weight:700">#${current.daily_ticket || current.id}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:.8rem;font-weight:600;color:var(--white)">${current.barber}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,0.4)">${current.reservation_time}</div>
-      </div>
-    </div>
-    ${waiting.length > 0 ? `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
-        <div style="font-size:.72rem;color:rgba(255,255,255,0.4)">🕐 ${waiting.length} client${waiting.length > 1 ? 's' : ''} en attente</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,0.4)">~${waiting.length * 45} min</div>
-      </div>
-      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
-        ${waiting.slice(0,6).map((r, i) => `
-          <div style="background:rgba(255,255,255,0.05);border:1px solid var(--border);padding:.35rem .7rem;font-size:.7rem;color:rgba(255,255,255,0.5)">
-            <span style="color:var(--gold)">#${r.daily_ticket || r.id}</span> · ${r.barber}
+    return `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:.7rem .9rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:.7rem">
+          ${b.photo ? `<img src="${b.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--gold)">` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1rem">${b.emoji}</div>`}
+          <div>
+            <div style="font-weight:600;font-size:.85rem">${b.name}</div>
+            <div style="font-size:.65rem;color:rgba(255,255,255,0.4)">${total === 0 ? 'Disponible' : `${total} client${total > 1 ? 's' : ''} · ~${total * 45}min`}</div>
           </div>
-        `).join('')}
+        </div>
+        <div style="text-align:right">
+          ${current ? `
+            <div style="font-size:.55rem;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.1em">En cours</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);font-weight:700">#${current.daily_ticket || current.id}</div>
+          ` : `<div style="font-size:.75rem;color:#34d399">✓ Libre</div>`}
+        </div>
       </div>
-    ` : '<div style="font-size:.72rem;color:#34d399;text-align:center;margin-top:.3rem">✓ Aucun client en attente</div>'}
-  `;
+    `;
+  }).join('');
 }
 
 // Refresh queue every 30s
@@ -2472,23 +2481,25 @@ function setupRealtimeListener(reservationId) {
 // Admin: Appeler suivant
 document.getElementById('btn-appeler-suivant').addEventListener('click', async () => {
   const today = new Date().toISOString().split('T')[0];
-  const now = new Date().toTimeString().slice(0,5);
 
-  // Get next confirmed reservation today
+  // Ask which barber
+  const barber = prompt('Quel coiffeur? (Younes / Mohamed / Nadir / Islem)');
+  if (!barber) return;
+
   const { data } = await db.from('reservations')
     .select('*')
     .eq('reservation_date', today)
+    .eq('barber', barber)
     .eq('status', 'confirmed')
     .order('reservation_time', { ascending: true })
     .limit(1);
 
   if (!data || data.length === 0) {
-    showToast('Aucun client en attente', 'error');
+    showToast(`Aucun client en attente pour ${barber}`, 'error');
     return;
   }
 
   const next = data[0];
-  // Update status to 'calling'
   await db.from('reservations').update({ status: 'calling' }).eq('id', next.id);
   showToast(`🔔 ${next.client_name} appelé! Ticket #${next.daily_ticket || next.id}`, 'success');
   loadAdminBookings();
