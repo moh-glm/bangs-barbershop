@@ -780,6 +780,14 @@ body {
     <!-- Admin Orders -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ffd580;text-transform:uppercase;margin-top:.5rem">📦 Commandes | الطلبات</div>
     <div id="admin-orders-list" style="padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.7rem"></div>
+
+    <!-- Blacklist -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ff8080;text-transform:uppercase;margin-top:.5rem">🚫 Blacklist</div>
+    <div style="padding:0 1.5rem .5rem;display:flex;gap:.7rem">
+      <input class="form-input" id="bl-phone" type="tel" placeholder="Numéro à blacklister" style="font-size:.8rem;flex:1">
+      <button id="btn-add-blacklist" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-size:.8rem;white-space:nowrap">🚫 Bloquer</button>
+    </div>
+    <div id="blacklist-list" style="padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.5rem"></div>
   </div>
 </div>
 
@@ -1002,7 +1010,7 @@ function showPage(p) {
   if (p === 'reviews') loadReviews();
   if (p === 'boutique') loadProducts();
   if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); }
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); }
   if (p === 'home') loadProducts();
 }
 
@@ -1338,8 +1346,17 @@ async function confirmBooking() {
     return;
   }
 
-  // Check client already booked today with same barber
+  // Check blacklist
   const clientPhone = document.getElementById('inp-phone').value.trim();
+  const { data: blacklisted } = await db.from('blacklist').select('id').eq('phone', clientPhone).limit(1);
+  if (blacklisted && blacklisted.length > 0) {
+    showToast('Réservation impossible ⚠️', 'error');
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmer le rendez-vous';
+    return;
+  }
+
+  // Check client already booked today with same barber
   const { data: alreadyBooked } = await db.from('reservations')
     .select('id')
     .eq('reservation_date', state.selectedDate)
@@ -1528,7 +1545,7 @@ async function loadReviews() {
         <span style="color:#111111;font-size:1rem">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
       </div>
       ${r.barber ? `<div style="font-size:.7rem;color:rgba(0,0,0,0.4);margin-bottom:.4rem">💈 ${r.barber}</div>` : ''}
-      ${r.comment ? `<div style="font-size:.85rem;color:rgba(255,255,255,0.7)">${r.comment}</div>` : ''}
+      ${r.comment ? `<div style="font-size:.85rem;color:rgba(0,0,0,0.7)">${r.comment}</div>` : ''}
       <div style="font-size:.65rem;color:rgba(0,0,0,0.3);margin-top:.5rem">${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>
     </div>
   `).join('');
@@ -1657,6 +1674,57 @@ document.getElementById('nav-boutique').addEventListener('click', () => showPage
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.changeQty = changeQty;
+
+async function blacklistPhone(phone, name) {
+  if (!confirm(`Blacklister ${name} (${phone}) ?`)) return;
+  const { error } = await db.from('blacklist').insert({ phone, reason: 'Spam/No show' });
+  if (error && error.code === '23505') {
+    showToast('Déjà blacklisté!', 'error');
+  } else if (error) {
+    showToast('Erreur!', 'error');
+  } else {
+    showToast(`🚫 ${name} blacklisté!`, 'success');
+    loadBlacklist();
+  }
+}
+window.blacklistPhone = blacklistPhone;
+
+async function loadBlacklist() {
+  const { data } = await db.from('blacklist').select('*').order('created_at', { ascending: false });
+  const list = document.getElementById('blacklist-list');
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem 0">Aucun numéro blacklisté</div>';
+    return;
+  }
+  list.innerHTML = data.map(b => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;background:rgba(255,80,80,0.04);border:1px solid rgba(255,80,80,0.15)">
+      <span style="font-size:.82rem">🚫 ${b.phone} ${b.reason ? `<span style="color:rgba(0,0,0,0.3);font-size:.7rem">· ${b.reason}</span>` : ''}</span>
+      <button onclick="removeBlacklist(${b.id})" style="background:none;border:none;color:#888;cursor:pointer;font-size:.8rem">✕ Débloquer</button>
+    </div>
+  `).join('');
+}
+
+async function removeBlacklist(id) {
+  await db.from('blacklist').delete().eq('id', id);
+  showToast('Numéro débloqué ✓', 'success');
+  loadBlacklist();
+}
+window.removeBlacklist = removeBlacklist;
+
+document.getElementById('btn-add-blacklist').addEventListener('click', async () => {
+  const phone = document.getElementById('bl-phone').value.trim();
+  if (!phone) return;
+  const { error } = await db.from('blacklist').insert({ phone, reason: 'Manuel' });
+  if (error && error.code === '23505') {
+    showToast('Déjà blacklisté!', 'error');
+  } else if (error) {
+    showToast('Erreur!', 'error');
+  } else {
+    showToast('🚫 Numéro blacklisté!', 'success');
+    document.getElementById('bl-phone').value = '';
+    loadBlacklist();
+  }
+});
 
 // ── WALK-IN ──
 function openWalkin() {
@@ -2035,6 +2103,10 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     document.getElementById('admin-dashboard').style.display = 'block';
     loadAdminBookings();
     loadConges();
+    loadCustomHours();
+    loadAdminProducts();
+    loadAdminOrders();
+    loadBlacklist();
   } else {
     document.getElementById('admin-error').style.display = 'block';
   }
@@ -2106,6 +2178,7 @@ function renderAdminBookings(data) {
       <div class="admin-actions">
         ${r.status !== 'cancelled' ? `<button class="btn-cancel" onclick="cancelBooking(${r.id})">✗ Annuler | إلغاء</button>` : ''}
         <button class="btn-delete" onclick="deleteBooking(${r.id})">🗑 Supprimer | حذف</button>
+        <button class="btn-cancel" onclick="blacklistPhone('${r.client_phone}', '${r.client_name}')" style="background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.2);color:#555">🚫 Blacklist</button>
       </div>
     </div>
   `).join('');
@@ -2362,14 +2435,14 @@ window.activateAlerts = activateAlerts;
 // ── LIVE QUEUE ──
 async function loadLiveQueue() {
   const today = new Date().toISOString().split('T')[0];
-  const { data } = await db.from('reservations')
-    .select('*')
-    .eq('reservation_date', today)
-    .in('status', ['confirmed', 'calling'])
-    .order('reservation_time', { ascending: true });
+  const [activeRes, doneRes] = await Promise.all([
+    db.from('reservations').select('*').eq('reservation_date', today).in('status', ['confirmed', 'calling']).order('reservation_time', { ascending: true }),
+    db.from('reservations').select('barber').eq('reservation_date', today).eq('status', 'done')
+  ]);
 
   const container = document.getElementById('queue-content');
-  const allData = data || [];
+  const allData = activeRes.data || [];
+  const doneData = doneRes.data || [];
 
   // Show my ticket banner
   const myTicketBanner = document.getElementById('my-ticket-banner');
@@ -2408,30 +2481,34 @@ async function loadLiveQueue() {
     myTicketBanner.innerHTML = '';
   }
 
-  container.innerHTML = BARBERS.map(b => {
-    const barberData = allData.filter(r => r.barber === b.name);
-    const current = barberData.find(r => r.status === 'calling') || barberData[0];
-    const waiting = current ? barberData.filter(r => r.id !== current.id) : [];
-    const total = barberData.length;
-
-    return `
-      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:.7rem .9rem;display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;align-items:center;gap:.7rem">
-          ${b.photo ? `<img src="${b.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #000000">` : `<div style="width:36px;height:36px;border-radius:50%;background:#eeeeee;display:flex;align-items:center;justify-content:center;font-size:1rem">${b.emoji}</div>`}
-          <div>
-            <div style="font-weight:600;font-size:.85rem">${b.name}</div>
-            <div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${total === 0 ? 'Disponible' : `${total} client${total > 1 ? 's' : ''} · ~${total * 45}min`}</div>
+  container.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">` +
+    BARBERS.map(b => {
+      const barberData = allData.filter(r => r.barber === b.name);
+      const current = barberData.find(r => r.status === 'calling') || barberData[0];
+      const total = barberData.length;
+      const busy = total > 0;
+      const doneCount = doneData.filter(r => r.barber === b.name).length;
+      return `
+        <div style="background:${busy ? '#111111' : '#ffffff'};border:1px solid ${busy ? '#111' : 'rgba(0,0,0,0.1)'};padding:.6rem .8rem;display:flex;align-items:center;gap:.6rem">
+          ${b.photo 
+            ? `<img src="${b.photo}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid ${busy?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.1)'}">`
+            : `<div style="width:34px;height:34px;border-radius:50%;background:${busy?'rgba(255,255,255,0.1)':'#eee'};display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0">${b.emoji}</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.1rem">
+              <div style="font-size:.75rem;font-weight:600;color:${busy ? '#ffffff' : '#111'}">${b.name}</div>
+              ${doneCount > 0 ? `<div style="font-size:.6rem;color:${busy?'rgba(255,255,255,0.4)':'#aaa'}">✓${doneCount}</div>` : ''}
+            </div>
+            ${current
+              ? `<div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#ffffff">#${current.daily_ticket || current.id}</div>
+                  ${total > 1 ? `<div style="font-size:.6rem;color:rgba(255,255,255,0.5)">+${total-1}</div>` : ''}
+                 </div>`
+              : `<div style="font-size:.7rem;color:#888">✓ Libre</div>`
+            }
           </div>
         </div>
-        <div style="text-align:right">
-          ${current ? `
-            <div style="font-size:.55rem;color:rgba(0,0,0,0.3);text-transform:uppercase;letter-spacing:.1em">En cours</div>
-            <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#111111;font-weight:700">#${current.daily_ticket || current.id}</div>
-          ` : `<div style="font-size:.75rem;color:#444444">✓ Libre</div>`}
-        </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('') + `</div>`;
 }
 
 // Refresh queue every 30s
@@ -2527,10 +2604,17 @@ function setupRealtimeListener(reservationId) {
 document.getElementById('btn-appeler-suivant').addEventListener('click', async () => {
   const today = new Date().toISOString().split('T')[0];
 
-  // Ask which barber
   const barber = prompt('Quel coiffeur? (Younes / Mohamed / Nadir / Islem)');
   if (!barber) return;
 
+  // Mark current 'calling' as done first
+  await db.from('reservations')
+    .update({ status: 'done' })
+    .eq('reservation_date', today)
+    .eq('barber', barber)
+    .eq('status', 'calling');
+
+  // Get next confirmed
   const { data } = await db.from('reservations')
     .select('*')
     .eq('reservation_date', today)
@@ -2541,6 +2625,7 @@ document.getElementById('btn-appeler-suivant').addEventListener('click', async (
 
   if (!data || data.length === 0) {
     showToast(`Aucun client en attente pour ${barber}`, 'error');
+    loadAdminBookings();
     return;
   }
 
@@ -2548,6 +2633,7 @@ document.getElementById('btn-appeler-suivant').addEventListener('click', async (
   await db.from('reservations').update({ status: 'calling' }).eq('id', next.id);
   showToast(`🔔 ${next.client_name} appelé! Ticket #${next.daily_ticket || next.id}`, 'success');
   loadAdminBookings();
+  loadLiveQueue();
 });
 
 // ── SPLASH SCREEN ──
