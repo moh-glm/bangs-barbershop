@@ -387,6 +387,7 @@ body {
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
 @keyframes spin { to { transform:rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
 </style>
 </head>
 <body>
@@ -425,11 +426,11 @@ body {
     </button>
 
     <!-- LIVE QUEUE -->
-    <div id="live-queue" style="width:100%;padding:0 1.5rem;margin-top:1rem;box-sizing:border-box">
-      <div style="background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);padding:1rem">
-        <div style="font-size:.55rem;letter-spacing:.3em;color:#222222;text-transform:uppercase;margin-bottom:.8rem;text-align:center">🔴 Live — File d'attente</div>
+    <div id="live-queue" style="width:100%;padding:0 1.5rem;margin-top:.8rem;box-sizing:border-box">
+      <div style="background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);padding:.7rem">
+        <div style="font-size:.5rem;letter-spacing:.3em;color:#222222;text-transform:uppercase;margin-bottom:.5rem;text-align:center">🔴 Live — File d'attente</div>
         <div id="my-ticket-banner"></div>
-        <div id="queue-content" style="display:flex;flex-direction:column;gap:.5rem"></div>
+        <div id="queue-content"></div>
       </div>
     </div>
     <div class="hero-info">
@@ -2754,12 +2755,22 @@ window.activateAlerts = activateAlerts;
 // ── LIVE QUEUE ──
 async function loadLiveQueue() {
   const today = new Date().toISOString().split('T')[0];
+  const container = document.getElementById('queue-content');
+  
+  // Show instant skeleton while loading
+  if (!container.hasChildNodes()) {
+    container.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">` +
+      (BARBERS.length > 0 ? BARBERS : [{name:'...'},{name:'...'},{name:'...'},{name:'...'}]).map(b => `
+        <div style="background:#f0f0f0;padding:.4rem .6rem;display:flex;align-items:center;gap:.5rem;animation:pulse 1s infinite">
+          <div style="width:28px;height:28px;border-radius:50%;background:#ddd;flex-shrink:0"></div>
+          <div style="flex:1"><div style="height:8px;background:#ddd;border-radius:4px;margin-bottom:4px;width:60%"></div><div style="height:10px;background:#ddd;border-radius:4px;width:40%"></div></div>
+        </div>`).join('') + `</div>`;
+  }
   const [activeRes, doneRes] = await Promise.all([
-    db.from('reservations').select('*').eq('reservation_date', today).in('status', ['confirmed', 'calling']).order('reservation_time', { ascending: true }),
+    db.from('reservations').select('*').eq('reservation_date', today).in('status', ['confirmed', 'calling']).order('daily_ticket', { ascending: true }),
     db.from('reservations').select('barber').eq('reservation_date', today).eq('status', 'done')
   ]);
 
-  const container = document.getElementById('queue-content');
   const allData = activeRes.data || [];
   const doneData = doneRes.data || [];
 
@@ -2772,20 +2783,22 @@ async function loadLiveQueue() {
       if (mt.date === today) {
         // Find my position in barber's queue
         const barberData = allData.filter(r => r.barber === mt.barber);
-        const myIdx = barberData.findIndex(r => r.id === mt.id);
-        const position = myIdx >= 0 ? myIdx : null;
+        const myTicket = barberData.find(r => r.id === mt.id);
+        // Position = number of tickets with smaller daily_ticket number still active
+        const position = myTicket 
+          ? barberData.filter(r => (r.daily_ticket || r.id) < (myTicket.daily_ticket || myTicket.id)).length
+          : null;
         myTicketBanner.innerHTML = `
-          <div style="background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.2);padding:.7rem 1rem;margin-bottom:.8rem;display:flex;justify-content:space-between;align-items:center">
+          <div style="background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.15);padding:.5rem .8rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center">
             <div>
-              <div style="font-size:.55rem;color:rgba(0,0,0,0.4);letter-spacing:.15em;text-transform:uppercase">Mon ticket · ${mt.barber}</div>
-              <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:#111111;font-weight:700">#${mt.ticket}</div>
-              <div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${mt.time}</div>
+              <div style="font-size:.5rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase">Mon ticket · ${mt.barber}</div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#111111;font-weight:700;line-height:1.2">#${mt.ticket}</div>
             </div>
             <div style="text-align:right">
-              ${position === 0 ? `<div style="color:#444444;font-weight:600;font-size:.85rem">C'est votre tour! 🔔</div>` :
-                position > 0 ? `<div style="color:rgba(0,0,0,0.5);font-size:.75rem">${position} client${position > 1 ? 's' : ''} avant vous</div><div style="color:rgba(0,0,0,0.3);font-size:.65rem">~${position * 45}min</div>` :
+              ${position === 0 ? `<div style="color:#111;font-weight:600;font-size:.75rem">C'est votre tour! 🔔</div>` :
+                position > 0 ? `<div style="color:rgba(0,0,0,0.5);font-size:.7rem">${position} avant vous</div>` :
                 `<div style="color:rgba(0,0,0,0.3);font-size:.7rem">Terminé ✓</div>`}
-              <button onclick="localStorage.removeItem('my_ticket');loadLiveQueue()" style="background:none;border:none;color:rgba(0,0,0,0.2);cursor:pointer;font-size:.65rem;margin-top:.3rem">✕ effacer</button>
+              <button onclick="localStorage.removeItem('my_ticket');loadLiveQueue()" style="background:none;border:none;color:rgba(0,0,0,0.2);cursor:pointer;font-size:.6rem">✕</button>
             </div>
           </div>
         `;
@@ -2800,7 +2813,7 @@ async function loadLiveQueue() {
     myTicketBanner.innerHTML = '';
   }
 
-  container.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">` +
+  container.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">` +
     BARBERS.map(b => {
       const barberData = allData.filter(r => r.barber === b.name);
       const current = barberData.find(r => r.status === 'calling') || barberData[0];
@@ -2808,21 +2821,21 @@ async function loadLiveQueue() {
       const busy = total > 0;
       const doneCount = doneData.filter(r => r.barber === b.name).length;
       return `
-        <div style="background:${busy ? '#111111' : '#ffffff'};border:1px solid ${busy ? '#111' : 'rgba(0,0,0,0.1)'};padding:.6rem .8rem;display:flex;align-items:center;gap:.6rem">
+        <div style="background:${busy ? '#111111' : '#ffffff'};border:1px solid ${busy ? '#111' : 'rgba(0,0,0,0.1)'};padding:.7rem .9rem;display:flex;align-items:center;gap:.7rem">
           ${b.photo 
-            ? `<img src="${b.photo}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid ${busy?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.1)'}">`
-            : `<div style="width:34px;height:34px;border-radius:50%;background:${busy?'rgba(255,255,255,0.1)':'#eee'};display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0">${b.emoji}</div>`}
+            ? `<img src="${b.photo}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+            : `<div style="width:42px;height:42px;border-radius:50%;background:${busy?'rgba(255,255,255,0.1)':'#eee'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">${b.emoji}</div>`}
           <div style="flex:1;min-width:0">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.1rem">
-              <div style="font-size:.75rem;font-weight:600;color:${busy ? '#ffffff' : '#111'}">${b.name}</div>
-              ${doneCount > 0 ? `<div style="font-size:.6rem;color:${busy?'rgba(255,255,255,0.4)':'#aaa'}">✓${doneCount}</div>` : ''}
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:.85rem;font-weight:600;color:${busy ? '#ffffff' : '#111'}">${b.name}</div>
+              ${doneCount > 0 ? `<div style="font-size:.65rem;color:${busy?'rgba(255,255,255,0.4)':'#bbb'}">✓${doneCount}</div>` : ''}
             </div>
             ${current
               ? `<div style="display:flex;justify-content:space-between;align-items:center">
-                  <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#ffffff">#${current.daily_ticket || current.id}</div>
-                  ${total > 1 ? `<div style="font-size:.6rem;color:rgba(255,255,255,0.5)">+${total-1}</div>` : ''}
+                  <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#ffffff">#${current.daily_ticket || current.id}</div>
+                  ${total > 1 ? `<div style="font-size:.65rem;color:rgba(255,255,255,0.5)">+${total-1} en attente</div>` : ''}
                  </div>`
-              : `<div style="font-size:.7rem;color:#888">✓ Libre</div>`
+              : `<div style="font-size:.78rem;color:#888">✓ Libre</div>`
             }
           </div>
         </div>
@@ -2934,13 +2947,13 @@ document.getElementById('btn-appeler-suivant').addEventListener('click', async (
     .eq('barber', barber)
     .eq('status', 'calling');
 
-  // Get next confirmed
+  // Get next confirmed — order by daily_ticket (smallest first)
   const { data } = await db.from('reservations')
     .select('*')
     .eq('reservation_date', today)
     .eq('barber', barber)
     .eq('status', 'confirmed')
-    .order('reservation_time', { ascending: true })
+    .order('daily_ticket', { ascending: true })
     .limit(1);
 
   if (!data || data.length === 0) {
@@ -2958,12 +2971,13 @@ document.getElementById('btn-appeler-suivant').addEventListener('click', async (
 
 // ── SPLASH SCREEN ──
 window.addEventListener('load', async () => {
-  // Load barbers & services from DB
+  // Load barbers & services + live queue in parallel immediately
   await refreshDynamicData();
+  loadLiveQueue(); // Load queue right away — no wait
   // Re-render if booking page active
   renderServices();
   // Populate dynamic admin selects (deferred to ensure function is defined)
-  setTimeout(() => { if (typeof populateAdminSelects === 'function') populateAdminSelects(); }, 0);
+  try { populateAdminSelects(); } catch(e) {}
   const logo = document.getElementById('splash-logo');
   const bar = document.getElementById('splash-bar');
   const splash = document.getElementById('splash');
