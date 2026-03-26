@@ -135,7 +135,7 @@ body {
 .nav-item svg { width:20px; height:20px; }
 
 /* ── BOOKING PAGE ── */
-#page-booking, #page-mybookings, #page-hours, #page-boutique { background:#f5f5f5; padding-bottom:calc(8rem + env(safe-area-inset-bottom)); }
+#page-booking, #page-hours, #page-boutique { background:#f5f5f5; padding-bottom:calc(8rem + env(safe-area-inset-bottom)); }
 
 .page-header {
   padding:2.5rem 1.5rem 1.5rem;
@@ -1585,33 +1585,6 @@ function resetBooking() {
   renderServices();
 }
 
-// ── MY BOOKINGS ──
-async function loadMyBookings() {
-  const container = document.getElementById('bookings-container');
-  const phone = localStorage.getItem('bangs_phone');
-  if(!phone) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucune réservation pour le moment.<br><span style="font-size:.75rem">Faites une réservation d'abord!</span></p></div>`;
-    return;
-  }
-  container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  const { data } = await db.from('reservations').select('*')
-    .eq('client_phone', phone)
-    .order('reservation_date', {ascending: false})
-    .limit(20);
-  if(!data || data.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucune réservation trouvée</p></div>`;
-    return;
-  }
-  container.innerHTML = '<div class="bookings-list">' + data.map(r => `
-    <div class="booking-card">
-      <div class="bc-service">${r.service} ${r.barber ? `<span style="color:#111111;font-size:.75rem">· ${r.barber}</span>` : ''}</div>
-      <div class="bc-date">📅 ${formatDate(r.reservation_date)} à ${r.reservation_time}</div>
-      <div class="bc-name">👤 ${r.client_name}</div>
-      <span class="bc-status ${r.status === 'cancelled' ? 'cancelled' : ''}">${r.status === 'cancelled' ? 'Annulé' : 'Confirmé'}</span>
-    </div>
-  `).join('') + '</div>';
-}
-
 // ── TOAST ──
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
@@ -2901,7 +2874,6 @@ async function requestPushPermission(reservationId) {
     // Also setup realtime listener for this reservation
     setupRealtimeListener(reservationId);
   } catch(e) {
-    console.log('Push not available:', e);
   }
 }
 
@@ -2937,7 +2909,6 @@ function setupRealtimeListener(reservationId) {
       }
     })
     .subscribe((status) => {
-      console.log('Realtime status:', status);
     });
 }
 
