@@ -789,6 +789,81 @@ body {
       <div id="cat-photos-list" style="display:flex;flex-direction:column;gap:.7rem"></div>
     </div>
 
+    <!-- Gestion Coiffeurs -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#34d399;text-transform:uppercase;margin-top:1rem">👥 Coiffeurs | الحلاقون</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="barber-name" type="text" placeholder="Nom" style="font-size:.8rem">
+        <input class="form-input" id="barber-job" type="text" placeholder="Spécialité" style="font-size:.8rem">
+      </div>
+      <input class="form-input" id="barber-img" type="text" placeholder="URL photo" style="font-size:.8rem">
+      <button id="btn-add-barber" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.4);color:#34d399;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter coiffeur</button>
+      <div id="barbers-admin-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
+    <!-- Gestion Catégories & Services -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#60a5fa;text-transform:uppercase;margin-top:.5rem">📂 Catégories & Services</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <!-- Tab toggle -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        <button id="tab-cats" onclick="switchCatTab('cats')" style="padding:.6rem;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;background:#111111;color:#fff;border:1px solid #111111">Catégorie</button>
+        <button id="tab-svcs" onclick="switchCatTab('svcs')" style="padding:.6rem;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;background:#fff;color:#111111;border:1px solid #111111">Sous-service</button>
+      </div>
+      <!-- Catégorie form -->
+      <div id="form-cats">
+        <div style="display:flex;flex-direction:column;gap:.7rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+            <input class="form-input" id="cat-name" type="text" placeholder="Nom catégorie" style="font-size:.8rem">
+            <input class="form-input" id="cat-job" type="text" placeholder="Description" style="font-size:.8rem">
+          </div>
+          <input class="form-input" id="cat-img" type="text" placeholder="URL image" style="font-size:.8rem">
+          <button id="btn-add-cat" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.4);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter catégorie</button>
+          <div id="cats-admin-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+        </div>
+      </div>
+      <!-- Sous-service form -->
+      <div id="form-svcs" style="display:none;flex-direction:column;gap:.7rem">
+        <select class="form-input" id="svc-cat-select" style="font-size:.8rem">
+          <option value="">Choisir catégorie...</option>
+          <option>Coupe</option><option>Barbe</option><option>Combo</option><option>Soin</option>
+        </select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+          <input class="form-input" id="svc-name" type="text" placeholder="Nom service" style="font-size:.8rem">
+          <input class="form-input" id="svc-duration" type="number" placeholder="Durée (min)" style="font-size:.8rem">
+        </div>
+        <input class="form-input" id="svc-img" type="text" placeholder="URL image (opt)" style="font-size:.8rem">
+        <button id="btn-add-svc" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.4);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter service</button>
+        <div id="svcs-admin-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+      </div>
+    </div>
+
+    <!-- Finance / Caisse -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#fbbf24;text-transform:uppercase;margin-top:.5rem">💰 Caisse | الصندوق</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <!-- Stats -->
+      <div id="finance-stats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.3rem"></div>
+      <!-- Add transaction -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="tx-amount" type="number" placeholder="Montant (DA)" style="font-size:.8rem">
+        <select class="form-input" id="tx-type" style="font-size:.8rem;cursor:pointer">
+          <option value="income">📈 Entrée</option>
+          <option value="expense">📉 Sortie</option>
+        </select>
+      </div>
+      <input class="form-input" id="tx-desc" type="text" placeholder="Description (opt)" style="font-size:.8rem">
+      <input class="form-input" id="tx-date" type="date" style="font-size:.8rem">
+      <!-- Balance selectors -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <select class="form-input" id="tx-filter-type" onchange="renderFinanceStats()" style="font-size:.8rem;cursor:pointer">
+          <option value="month">Ce mois</option>
+          <option value="year">Cette année</option>
+          <option value="all">Tout</option>
+        </select>
+        <button id="btn-add-tx" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Enregistrer</button>
+      </div>
+      <div id="tx-list" style="display:flex;flex-direction:column;gap:.5rem;max-height:350px;overflow-y:auto"></div>
+    </div>
+
     <!-- Blacklist -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ff8080;text-transform:uppercase;margin-top:.5rem">🚫 Blacklist</div>
     <div style="padding:0 1.5rem .5rem;display:flex;gap:.7rem">
@@ -985,6 +1060,37 @@ const BARBERS = [
   { id:4, name:'Islem', emoji:'⭐', photo:'https://i.ibb.co/vCsBNq5k/5888968061031747258.jpg', instagram:'barber_bangs_dz', speciality:'Coupe & Soin' },
 ];
 
+// ── DYNAMIC DATA (loaded from DB) ──
+let dynamicBarbers = [];
+let dynamicCategories = []; // {id, name, description, image_url}
+let dynamicServicesList = []; // {id, name, category, duration_mins, emoji, image_url}
+
+async function loadDynamicBarbers() {
+  const { data } = await db.from('barbers').select('*').order('created_at', { ascending: true });
+  if (data && data.length > 0) {
+    dynamicBarbers = data.map(b => ({ id: b.id, name: b.name, emoji: '💈', photo: b.photo_url || null, speciality: b.speciality || '', instagram: null }));
+  } else {
+    dynamicBarbers = BARBERS.map(b => ({ ...b }));
+  }
+}
+
+async function loadDynamicCategories() {
+  const { data } = await db.from('service_categories').select('*').order('created_at', { ascending: true });
+  dynamicCategories = data || [];
+}
+
+async function loadDynamicServices() {
+  const { data } = await db.from('services_list').select('*').order('created_at', { ascending: true });
+  if (data && data.length > 0) {
+    dynamicServicesList = data.map((s, i) => ({
+      id: s.id, name: s.name, emoji: s.emoji || '✂️',
+      duration: s.duration_mins ? (s.duration_mins >= 60 ? `${Math.floor(s.duration_mins/60)}h${s.duration_mins%60>0?s.duration_mins%60+'min':''}` : `${s.duration_mins} min`) : '45 min',
+      durationMins: s.duration_mins || 45,
+      price: 'À confirmer', category: s.category, img: s.image_url || null
+    }));
+  }
+}
+
 // ── TIME SLOTS ──
 const ALL_SLOTS = [
   '10:00','10:45','11:30','12:15','13:00','13:45',
@@ -1018,8 +1124,8 @@ function showPage(p) {
   state.page = p;
   if (p === 'reviews') loadReviews();
   if (p === 'boutique') loadProducts();
-  if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); loadCatPhotos(); }
+  if (p === 'booking' && state.step === 1) { loadDynamicBarbers().then(() => { loadDynamicCategories(); loadDynamicServices(); renderServices(); }); loadBlockedDates(); }
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); loadCatPhotos(); loadAdminBarbers(); loadAdminCats(); loadTransactions(); }
   if (p === 'home') loadProducts();
 }
 
@@ -1051,10 +1157,26 @@ function updateStepIndicators(current) {
 let openCategory = null;
 let expandedService = null;
 
+function getActiveServices() {
+  return dynamicServicesList.length > 0 ? [...SERVICES, ...dynamicServicesList] : SERVICES;
+}
+
+function getActiveCategoryOrder() {
+  const defaultCats = ['Coupe', 'Barbe', 'Combo', 'Soin'];
+  if (dynamicCategories.length > 0) {
+    const dbCats = dynamicCategories.map(c => c.name);
+    return [...new Set([...defaultCats, ...dbCats])];
+  }
+  return defaultCats;
+}
+
 function renderServices() {
   const list = document.getElementById('services-list');
-  const categoryOrder = ['Coupe', 'Barbe', 'Combo', 'Soin'];
-  const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
+  const categoryOrder = getActiveCategoryOrder();
+  const allServices = getActiveServices();
+  const catImages = { ...JSON.parse(localStorage.getItem('bangs_cat_images') || '{}') };
+  // Also merge category images from dynamicCategories
+  dynamicCategories.forEach(c => { if (c.image_url) catImages[c.name] = c.image_url; });
   // Show selected summary if any services picked
   const totalDur = getTotalDuration();
   const selectedNames = state.selectedServices.map(s => s.name);
@@ -1069,7 +1191,7 @@ function renderServices() {
     }
   }
   list.innerHTML = categoryOrder.map(cat => {
-    const services = SERVICES.filter(s => s.category === cat);
+    const services = allServices.filter(s => s.category === cat);
     if (!services.length) return '';
     const isOpen = openCategory === cat;
     const catImg = catImages[cat];
@@ -1163,11 +1285,16 @@ function selectService(id) {
   toggleServiceSelection(id);
 }
 
+function getActiveBarbers() {
+  return dynamicBarbers.length > 0 ? dynamicBarbers : BARBERS;
+}
+
 function renderBarbers() {
+  const barbers = getActiveBarbers();
   const list = document.getElementById('barbers-list');
-  list.innerHTML = BARBERS.map(b => `
-    <div class="barber-card ${state.selectedBarber?.id === b.id ? 'selected':''}" onclick="selectBarber(${b.id})">
-      ${b.photo 
+  list.innerHTML = barbers.map(b => `
+    <div class="barber-card ${String(state.selectedBarber?.id) === String(b.id) ? 'selected':''}" onclick="selectBarber('${b.id}')">
+      ${b.photo
         ? `<div class="barber-avatar" style="padding:0;overflow:hidden"><img src="${b.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
         : `<div class="barber-avatar">${b.emoji}</div>`}
       <div class="barber-name">${b.name}</div>
@@ -1177,7 +1304,7 @@ function renderBarbers() {
 }
 
 function selectBarber(id) {
-  state.selectedBarber = BARBERS.find(b => b.id === id);
+  state.selectedBarber = getActiveBarbers().find(b => String(b.id) === String(id));
   renderBarbers();
   checkStep1();
 }
@@ -1780,6 +1907,251 @@ document.getElementById('btn-add-blacklist').addEventListener('click', async () 
   }
 });
 
+// ── ADMIN BARBERS ──
+async function loadAdminBarbers() {
+  const { data } = await db.from('barbers').select('*').order('created_at', { ascending: true });
+  const list = document.getElementById('barbers-admin-list');
+  if (!list) return;
+  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucun coiffeur ajouté</div>'; return; }
+  list.innerHTML = data.map(b => `
+    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border)">
+      ${b.photo_url ? `<img src="${b.photo_url}" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid var(--border)">` : `<div style="width:40px;height:40px;background:#eee;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem">💈</div>`}
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.85rem">${b.name}</div>
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${b.speciality || ''}</div>
+      </div>
+      <button onclick="deleteBarberAdmin('${b.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
+    </div>
+  `).join('');
+}
+window.deleteBarberAdmin = async function(id) {
+  if (!confirm('Supprimer ce coiffeur?')) return;
+  await db.from('barbers').delete().eq('id', id);
+  showToast('Coiffeur supprimé', 'success');
+  await loadDynamicBarbers();
+  loadAdminBarbers();
+  renderBarbers();
+};
+document.addEventListener('DOMContentLoaded', () => {
+  const btnAddBarber = document.getElementById('btn-add-barber');
+  if (btnAddBarber) btnAddBarber.addEventListener('click', async () => {
+    const name = document.getElementById('barber-name').value.trim();
+    const speciality = document.getElementById('barber-job').value.trim();
+    const photo_url = document.getElementById('barber-img').value.trim();
+    if (!name) { showToast('Nom obligatoire ⚠️', 'error'); return; }
+    const { error } = await db.from('barbers').insert({ name, speciality: speciality || null, photo_url: photo_url || null });
+    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
+    showToast('Coiffeur ajouté ✓', 'success');
+    document.getElementById('barber-name').value = '';
+    document.getElementById('barber-job').value = '';
+    document.getElementById('barber-img').value = '';
+    await loadDynamicBarbers();
+    loadAdminBarbers();
+    renderBarbers();
+  });
+});
+
+// ── ADMIN CATEGORIES ──
+window.switchCatTab = function(tab) {
+  document.getElementById('form-cats').style.display = tab === 'cats' ? 'block' : 'none';
+  document.getElementById('form-svcs').style.display = tab === 'svcs' ? 'flex' : 'none';
+  document.getElementById('tab-cats').style.background = tab === 'cats' ? '#111' : '#fff';
+  document.getElementById('tab-cats').style.color = tab === 'cats' ? '#fff' : '#111';
+  document.getElementById('tab-svcs').style.background = tab === 'svcs' ? '#111' : '#fff';
+  document.getElementById('tab-svcs').style.color = tab === 'svcs' ? '#fff' : '#111';
+  if (tab === 'svcs') loadAdminServices();
+};
+
+async function loadAdminCats() {
+  const { data } = await db.from('service_categories').select('*').order('created_at', { ascending: true });
+  const list = document.getElementById('cats-admin-list');
+  if (!list) return;
+  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucune catégorie ajoutée</div>'; return; }
+  list.innerHTML = data.map(c => `
+    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border)">
+      ${c.image_url ? `<img src="${c.image_url}" style="width:40px;height:40px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:40px;height:40px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📂</div>`}
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.85rem">${c.name}</div>
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${c.description || ''}</div>
+      </div>
+      <button onclick="deleteCatAdmin('${c.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
+    </div>
+  `).join('');
+}
+window.deleteCatAdmin = async function(id) {
+  if (!confirm('Supprimer cette catégorie?')) return;
+  await db.from('service_categories').delete().eq('id', id);
+  showToast('Catégorie supprimée', 'success');
+  await loadDynamicCategories();
+  loadAdminCats();
+};
+document.addEventListener('DOMContentLoaded', () => {
+  const btnAddCat = document.getElementById('btn-add-cat');
+  if (btnAddCat) btnAddCat.addEventListener('click', async () => {
+    const name = document.getElementById('cat-name').value.trim();
+    const description = document.getElementById('cat-job').value.trim();
+    const image_url = document.getElementById('cat-img').value.trim();
+    if (!name) { showToast('Nom obligatoire ⚠️', 'error'); return; }
+    const { error } = await db.from('service_categories').insert({ name, description: description || null, image_url: image_url || null });
+    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
+    showToast('Catégorie ajoutée ✓', 'success');
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-job').value = '';
+    document.getElementById('cat-img').value = '';
+    await loadDynamicCategories();
+    loadAdminCats();
+    // Refresh category select in sous-service form
+    refreshSvcCatSelect();
+  });
+});
+
+async function loadAdminServices() {
+  const { data } = await db.from('services_list').select('*').order('created_at', { ascending: true });
+  const list = document.getElementById('svcs-admin-list');
+  if (!list) return;
+  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucun service ajouté</div>'; return; }
+  list.innerHTML = data.map(s => `
+    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border)">
+      ${s.image_url ? `<img src="${s.image_url}" style="width:40px;height:40px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:40px;height:40px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:1.2rem">✂️</div>`}
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.85rem">${s.name}</div>
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${s.category} · ${s.duration_mins || 45} min</div>
+      </div>
+      <button onclick="deleteSvcAdmin('${s.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
+    </div>
+  `).join('');
+}
+window.deleteSvcAdmin = async function(id) {
+  if (!confirm('Supprimer ce service?')) return;
+  await db.from('services_list').delete().eq('id', id);
+  showToast('Service supprimé', 'success');
+  await loadDynamicServices();
+  loadAdminServices();
+};
+function refreshSvcCatSelect() {
+  const sel = document.getElementById('svc-cat-select');
+  if (!sel) return;
+  const defaultOpts = ['Coupe','Barbe','Combo','Soin'];
+  const dynOpts = dynamicCategories.map(c => c.name).filter(n => !defaultOpts.includes(n));
+  const all = [...defaultOpts, ...dynOpts];
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Choisir catégorie...</option>' + all.map(n => `<option ${n===current?'selected':''}>${n}</option>`).join('');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const btnAddSvc = document.getElementById('btn-add-svc');
+  if (btnAddSvc) btnAddSvc.addEventListener('click', async () => {
+    const category = document.getElementById('svc-cat-select').value;
+    const name = document.getElementById('svc-name').value.trim();
+    const duration_mins = parseInt(document.getElementById('svc-duration').value) || 45;
+    const image_url = document.getElementById('svc-img').value.trim();
+    if (!name || !category) { showToast('Nom et catégorie obligatoires ⚠️', 'error'); return; }
+    const { error } = await db.from('services_list').insert({ name, category, duration_mins, image_url: image_url || null, emoji: '✂️' });
+    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
+    showToast('Service ajouté ✓', 'success');
+    document.getElementById('svc-name').value = '';
+    document.getElementById('svc-duration').value = '';
+    document.getElementById('svc-img').value = '';
+    await loadDynamicServices();
+    loadAdminServices();
+  });
+});
+
+// ── FINANCE / CAISSE ──
+let allTransactions = [];
+
+async function loadTransactions() {
+  const { data } = await db.from('transactions').select('*').order('date', { ascending: false });
+  allTransactions = data || [];
+  renderFinanceStats();
+  renderTxList();
+}
+
+function renderFinanceStats() {
+  const filterType = document.getElementById('tx-filter-type')?.value || 'month';
+  const now = new Date();
+  const filtered = allTransactions.filter(t => {
+    const d = new Date(t.date);
+    if (filterType === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (filterType === 'year') return d.getFullYear() === now.getFullYear();
+    return true;
+  });
+  const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
+  const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
+  const balance = income - expense;
+  const labelMap = { month: 'Ce mois', year: 'Cette année', all: 'Total' };
+  const container = document.getElementById('finance-stats');
+  if (!container) return;
+  container.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--border);border-top:2px solid #34d399;padding:.8rem;text-align:center">
+      <div style="font-size:1rem;font-weight:700;color:#34d399">${income.toLocaleString()} DA</div>
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.2rem">📈 Entrées</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-top:2px solid #ff8080;padding:.8rem;text-align:center">
+      <div style="font-size:1rem;font-weight:700;color:#ff8080">${expense.toLocaleString()} DA</div>
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.2rem">📉 Sorties</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-top:2px solid ${balance>=0?'#111':'#ff8080'};padding:.8rem;text-align:center">
+      <div style="font-size:1rem;font-weight:700;color:${balance>=0?'#111':'#ff8080'}">${balance>=0?'+':''}${balance.toLocaleString()} DA</div>
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.2rem">💼 Balance</div>
+    </div>
+  `;
+}
+window.renderFinanceStats = renderFinanceStats;
+
+function renderTxList() {
+  const filterType = document.getElementById('tx-filter-type')?.value || 'month';
+  const now = new Date();
+  const filtered = allTransactions.filter(t => {
+    const d = new Date(t.date);
+    if (filterType === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (filterType === 'year') return d.getFullYear() === now.getFullYear();
+    return true;
+  });
+  const list = document.getElementById('tx-list');
+  if (!list) return;
+  if (!filtered.length) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucune transaction</div>'; return; }
+  list.innerHTML = filtered.map(t => `
+    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border);border-left:3px solid ${t.type==='income'?'#34d399':'#ff8080'}">
+      <div style="font-size:1.1rem">${t.type==='income'?'📈':'📉'}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.85rem;color:${t.type==='income'?'#059669':'#dc2626'}">${t.type==='income'?'+':'−'}${(t.amount||0).toLocaleString()} DA</div>
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${t.description||'—'} · ${t.date}</div>
+      </div>
+      <button onclick="deleteTx('${t.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
+    </div>
+  `).join('');
+}
+
+window.deleteTx = async function(id) {
+  await db.from('transactions').delete().eq('id', id);
+  showToast('Supprimé', 'success');
+  loadTransactions();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today as default date for transaction
+  const txDate = document.getElementById('tx-date');
+  if (txDate) txDate.value = new Date().toISOString().split('T')[0];
+
+  const btnAddTx = document.getElementById('btn-add-tx');
+  if (btnAddTx) btnAddTx.addEventListener('click', async () => {
+    const amount = parseFloat(document.getElementById('tx-amount').value);
+    const type = document.getElementById('tx-type').value;
+    const description = document.getElementById('tx-desc').value.trim();
+    const date = document.getElementById('tx-date').value;
+    if (!amount || !date) { showToast('Montant et date obligatoires ⚠️', 'error'); return; }
+    const { error } = await db.from('transactions').insert({ amount, type, description: description || null, date });
+    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
+    showToast('Transaction enregistrée ✓', 'success');
+    document.getElementById('tx-amount').value = '';
+    document.getElementById('tx-desc').value = '';
+    loadTransactions();
+  });
+
+  const txFilterType = document.getElementById('tx-filter-type');
+  if (txFilterType) txFilterType.addEventListener('change', () => { renderFinanceStats(); renderTxList(); });
+});
+
 // ── CATEGORY PHOTOS ──
 function loadCatPhotos() {
   const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
@@ -2212,6 +2584,9 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     loadAdminOrders();
     loadBlacklist();
     loadCatPhotos();
+    loadAdminBarbers();
+    loadAdminCats();
+    loadTransactions();
   } else {
     document.getElementById('admin-error').style.display = 'block';
   }
