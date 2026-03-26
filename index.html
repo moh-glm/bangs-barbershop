@@ -790,7 +790,7 @@ body {
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <input class="form-input" id="sc-name" type="text" placeholder="Nom du service" style="font-size:.8rem">
-        <input class="form-input" id="sc-category" type="text" placeholder="Catégorie (ex: Coupe, Barbe, Soin...)" style="font-size:.8rem" list="categories-list">
+        <input class="form-input" id="sc-category" type="text" placeholder="Catégorie (ex: Coupe, Barbe...)" style="font-size:.8rem" list="categories-list">
         <datalist id="categories-list">
           <option value="Coupe">
           <option value="Barbe">
@@ -798,12 +798,15 @@ body {
           <option value="Soin">
         </datalist>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <input class="form-input" id="sc-price" type="number" placeholder="Prix en DA (ex: 500)" style="font-size:.8rem" min="0">
         <input class="form-input" id="sc-duration" type="number" placeholder="Durée en minutes (ex: 45)" style="font-size:.8rem" min="5">
-        <input class="form-input" id="sc-emoji" type="url" placeholder="URL logo catégorie (optionnel)" style="font-size:.8rem">
       </div>
-      <input class="form-input" id="sc-image" type="url" placeholder="URL image (optionnel)" style="font-size:.8rem">
+      <input class="form-input" id="sc-desc" type="text" placeholder="Description du service (optionnel)" style="font-size:.8rem">
+      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem">3 images séparées</div>
+      <input class="form-input" id="sc-cat-logo" type="url" placeholder="① URL logo catégorie (icône header — ex: logo coupe)" style="font-size:.8rem">
+      <input class="form-input" id="sc-emoji" type="url" placeholder="② URL logo service (icône liste — ex: logo wolf cut)" style="font-size:.8rem">
+      <input class="form-input" id="sc-image" type="url" placeholder="③ URL photo service (grande image détails)" style="font-size:.8rem">
       <button id="btn-add-service" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter service</button>
       <div id="services-config-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
@@ -1150,6 +1153,7 @@ function renderServices() {
                       <div style="padding:.8rem 1rem;display:flex;justify-content:space-between;align-items:center">
                         <div>
                           <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">⏱ ${s.duration}</div>
+                          ${s.description ? `<div style="font-size:.75rem;color:rgba(0,0,0,0.6);margin-top:.2rem">${s.description}</div>` : ''}
                           <div style="font-size:.9rem;color:#111111;font-weight:700;margin-top:.2rem">${s.price}</div>
                         </div>
                         <button onclick="selectService(${s.id})" style="background:${isSelected?'#111111':'rgba(0,0,0,0.08)'};border:1px solid #111111;color:${isSelected?'#ffffff':'#111111'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
@@ -1933,14 +1937,16 @@ document.getElementById('btn-add-service').addEventListener('click', async () =>
   const h = Math.floor(durationMinsRaw / 60);
   const m = durationMinsRaw % 60;
   const duration = h > 0 ? `${h}h${m > 0 ? m+'min' : ''}` : `${durationMinsRaw} min`;
-  const category_logo = document.getElementById('sc-emoji').value.trim() || null;
-  const emoji = category_logo || '✂️';
+  const description = document.getElementById('sc-desc').value.trim() || null;
+  const category_logo = document.getElementById('sc-cat-logo').value.trim() || null;
+  const emojiRaw = document.getElementById('sc-emoji').value.trim();
+  const emoji = emojiRaw || '✂️';
   const image_url = document.getElementById('sc-image').value.trim() || null;
   if (!name) { showToast('Entrez le nom ⚠️', 'error'); return; }
-  const { error } = await db.from('services_config').insert({ name, category, price, duration, emoji, image_url, duration_mins: durationMinsRaw, category_logo });
+  const { error } = await db.from('services_config').insert({ name, category, price, duration, emoji, image_url, duration_mins: durationMinsRaw, category_logo, description });
   if (error) { showToast('Erreur!', 'error'); return; }
   showToast(`✂️ ${name} ajouté!`, 'success');
-  ['sc-name','sc-price','sc-duration','sc-emoji','sc-image'].forEach(id => document.getElementById(id).value = '');
+  ['sc-name','sc-price','sc-duration','sc-desc','sc-cat-logo','sc-emoji','sc-image'].forEach(id => document.getElementById(id).value = '');
   loadServicesConfig();
   await refreshDynamicData();
 });
@@ -1963,7 +1969,8 @@ async function refreshDynamicData() {
       category: s.category, duration: s.duration,
       price: s.price, img: s.image_url,
       durationMins: s.duration_mins || 45,
-      categoryLogo: s.category_logo || null
+      categoryLogo: s.category_logo || null,
+      description: s.description || null
     }));
   }
   populateAdminSelects();
