@@ -210,7 +210,7 @@ body {
   transition: all .2s; border-radius:2px;
 }
 .cal-day:hover:not(.disabled):not(.empty) { border-color:#222222; background:rgba(0,0,0,0.07); }
-.cal-day.selected { background:#222222; border-color:#444444; color:white; }
+.cal-day.selected { background:#111111; border-color:#111111; color:#ffffff !important; }
 .cal-day.today { color:#111111; font-weight:600; }
 .cal-day.disabled { color:rgba(0,0,0,0.15); cursor:not-allowed; }
 .cal-day.empty { cursor:default; }
@@ -638,10 +638,6 @@ body {
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
       <select class="form-input" id="conge-barber" style="font-size:.8rem">
         <option value="">Tous les coiffeurs</option>
-        <option>Younes</option>
-        <option>Mohamed</option>
-        <option>Nadir</option>
-        <option>Islem</option>
       </select>
       <div style="display:flex;gap:.7rem">
         <input class="form-input" id="conge-date" type="date" style="font-size:.8rem;flex:1">
@@ -662,10 +658,6 @@ body {
       </div>
       <select class="form-input" id="ch-barber" style="font-size:.8rem">
         <option value="">Tous les coiffeurs</option>
-        <option>Younes</option>
-        <option>Mohamed</option>
-        <option>Nadir</option>
-        <option>Islem</option>
       </select>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <div>
@@ -716,22 +708,12 @@ body {
           <label class="form-label">Coiffeur</label>
           <select class="form-input" id="wi-barber">
             <option value="">Choisir...</option>
-            <option>Younes</option>
-            <option>Mohamed</option>
-            <option>Nadir</option>
-            <option>Islem</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">Service</label>
           <select class="form-input" id="wi-service">
             <option value="">Choisir...</option>
-            <option>Coupe</option>
-            <option>Barbe</option>
-            <option>Coupe + Barbe</option>
-            <option>Coloration</option>
-            <option>Soin capillaire</option>
-            <option>Coupe Enfant</option>
           </select>
         </div>
         <div class="form-group">
@@ -807,12 +789,13 @@ body {
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <input class="form-input" id="sc-name" type="text" placeholder="Nom du service" style="font-size:.8rem">
-        <select class="form-input" id="sc-category" style="font-size:.8rem">
-          <option value="Coupe">Coupe</option>
-          <option value="Barbe">Barbe</option>
-          <option value="Combo">Combo</option>
-          <option value="Soin">Soin</option>
-        </select>
+        <input class="form-input" id="sc-category" type="text" placeholder="Catégorie (ex: Coupe, Barbe, Soin...)" style="font-size:.8rem" list="categories-list">
+        <datalist id="categories-list">
+          <option value="Coupe">
+          <option value="Barbe">
+          <option value="Combo">
+          <option value="Soin">
+        </datalist>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem">
         <input class="form-input" id="sc-price" type="number" placeholder="Prix en DA (ex: 500)" style="font-size:.8rem" min="0">
@@ -917,7 +900,7 @@ body {
   </div>
 
   <!-- KPIs -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:1.5rem" id="stats-kpis"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.6rem;margin-bottom:1.5rem" id="stats-kpis"></div>
 
   <!-- Rdv par jour -->
   <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem">
@@ -1117,7 +1100,7 @@ function renderServicesBanner() {
 
 function renderServices() {
   const list = document.getElementById('services-list');
-  const categoryOrder = ['Coupe', 'Barbe', 'Combo', 'Soin'];
+  const categoryOrder = [...new Set(SERVICES.map(s => s.category))].filter(Boolean);
   list.innerHTML = categoryOrder.map(cat => {
     const services = SERVICES.filter(s => s.category === cat);
     if (!services.length) return '';
@@ -1860,6 +1843,25 @@ document.getElementById('btn-add-blacklist').addEventListener('click', async () 
   }
 });
 
+function populateAdminSelects() {
+  const barberOptions = BARBERS.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+  const serviceOptions = SERVICES.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  
+  ['conge-barber', 'ch-barber'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<option value="">Tous les coiffeurs</option>${barberOptions}`;
+  });
+  
+  const wiBarber = document.getElementById('wi-barber');
+  if (wiBarber) wiBarber.innerHTML = `<option value="">Choisir...</option>${barberOptions}`;
+  
+  const wiService = document.getElementById('wi-service');
+  if (wiService) wiService.innerHTML = `<option value="">Choisir...</option>${serviceOptions}`;
+
+  // Also update appeler suivant prompt options
+  window._barberNames = BARBERS.map(b => b.name);
+}
+
 // ── BARBERS CONFIG ──
 async function loadBarbersConfig() {
   const { data } = await db.from('barbers_config').select('*').eq('active', true).order('sort_order');
@@ -1975,6 +1977,7 @@ async function refreshDynamicData() {
       durationMins: s.duration_mins || 45
     }));
   }
+  populateAdminSelects();
   // Re-render booking page if open
   if (document.getElementById('page-booking').classList.contains('active')) {
     renderServices();
@@ -2601,18 +2604,35 @@ async function loadStats() {
   const weekRdv = data.filter(r => new Date(r.reservation_date) >= weekAgo).length;
   const totalRdv = data.length;
 
+  // Calculate total revenue
+  let totalRevenue = 0;
+  data.forEach(r => {
+    const serviceNames = r.service ? r.service.split(' + ') : [];
+    serviceNames.forEach(name => {
+      const svc = SERVICES.find(s => s.name === name.trim());
+      if (svc?.price && svc.price !== 'À confirmer') {
+        const num = parseInt(svc.price.replace(/\s/g,'').replace('DA','').replace(',',''));
+        if (!isNaN(num) && num > 0) totalRevenue += num;
+      }
+    });
+  });
+
   document.getElementById('stats-kpis').innerHTML = `
-    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #000000;padding:1rem;text-align:center">
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#000000">${todayRdv}</div>
-      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Aujourd'hui</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #000000;padding:.8rem;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#000000">${todayRdv}</div>
+      <div style="font-size:.55rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Aujourd'hui</div>
     </div>
-    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #a78bfa;padding:1rem;text-align:center">
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#a78bfa">${weekRdv}</div>
-      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">7 jours</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #a78bfa;padding:.8rem;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#a78bfa">${weekRdv}</div>
+      <div style="font-size:.55rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">7 jours</div>
     </div>
-    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #222222;padding:1rem;text-align:center">
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#444444">${totalRdv}</div>
-      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Total</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-top:2px solid #222222;padding:.8rem;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#444444">${totalRdv}</div>
+      <div style="font-size:.55rem;color:rgba(0,0,0,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">Total RDV</div>
+    </div>
+    <div style="background:#111111;border:1px solid #111;border-top:2px solid #111;padding:.8rem;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#ffffff">${totalRevenue > 0 ? totalRevenue.toLocaleString() : '—'}</div>
+      <div style="font-size:.55rem;color:rgba(255,255,255,0.5);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem">${totalRevenue > 0 ? 'DA revenus' : 'Prix non définis'}</div>
     </div>
   `;
 
@@ -2903,7 +2923,8 @@ function setupRealtimeListener(reservationId) {
 document.getElementById('btn-appeler-suivant').addEventListener('click', async () => {
   const today = new Date().toISOString().split('T')[0];
 
-  const barber = prompt('Quel coiffeur? (Younes / Mohamed / Nadir / Islem)');
+  const barberList = (window._barberNames || BARBERS.map(b => b.name)).join(' / ');
+  const barber = prompt(`Quel coiffeur? (${barberList})`);
   if (!barber) return;
 
   // Mark current 'calling' as done first
@@ -2941,6 +2962,8 @@ window.addEventListener('load', async () => {
   await refreshDynamicData();
   // Re-render if booking page active
   renderServices();
+  // Populate dynamic admin selects (deferred to ensure function is defined)
+  setTimeout(() => { if (typeof populateAdminSelects === 'function') populateAdminSelects(); }, 0);
   const logo = document.getElementById('splash-logo');
   const bar = document.getElementById('splash-bar');
   const splash = document.getElementById('splash');
@@ -3054,9 +3077,9 @@ setInterval(checkUpcomingTickets, 30000);
 <!-- Ticket Alert Overlay -->
 <div id="ticket-alert-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem" onclick="closeTicketAlert()">
   <div style="font-size:.8rem;letter-spacing:.4em;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-bottom:1rem">C'est l'heure du client</div>
-  <div style="font-family:'Playfair Display',serif;font-size:8rem;font-weight:700;color:#111111;line-height:1" id="alert-ticket-num">#1</div>
+  <div style="font-family:'Playfair Display',serif;font-size:8rem;font-weight:700;color:#ffffff;line-height:1" id="alert-ticket-num">#1</div>
   <div style="font-size:1.6rem;font-weight:600;color:white;margin-top:1rem" id="alert-ticket-name">Ahmed</div>
-  <div style="font-size:1rem;color:rgba(0,0,0,0.5);margin-top:.5rem" id="alert-ticket-info">Coupe · Younes</div>
+  <div style="font-size:1rem;color:rgba(255,255,255,0.5);margin-top:.5rem" id="alert-ticket-info">Coupe · Younes</div>
   <div style="margin-top:3rem;font-size:.75rem;color:rgba(255,255,255,0.25)">Appuyer pour fermer</div>
 </div>
 
