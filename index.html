@@ -976,6 +976,14 @@ body {
 
 <script>
 // ── SUPABASE ──
+// Helper — local date string YYYY-MM-DD (not UTC)
+function getToday() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 const SUPABASE_URL = 'https://rdnptrgktqgdepzscrev.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_pKqN66Sd9W5CxxXXnWnXIQ_jUyH8Fts';
 const { createClient } = supabase;
@@ -1311,7 +1319,7 @@ function renderSlots() {
   const d = new Date(state.selectedDate);
   const isFri = d.getDay() === 5;
   const now = new Date();
-  const isToday = state.selectedDate === now.toISOString().split('T')[0];
+  const isToday = state.selectedDate === getToday();
   const currentHHMM = now.toTimeString().slice(0,5);
 
   const blocked = (state.customHours || []).filter(h => h.type === 'block');
@@ -1702,7 +1710,7 @@ document.getElementById('nav-reviews').addEventListener('click', () => showPage(
 window.setRating = setRating;
 
 document.getElementById('btn-delete-today').addEventListener('click', async () => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getToday();
   if(!confirm(`Supprimer toutes les réservations de aujourd'hui (${today}) ?`)) return;
   const { error } = await db.from('reservations').delete().eq('reservation_date', today);
   if(error) {
@@ -1989,7 +1997,7 @@ async function refreshDynamicData() {
 function openWalkin() {
   // Fill time select with today's slots
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = getToday();
   const isFri = now.getDay() === 5;
   const timeSelect = document.getElementById('wi-time');
   timeSelect.innerHTML = ALL_SLOTS
@@ -2017,7 +2025,7 @@ document.getElementById('btn-walkin-confirm').addEventListener('click', async ()
   const barber = document.getElementById('wi-barber').value;
   const service = document.getElementById('wi-service').value;
   const time = document.getElementById('wi-time').value;
-  const today = new Date().toISOString().split('T')[0];
+  const today = getToday();
 
   if(!name || !barber || !service) {
     showToast('Remplissez tous les champs ⚠️', 'error');
@@ -2331,7 +2339,7 @@ document.getElementById('btn-add-ch').addEventListener('click', async () => {
   if (start >= end) {
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
-    const nextDayStr = nextDay.toISOString().split('T')[0];
+    const nextDayStr = (() => { const y=nextDay.getFullYear(),m=String(nextDay.getMonth()+1).padStart(2,'0'),d=String(nextDay.getDate()).padStart(2,'0'); return `${y}-${m}-${d}`; })();
     const [r1, r2] = await Promise.all([
       db.from('custom_hours').insert({ date, type, time_start: start, time_end: '23:59:00', barber: chBarber }),
       db.from('custom_hours').insert({ date: nextDayStr, type, time_start: '00:00:00', time_end: end, barber: chBarber })
@@ -2417,7 +2425,7 @@ function renderAdminBookings(data) {
     return;
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getToday();
   const todayCount = allAdminData.filter(r => r.reservation_date === today).length;
   document.getElementById('stat-today').textContent = todayCount;
   document.getElementById('stat-total').textContent = allAdminData.length;
@@ -2518,7 +2526,7 @@ async function renderTVMode() {
   document.getElementById('tv-clock').textContent = now.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
   document.getElementById('tv-date').textContent = now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
 
-  const today = now.toISOString().split('T')[0];
+  const today = getToday();
   const { data } = await db.from('reservations').select('*')
     .eq('reservation_date', today)
     .order('reservation_time', {ascending: true});
@@ -2597,7 +2605,7 @@ async function loadStats() {
   if (!data) return;
 
   const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = getToday();
 
   // KPIs
   const todayRdv = data.filter(r => r.reservation_date === todayStr).length;
@@ -2641,7 +2649,7 @@ async function loadStats() {
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
-    const str = d.toISOString().split('T')[0];
+    const str = (() => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; })();
     const count = data.filter(r => r.reservation_date === str).length;
     days.push({ str, count, label: d.toLocaleDateString('fr-FR', {weekday:'short'}) });
   }
@@ -2754,7 +2762,7 @@ window.activateAlerts = activateAlerts;
 
 // ── LIVE QUEUE ──
 async function loadLiveQueue() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getToday();
   const container = document.getElementById('queue-content');
   
   // Show instant skeleton while loading
@@ -2784,9 +2792,10 @@ async function loadLiveQueue() {
         // Find my position in barber's queue
         const barberData = allData.filter(r => r.barber === mt.barber);
         const myTicket = barberData.find(r => r.id === mt.id);
-        // Position = number of tickets with smaller daily_ticket number still active
+        // Position = how many tickets are AHEAD of me (smaller number, still active)
+        const myNum = myTicket?.daily_ticket || myTicket?.id || 9999;
         const position = myTicket 
-          ? barberData.filter(r => (r.daily_ticket || r.id) < (myTicket.daily_ticket || myTicket.id)).length
+          ? barberData.filter(r => (r.daily_ticket || r.id) < myNum).length
           : null;
         myTicketBanner.innerHTML = `
           <div style="background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.15);padding:.5rem .8rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center">
@@ -2795,9 +2804,9 @@ async function loadLiveQueue() {
               <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#111111;font-weight:700;line-height:1.2">#${mt.ticket}</div>
             </div>
             <div style="text-align:right">
-              ${position === 0 ? `<div style="color:#111;font-weight:600;font-size:.75rem">C'est votre tour! 🔔</div>` :
-                position > 0 ? `<div style="color:rgba(0,0,0,0.5);font-size:.7rem">${position} avant vous</div>` :
-                `<div style="color:rgba(0,0,0,0.3);font-size:.7rem">Terminé ✓</div>`}
+              ${position === null ? `<div style="color:rgba(0,0,0,0.3);font-size:.7rem">Terminé ✓</div>` :
+                position === 0 ? `<div style="color:#111;font-weight:600;font-size:.75rem">C'est votre tour! 🔔</div>` :
+                `<div style="color:rgba(0,0,0,0.5);font-size:.7rem">${position} avant vous</div>`}
               <button onclick="localStorage.removeItem('my_ticket');loadLiveQueue()" style="background:none;border:none;color:rgba(0,0,0,0.2);cursor:pointer;font-size:.6rem">✕</button>
             </div>
           </div>
@@ -2934,7 +2943,7 @@ function setupRealtimeListener(reservationId) {
 
 // Admin: Appeler suivant
 document.getElementById('btn-appeler-suivant').addEventListener('click', async () => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getToday();
 
   const barberList = (window._barberNames || BARBERS.map(b => b.name)).join(' / ');
   const barber = prompt(`Quel coiffeur? (${barberList})`);
@@ -3036,7 +3045,7 @@ window.closeTicketAlert = closeTicketAlert;
 async function checkUpcomingTickets() {
   if (!adminAuth) return;
   const now = new Date();
-  const today = now.toISOString().split('T')[0];
+  const today = getToday();
   const hhmm = now.toTimeString().slice(0,5);
 
   const { data } = await db.from('reservations')
