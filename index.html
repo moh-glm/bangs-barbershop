@@ -1123,7 +1123,6 @@ function renderServices() {
       <div style="border:1px solid var(--border);overflow:hidden;margin-bottom:.5rem">
         <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:#ffffff;user-select:none">
           <div style="display:flex;align-items:center;gap:.7rem">
-            <span style="color:#111111;font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
             ${catLogo 
               ? `<img src="${catLogo}" style="width:26px;height:26px;object-fit:cover;border-radius:4px">` 
               : ''}
@@ -1145,7 +1144,6 @@ function renderServices() {
                       <span style="font-size:1.1rem">${s.emoji && s.emoji.startsWith('http') ? `<img src="${s.emoji}" style="width:24px;height:24px;object-fit:cover;border-radius:3px;vertical-align:middle">` : s.emoji}</span>
                       <span style="font-size:.85rem;font-weight:500">${s.name}</span>
                     </div>
-                    <span style="color:#111111;font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
                   </div>
                   ${isExpanded ? `
                     <div style="border-top:1px solid var(--border)">
