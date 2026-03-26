@@ -485,6 +485,7 @@ body {
 
   <!-- STEP 1: Service -->
   <div class="step-content active" id="step-1">
+    <div id="selected-services-summary" style="display:none;margin-bottom:.8rem;padding:.7rem 1rem;background:#111111;color:#ffffff;font-size:.82rem;border-left:3px solid #ffffff"></div>
     <div class="services-list" id="services-list"></div>
     <div style="margin-top:1.5rem">
       <label class="form-label" style="color:#111111;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase">Choisir le coiffeur | اختر الحلاق</label>
@@ -781,6 +782,13 @@ body {
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ffd580;text-transform:uppercase;margin-top:.5rem">📦 Commandes | الطلبات</div>
     <div id="admin-orders-list" style="padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.7rem"></div>
 
+    <!-- Photos Catégories -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#c4b5fd;text-transform:uppercase;margin-top:1rem">🖼 Photos Catégories | صور الأقسام</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="font-size:.7rem;color:rgba(0,0,0,0.4);padding:.2rem 0">Uploadez une photo pour chaque catégorie (Coupe, Barbe, Combo, Soin)</div>
+      <div id="cat-photos-list" style="display:flex;flex-direction:column;gap:.7rem"></div>
+    </div>
+
     <!-- Blacklist -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ff8080;text-transform:uppercase;margin-top:.5rem">🚫 Blacklist</div>
     <div style="padding:0 1.5rem .5rem;display:flex;gap:.7rem">
@@ -958,15 +966,15 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── SERVICES ──
 const SERVICES = [
-  { id:1, name:'Wolf Cut', emoji:'🐺', duration:'45 min', price:'À confirmer', category:'Coupe', img:'https://i.ibb.co/4Z8gBQ7B/1-2-683x1024.jpg' },
-  { id:2, name:'Fade', emoji:'✂️', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
-  { id:3, name:'Low Fade', emoji:'💈', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
-  { id:4, name:'Dégradé', emoji:'⚡', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
-  { id:9, name:'Coupe Enfant', emoji:'👦', duration:'30 min', price:'À confirmer', category:'Coupe', img:null },
-  { id:5, name:'Barbe', emoji:'🪒', duration:'20 min', price:'À confirmer', category:'Barbe', img:null },
-  { id:6, name:'Coupe + Barbe', emoji:'💇', duration:'60 min', price:'À confirmer', category:'Combo', img:null },
-  { id:7, name:'Coloration', emoji:'🎨', duration:'60 min', price:'À confirmer', category:'Soin', img:null },
-  { id:8, name:'Protéine', emoji:'💊', duration:'1h 30min', price:'À confirmer', category:'Soin', durationMins:90, img:null },
+  { id:1, name:'Wolf Cut', emoji:'🐺', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:'https://i.ibb.co/4Z8gBQ7B/1-2-683x1024.jpg' },
+  { id:2, name:'Fade', emoji:'✂️', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:null },
+  { id:3, name:'Low Fade', emoji:'💈', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:null },
+  { id:4, name:'Dégradé', emoji:'⚡', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:null },
+  { id:9, name:'Coupe Enfant', emoji:'👦', duration:'30 min', durationMins:30, price:'À confirmer', category:'Coupe', img:null },
+  { id:5, name:'Barbe', emoji:'🪒', duration:'20 min', durationMins:20, price:'À confirmer', category:'Barbe', img:null },
+  { id:6, name:'Coupe + Barbe', emoji:'💇', duration:'60 min', durationMins:60, price:'À confirmer', category:'Combo', img:null },
+  { id:7, name:'Coloration', emoji:'🎨', duration:'60 min', durationMins:60, price:'À confirmer', category:'Soin', img:null },
+  { id:8, name:'Protéine', emoji:'💊', duration:'1h 30min', durationMins:90, price:'À confirmer', category:'Soin', img:null },
 ];
 
 // ── BARBERS ──
@@ -990,6 +998,7 @@ let state = {
   page: 'home',
   step: 1,
   selectedService: null,
+  selectedServices: [],
   selectedBarber: null,
   selectedDate: null,
   selectedTime: null,
@@ -1010,7 +1019,7 @@ function showPage(p) {
   if (p === 'reviews') loadReviews();
   if (p === 'boutique') loadProducts();
   if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); }
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); loadCatPhotos(); }
   if (p === 'home') loadProducts();
 }
 
@@ -1045,31 +1054,51 @@ let expandedService = null;
 function renderServices() {
   const list = document.getElementById('services-list');
   const categoryOrder = ['Coupe', 'Barbe', 'Combo', 'Soin'];
+  const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
+  // Show selected summary if any services picked
+  const totalDur = getTotalDuration();
+  const selectedNames = state.selectedServices.map(s => s.name);
+  const summaryEl = document.getElementById('selected-services-summary');
+  if (summaryEl) {
+    if (state.selectedServices.length > 0) {
+      const durStr = totalDur >= 60 ? `${Math.floor(totalDur/60)}h${totalDur%60>0?totalDur%60+'min':''}` : `${totalDur} min`;
+      summaryEl.style.display = 'block';
+      summaryEl.innerHTML = `<span style="font-size:.7rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Sélectionné:</span> <strong>${selectedNames.join(' + ')}</strong> <span style="color:rgba(0,0,0,0.4);font-size:.8rem">(${durStr})</span>`;
+    } else {
+      summaryEl.style.display = 'none';
+    }
+  }
   list.innerHTML = categoryOrder.map(cat => {
     const services = SERVICES.filter(s => s.category === cat);
     if (!services.length) return '';
     const isOpen = openCategory === cat;
+    const catImg = catImages[cat];
     return `
       <div style="border:1px solid var(--border);overflow:hidden;margin-bottom:.5rem">
-        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:#ffffff;user-select:none">
-          <div style="display:flex;align-items:center;gap:.7rem">
+        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:0;cursor:pointer;background:#ffffff;user-select:none;overflow:hidden">
+          ${catImg ? `<img src="${catImg}" style="width:56px;height:56px;object-fit:cover;flex-shrink:0">` : ''}
+          <div style="display:flex;align-items:center;gap:.7rem;padding:1rem ${catImg?'.8rem':'1.2rem'};flex:1">
             <span style="color:#111111;font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
             <span style="font-weight:600;font-size:.95rem">${cat}</span>
           </div>
+          ${state.selectedServices.some(s => s.category === cat) ? `<span style="padding:.3rem .6rem;background:#111111;color:#fff;font-size:.6rem;margin-right:.8rem">✓ ${state.selectedServices.filter(s=>s.category===cat).length}</span>` : ''}
         </div>
         ${isOpen ? `
           <div style="background:#eeeeee;display:flex;flex-direction:column;gap:.5rem;padding:.7rem">
             ${services.map(s => {
               const isExpanded = expandedService === s.id;
-              const isSelected = state.selectedService?.id === s.id;
+              const isSelected = state.selectedServices.some(sv => sv.id === s.id);
               return `
-                <div style="border:1px solid ${isSelected?'#000000':'var(--border)'};overflow:hidden;background:#ffffff">
+                <div style="border:2px solid ${isSelected?'#000000':'var(--border)'};overflow:hidden;background:#ffffff">
                   <div onclick="toggleService(${s.id})" style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;cursor:pointer">
                     <div style="display:flex;align-items:center;gap:.7rem">
                       <span style="font-size:1.2rem">${s.emoji}</span>
                       <span style="font-size:.85rem;font-weight:500">${s.name}</span>
                     </div>
-                    <span style="color:#111111;font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
+                    <div style="display:flex;align-items:center;gap:.5rem">
+                      ${isSelected ? `<span style="font-size:.7rem;background:#111111;color:#fff;padding:.15rem .4rem">✓</span>` : ''}
+                      <span style="color:#111111;font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
+                    </div>
                   </div>
                   ${isExpanded ? `
                     <div style="border-top:1px solid var(--border)">
@@ -1079,8 +1108,8 @@ function renderServices() {
                           <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">⏱ ${s.duration}</div>
                           <div style="font-size:.9rem;color:#111111;font-weight:700;margin-top:.2rem">${s.price}</div>
                         </div>
-                        <button onclick="selectService(${s.id})" style="background:${isSelected?'#111111':'rgba(0,0,0,0.08)'};border:1px solid #111111;color:${isSelected?'#ffffff':'#111111'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
-                          ${isSelected?'✓ Sélectionné':'Choisir'}
+                        <button onclick="event.stopPropagation();toggleServiceSelection(${s.id})" style="background:${isSelected?'#111111':'rgba(0,0,0,0.08)'};border:1px solid #111111;color:${isSelected?'#ffffff':'#111111'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
+                          ${isSelected?'✓ Retiré':'+ Ajouter'}
                         </button>
                       </div>
                     </div>
@@ -1109,11 +1138,29 @@ function toggleService(id) {
 
 window.toggleCategory = toggleCategory;
 window.toggleService = toggleService;
+window.toggleServiceSelection = toggleServiceSelection;
 
-function selectService(id) {
-  state.selectedService = SERVICES.find(s => s.id === id);
+function getTotalDuration() {
+  if (state.selectedServices.length === 0) return 45;
+  return state.selectedServices.reduce((sum, s) => sum + (s.durationMins || 45), 0);
+}
+
+function toggleServiceSelection(id) {
+  const svc = SERVICES.find(s => s.id === id);
+  if (!svc) return;
+  const idx = state.selectedServices.findIndex(s => s.id === id);
+  if (idx >= 0) {
+    state.selectedServices.splice(idx, 1);
+  } else {
+    state.selectedServices.push(svc);
+  }
+  state.selectedService = state.selectedServices[0] || null;
   renderServices();
   checkStep1();
+}
+
+function selectService(id) {
+  toggleServiceSelection(id);
 }
 
 function renderBarbers() {
@@ -1136,7 +1183,7 @@ function selectBarber(id) {
 }
 
 function checkStep1() {
-  document.getElementById('btn-next-1').disabled = !(state.selectedService && state.selectedBarber);
+  document.getElementById('btn-next-1').disabled = !(state.selectedServices.length > 0 && state.selectedBarber);
 }
 
 async function loadBlockedDates() {
@@ -1203,11 +1250,14 @@ async function selectDate(dateStr) {
     db.from('custom_hours').select('*').eq('date', dateStr).or(`barber.is.null,barber.eq.${state.selectedBarber?.name || ''}`)
   ]);
 
-  // Build all blocked slots considering duration
+  // Build all blocked slots considering duration (handles multi-service "A + B" format)
   const bookedSet = new Set();
   (slotsRes.data || []).forEach(r => {
-    const svc = SERVICES.find(s => s.name === r.service);
-    const dur = svc?.durationMins || 45;
+    const serviceNames = (r.service || '').split(' + ');
+    const dur = serviceNames.reduce((sum, name) => {
+      const svc = SERVICES.find(sv => sv.name === name.trim());
+      return sum + (svc?.durationMins || 45);
+    }, 0);
     const slots = Math.ceil(dur / 45);
     const [h, m] = r.reservation_time.split(':').map(Number);
     const startMins = h * 60 + m;
@@ -1275,7 +1325,7 @@ function renderSlots() {
     if (isBlocked) return false;
     return true;
   });
-  const serviceDuration = state.selectedService?.durationMins || 45;
+  const serviceDuration = getTotalDuration();
   const slotsNeeded = Math.ceil(serviceDuration / 45);
 
   grid.innerHTML = validSlots.map(s => {
@@ -1309,13 +1359,16 @@ function validateStep3() {
 
 // ── SUMMARY ──
 function renderSummary() {
-  document.getElementById('sum-service').textContent = state.selectedService?.name || '—';
+  const totalDur = getTotalDuration();
+  const durStr = totalDur >= 60 ? `${Math.floor(totalDur/60)}h${totalDur%60>0?totalDur%60+'min':''}` : `${totalDur} min`;
+  const servicesText = state.selectedServices.length > 0 ? state.selectedServices.map(s => s.name).join(' + ') + ` (${durStr})` : '—';
+  document.getElementById('sum-service').textContent = servicesText;
   document.getElementById('sum-barber').textContent = state.selectedBarber?.name || '—';
   document.getElementById('sum-date').textContent = formatDate(state.selectedDate);
   document.getElementById('sum-time').textContent = state.selectedTime || '—';
   document.getElementById('sum-name').textContent = document.getElementById('inp-name').value;
   document.getElementById('sum-phone').textContent = document.getElementById('inp-phone').value;
-  document.getElementById('sum-price').textContent = state.selectedService?.price || '—';
+  document.getElementById('sum-price').textContent = state.selectedServices[0]?.price || '—';
 }
 
 function formatDate(str) {
@@ -1382,7 +1435,7 @@ async function confirmBooking() {
   const { data: insertData, error: insertError } = await db.from('reservations').insert({
     client_name: document.getElementById('inp-name').value.trim(),
     client_phone: document.getElementById('inp-phone').value.trim(),
-    service: state.selectedService?.name,
+    service: state.selectedServices.map(s => s.name).join(' + '),
     barber: state.selectedBarber?.name,
     reservation_date: state.selectedDate,
     reservation_time: state.selectedTime,
@@ -1419,7 +1472,7 @@ async function confirmBooking() {
         </div>
         <div style="display:flex;justify-content:space-between">
           <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Service</span>
-          <span style="font-weight:600">${state.selectedService?.name}</span>
+          <span style="font-weight:600">${state.selectedServices.map(s=>s.name).join(' + ')}</span>
         </div>
         <div style="display:flex;justify-content:space-between">
           <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Date</span>
@@ -1450,6 +1503,7 @@ async function confirmBooking() {
 
 function resetBooking() {
   state.selectedService = null;
+  state.selectedServices = [];
   state.selectedBarber = null;
   state.selectedDate = null;
   state.selectedTime = null;
@@ -1725,6 +1779,56 @@ document.getElementById('btn-add-blacklist').addEventListener('click', async () 
     loadBlacklist();
   }
 });
+
+// ── CATEGORY PHOTOS ──
+function loadCatPhotos() {
+  const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
+  const categories = ['Coupe', 'Barbe', 'Combo', 'Soin'];
+  const container = document.getElementById('cat-photos-list');
+  if (!container) return;
+  container.innerHTML = categories.map(cat => {
+    const img = catImages[cat];
+    return `
+      <div style="border:1px solid var(--border);padding:.8rem 1rem;background:#ffffff;display:flex;align-items:center;gap:1rem">
+        ${img ? `<img src="${img}" style="width:56px;height:56px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)">` : `<div style="width:56px;height:56px;background:#eeeeee;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">📷</div>`}
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:.85rem">${cat}</div>
+          <label style="display:inline-block;margin-top:.4rem;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.4);color:#7c3aed;padding:.4rem .8rem;cursor:pointer;font-size:.7rem;font-family:'DM Sans',sans-serif">
+            📤 Upload photo
+            <input type="file" accept="image/*" style="display:none" onchange="uploadCatPhoto('${cat}', this)">
+          </label>
+          ${img ? `<button onclick="removeCatPhoto('${cat}')" style="margin-left:.5rem;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.4rem .8rem;cursor:pointer;font-size:.7rem;font-family:'DM Sans',sans-serif">✕ Supprimer</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function uploadCatPhoto(cat, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const maxSize = 2 * 1024 * 1024; // 2MB
+  if (file.size > maxSize) { showToast('Photo trop grande (max 2MB) ⚠️', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
+    catImages[cat] = e.target.result;
+    localStorage.setItem('bangs_cat_images', JSON.stringify(catImages));
+    showToast(`Photo ${cat} mise à jour ✓`, 'success');
+    loadCatPhotos();
+  };
+  reader.readAsDataURL(file);
+}
+window.uploadCatPhoto = uploadCatPhoto;
+
+function removeCatPhoto(cat) {
+  const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
+  delete catImages[cat];
+  localStorage.setItem('bangs_cat_images', JSON.stringify(catImages));
+  showToast(`Photo ${cat} supprimée`, 'success');
+  loadCatPhotos();
+}
+window.removeCatPhoto = removeCatPhoto;
 
 // ── WALK-IN ──
 function openWalkin() {
@@ -2107,6 +2211,7 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     loadAdminProducts();
     loadAdminOrders();
     loadBlacklist();
+    loadCatPhotos();
   } else {
     document.getElementById('admin-error').style.display = 'block';
   }
