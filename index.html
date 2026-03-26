@@ -485,7 +485,7 @@ body {
 
   <!-- STEP 1: Service -->
   <div class="step-content active" id="step-1">
-    <div id="selected-services-summary" style="display:none;margin-bottom:.8rem;padding:.7rem 1rem;background:#111111;color:#ffffff;font-size:.82rem;border-left:3px solid #ffffff"></div>
+    <div id="services-banner" style="display:none;background:#111111;color:#ffffff;padding:.8rem 1.2rem;margin-bottom:.8rem;border-left:3px solid #ffffff"></div>
     <div class="services-list" id="services-list"></div>
     <div style="margin-top:1.5rem">
       <label class="form-label" style="color:#111111;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase">Choisir le coiffeur | اختر الحلاق</label>
@@ -782,95 +782,47 @@ body {
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ffd580;text-transform:uppercase;margin-top:.5rem">📦 Commandes | الطلبات</div>
     <div id="admin-orders-list" style="padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.7rem"></div>
 
-    <!-- Photos Catégories -->
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#c4b5fd;text-transform:uppercase;margin-top:1rem">🖼 Photos Catégories | صور الأقسام</div>
-    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
-      <div style="font-size:.7rem;color:rgba(0,0,0,0.4);padding:.2rem 0">Uploadez une photo pour chaque catégorie (Coupe, Barbe, Combo, Soin)</div>
-      <div id="cat-photos-list" style="display:flex;flex-direction:column;gap:.7rem"></div>
-    </div>
-
-    <!-- Gestion Coiffeurs -->
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#34d399;text-transform:uppercase;margin-top:1rem">👥 Coiffeurs | الحلاقون</div>
-    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-        <input class="form-input" id="barber-name" type="text" placeholder="Nom" style="font-size:.8rem">
-        <input class="form-input" id="barber-job" type="text" placeholder="Spécialité" style="font-size:.8rem">
-      </div>
-      <input class="form-input" id="barber-img" type="text" placeholder="URL photo" style="font-size:.8rem">
-      <button id="btn-add-barber" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.4);color:#34d399;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter coiffeur</button>
-      <div id="barbers-admin-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
-    </div>
-
-    <!-- Gestion Catégories & Services -->
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#60a5fa;text-transform:uppercase;margin-top:.5rem">📂 Catégories & Services</div>
-    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
-      <!-- Tab toggle -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
-        <button id="tab-cats" onclick="switchCatTab('cats')" style="padding:.6rem;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;background:#111111;color:#fff;border:1px solid #111111">Catégorie</button>
-        <button id="tab-svcs" onclick="switchCatTab('svcs')" style="padding:.6rem;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;background:#fff;color:#111111;border:1px solid #111111">Sous-service</button>
-      </div>
-      <!-- Catégorie form -->
-      <div id="form-cats">
-        <div style="display:flex;flex-direction:column;gap:.7rem">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-            <input class="form-input" id="cat-name" type="text" placeholder="Nom catégorie" style="font-size:.8rem">
-            <input class="form-input" id="cat-job" type="text" placeholder="Description" style="font-size:.8rem">
-          </div>
-          <input class="form-input" id="cat-img" type="text" placeholder="URL image" style="font-size:.8rem">
-          <button id="btn-add-cat" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.4);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter catégorie</button>
-          <div id="cats-admin-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
-        </div>
-      </div>
-      <!-- Sous-service form -->
-      <div id="form-svcs" style="display:none;flex-direction:column;gap:.7rem">
-        <select class="form-input" id="svc-cat-select" style="font-size:.8rem">
-          <option value="">Choisir catégorie...</option>
-          <option>Coupe</option><option>Barbe</option><option>Combo</option><option>Soin</option>
-        </select>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-          <input class="form-input" id="svc-name" type="text" placeholder="Nom service" style="font-size:.8rem">
-          <input class="form-input" id="svc-duration" type="number" placeholder="Durée (min)" style="font-size:.8rem">
-        </div>
-        <input class="form-input" id="svc-img" type="text" placeholder="URL image (opt)" style="font-size:.8rem">
-        <button id="btn-add-svc" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.4);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter service</button>
-        <div id="svcs-admin-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
-      </div>
-    </div>
-
-    <!-- Finance / Caisse -->
-    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#fbbf24;text-transform:uppercase;margin-top:.5rem">💰 Caisse | الصندوق</div>
-    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
-      <!-- Stats -->
-      <div id="finance-stats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.3rem"></div>
-      <!-- Add transaction -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-        <input class="form-input" id="tx-amount" type="number" placeholder="Montant (DA)" style="font-size:.8rem">
-        <select class="form-input" id="tx-type" style="font-size:.8rem;cursor:pointer">
-          <option value="income">📈 Entrée</option>
-          <option value="expense">📉 Sortie</option>
-        </select>
-      </div>
-      <input class="form-input" id="tx-desc" type="text" placeholder="Description (opt)" style="font-size:.8rem">
-      <input class="form-input" id="tx-date" type="date" style="font-size:.8rem">
-      <!-- Balance selectors -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-        <select class="form-input" id="tx-filter-type" onchange="renderFinanceStats()" style="font-size:.8rem;cursor:pointer">
-          <option value="month">Ce mois</option>
-          <option value="year">Cette année</option>
-          <option value="all">Tout</option>
-        </select>
-        <button id="btn-add-tx" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Enregistrer</button>
-      </div>
-      <div id="tx-list" style="display:flex;flex-direction:column;gap:.5rem;max-height:350px;overflow-y:auto"></div>
-    </div>
-
     <!-- Blacklist -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#ff8080;text-transform:uppercase;margin-top:.5rem">🚫 Blacklist</div>
     <div style="padding:0 1.5rem .5rem;display:flex;gap:.7rem">
       <input class="form-input" id="bl-phone" type="tel" placeholder="Numéro à blacklister" style="font-size:.8rem;flex:1">
       <button id="btn-add-blacklist" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-size:.8rem;white-space:nowrap">🚫 Bloquer</button>
     </div>
-    <div id="blacklist-list" style="padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.5rem"></div>
+    <div id="blacklist-list" style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.5rem"></div>
+
+    <!-- Gestion Coiffeurs -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#a78bfa;text-transform:uppercase;margin-top:.5rem">💈 Gestion Coiffeurs</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="bc-name" type="text" placeholder="Nom du coiffeur" style="font-size:.8rem">
+        <input class="form-input" id="bc-speciality" type="text" placeholder="Spécialité" style="font-size:.8rem">
+      </div>
+      <input class="form-input" id="bc-photo" type="url" placeholder="URL photo (optionnel)" style="font-size:.8rem">
+      <button id="btn-add-barber" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter coiffeur</button>
+      <div id="barbers-config-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
+    <!-- Gestion Services -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#60a5fa;text-transform:uppercase;margin-top:.5rem">✂️ Gestion Services</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="sc-name" type="text" placeholder="Nom du service" style="font-size:.8rem">
+        <select class="form-input" id="sc-category" style="font-size:.8rem">
+          <option value="Coupe">Coupe</option>
+          <option value="Barbe">Barbe</option>
+          <option value="Combo">Combo</option>
+          <option value="Soin">Soin</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem">
+        <input class="form-input" id="sc-price" type="number" placeholder="Prix en DA (ex: 500)" style="font-size:.8rem" min="0">
+        <input class="form-input" id="sc-duration" type="number" placeholder="Durée en minutes (ex: 45)" style="font-size:.8rem" min="5">
+        <input class="form-input" id="sc-emoji" type="url" placeholder="URL logo catégorie (optionnel)" style="font-size:.8rem">
+      </div>
+      <input class="form-input" id="sc-image" type="url" placeholder="URL image (optionnel)" style="font-size:.8rem">
+      <button id="btn-add-service" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter service</button>
+      <div id="services-config-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
   </div>
 </div>
 
@@ -985,6 +937,12 @@ body {
     <div style="font-size:.6rem;letter-spacing:.2em;color:#222222;text-transform:uppercase;margin-bottom:1rem">💈 Performance coiffeurs</div>
     <div id="stats-barbers" style="display:flex;flex-direction:column;gap:.6rem"></div>
   </div>
+
+  <!-- Bilan mensuel -->
+  <div style="background:#ffffff;border:1px solid var(--border);padding:1.2rem;margin-top:1rem">
+    <div style="font-size:.6rem;letter-spacing:.2em;color:#222222;text-transform:uppercase;margin-bottom:1rem">📅 Bilan mensuel</div>
+    <div id="stats-monthly" style="display:flex;flex-direction:column;gap:.6rem"></div>
+  </div>
 </div>
 
 <!-- TV MODE -->
@@ -1040,56 +998,25 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── SERVICES ──
-const SERVICES = [
-  { id:1, name:'Wolf Cut', emoji:'🐺', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:'https://i.ibb.co/4Z8gBQ7B/1-2-683x1024.jpg' },
-  { id:2, name:'Fade', emoji:'✂️', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:null },
-  { id:3, name:'Low Fade', emoji:'💈', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:null },
-  { id:4, name:'Dégradé', emoji:'⚡', duration:'45 min', durationMins:45, price:'À confirmer', category:'Coupe', img:null },
-  { id:9, name:'Coupe Enfant', emoji:'👦', duration:'30 min', durationMins:30, price:'À confirmer', category:'Coupe', img:null },
-  { id:5, name:'Barbe', emoji:'🪒', duration:'20 min', durationMins:20, price:'À confirmer', category:'Barbe', img:null },
-  { id:6, name:'Coupe + Barbe', emoji:'💇', duration:'60 min', durationMins:60, price:'À confirmer', category:'Combo', img:null },
-  { id:7, name:'Coloration', emoji:'🎨', duration:'60 min', durationMins:60, price:'À confirmer', category:'Soin', img:null },
-  { id:8, name:'Protéine', emoji:'💊', duration:'1h 30min', durationMins:90, price:'À confirmer', category:'Soin', img:null },
+let SERVICES = [
+  { id:1, name:'Wolf Cut', emoji:'🐺', duration:'45 min', price:'À confirmer', category:'Coupe', img:'https://i.ibb.co/4Z8gBQ7B/1-2-683x1024.jpg' },
+  { id:2, name:'Fade', emoji:'✂️', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:3, name:'Low Fade', emoji:'💈', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:4, name:'Dégradé', emoji:'⚡', duration:'45 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:9, name:'Coupe Enfant', emoji:'👦', duration:'30 min', price:'À confirmer', category:'Coupe', img:null },
+  { id:5, name:'Barbe', emoji:'🪒', duration:'20 min', price:'À confirmer', category:'Barbe', img:null },
+  { id:6, name:'Coupe + Barbe', emoji:'💇', duration:'60 min', price:'À confirmer', category:'Combo', img:null },
+  { id:7, name:'Coloration', emoji:'🎨', duration:'60 min', price:'À confirmer', category:'Soin', img:null },
+  { id:8, name:'Protéine', emoji:'💊', duration:'1h 30min', price:'À confirmer', category:'Soin', durationMins:90, img:null },
 ];
 
 // ── BARBERS ──
-const BARBERS = [
+let BARBERS = [
   { id:1, name:'Younes', emoji:'💈', photo:'https://i.ibb.co/TM7bCGmD/5888968061031747260-1.jpg', instagram:'barber_bangs_dz', speciality:'Dégradé & Barbe' },
   { id:2, name:'Mohamed', emoji:'✂️', photo:'https://i.ibb.co/gZySDM6R/5888968061031747259.jpg', instagram:'barber_bangs_dz', speciality:'Wolf Cut & Fade' },
   { id:3, name:'Nadir', emoji:'🪒', photo:null, instagram:'barber_bangs_dz', speciality:'Low Fade & Coupe' },
   { id:4, name:'Islem', emoji:'⭐', photo:'https://i.ibb.co/vCsBNq5k/5888968061031747258.jpg', instagram:'barber_bangs_dz', speciality:'Coupe & Soin' },
 ];
-
-// ── DYNAMIC DATA (loaded from DB) ──
-let dynamicBarbers = [];
-let dynamicCategories = []; // {id, name, description, image_url}
-let dynamicServicesList = []; // {id, name, category, duration_mins, emoji, image_url}
-
-async function loadDynamicBarbers() {
-  const { data } = await db.from('barbers').select('*').order('created_at', { ascending: true });
-  if (data && data.length > 0) {
-    dynamicBarbers = data.map(b => ({ id: b.id, name: b.name, emoji: '💈', photo: b.photo_url || null, speciality: b.speciality || '', instagram: null }));
-  } else {
-    dynamicBarbers = BARBERS.map(b => ({ ...b }));
-  }
-}
-
-async function loadDynamicCategories() {
-  const { data } = await db.from('service_categories').select('*').order('created_at', { ascending: true });
-  dynamicCategories = data || [];
-}
-
-async function loadDynamicServices() {
-  const { data } = await db.from('services_list').select('*').order('created_at', { ascending: true });
-  if (data && data.length > 0) {
-    dynamicServicesList = data.map((s, i) => ({
-      id: s.id, name: s.name, emoji: s.emoji || '✂️',
-      duration: s.duration_mins ? (s.duration_mins >= 60 ? `${Math.floor(s.duration_mins/60)}h${s.duration_mins%60>0?s.duration_mins%60+'min':''}` : `${s.duration_mins} min`) : '45 min',
-      durationMins: s.duration_mins || 45,
-      price: 'À confirmer', category: s.category, img: s.image_url || null
-    }));
-  }
-}
 
 // ── TIME SLOTS ──
 const ALL_SLOTS = [
@@ -1104,7 +1031,7 @@ let state = {
   page: 'home',
   step: 1,
   selectedService: null,
-  selectedServices: [],
+  selectedServices: [], // multi-select
   selectedBarber: null,
   selectedDate: null,
   selectedTime: null,
@@ -1124,8 +1051,8 @@ function showPage(p) {
   state.page = p;
   if (p === 'reviews') loadReviews();
   if (p === 'boutique') loadProducts();
-  if (p === 'booking' && state.step === 1) { loadDynamicBarbers().then(() => { loadDynamicCategories(); loadDynamicServices(); renderServices(); }); loadBlockedDates(); }
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); loadCatPhotos(); loadAdminBarbers(); loadAdminCats(); loadTransactions(); }
+  if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
+  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); }
   if (p === 'home') loadProducts();
 }
 
@@ -1157,70 +1084,68 @@ function updateStepIndicators(current) {
 let openCategory = null;
 let expandedService = null;
 
-function getActiveServices() {
-  return dynamicServicesList.length > 0 ? [...SERVICES, ...dynamicServicesList] : SERVICES;
+function getTotalDuration() {
+  return state.selectedServices.reduce((sum, s) => sum + (s.durationMins || 45), 0);
 }
 
-function getActiveCategoryOrder() {
-  const defaultCats = ['Coupe', 'Barbe', 'Combo', 'Soin'];
-  if (dynamicCategories.length > 0) {
-    const dbCats = dynamicCategories.map(c => c.name);
-    return [...new Set([...defaultCats, ...dbCats])];
+function renderServicesBanner() {
+  const banner = document.getElementById('services-banner');
+  if (!banner) return;
+  if (state.selectedServices.length === 0) {
+    banner.style.display = 'none';
+    return;
   }
-  return defaultCats;
+  const totalMins = getTotalDuration();
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  const durStr = h > 0 ? `${h}h${m > 0 ? m + 'min' : ''}` : `${m}min`;
+  const names = state.selectedServices.map(s => s.name).join(' + ');
+  banner.style.display = 'block';
+  banner.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Sélection</div>
+        <div style="font-size:.82rem;font-weight:600">${names}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">Durée totale</div>
+        <div style="font-size:.9rem;font-weight:700">⏱ ${durStr}</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderServices() {
   const list = document.getElementById('services-list');
-  const categoryOrder = getActiveCategoryOrder();
-  const allServices = getActiveServices();
-  const catImages = { ...JSON.parse(localStorage.getItem('bangs_cat_images') || '{}') };
-  // Also merge category images from dynamicCategories
-  dynamicCategories.forEach(c => { if (c.image_url) catImages[c.name] = c.image_url; });
-  // Show selected summary if any services picked
-  const totalDur = getTotalDuration();
-  const selectedNames = state.selectedServices.map(s => s.name);
-  const summaryEl = document.getElementById('selected-services-summary');
-  if (summaryEl) {
-    if (state.selectedServices.length > 0) {
-      const durStr = totalDur >= 60 ? `${Math.floor(totalDur/60)}h${totalDur%60>0?totalDur%60+'min':''}` : `${totalDur} min`;
-      summaryEl.style.display = 'block';
-      summaryEl.innerHTML = `<span style="font-size:.7rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Sélectionné:</span> <strong>${selectedNames.join(' + ')}</strong> <span style="color:rgba(0,0,0,0.4);font-size:.8rem">(${durStr})</span>`;
-    } else {
-      summaryEl.style.display = 'none';
-    }
-  }
+  const categoryOrder = ['Coupe', 'Barbe', 'Combo', 'Soin'];
   list.innerHTML = categoryOrder.map(cat => {
-    const services = allServices.filter(s => s.category === cat);
+    const services = SERVICES.filter(s => s.category === cat);
     if (!services.length) return '';
     const isOpen = openCategory === cat;
-    const catImg = catImages[cat];
     return `
       <div style="border:1px solid var(--border);overflow:hidden;margin-bottom:.5rem">
-        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:0;cursor:pointer;background:#ffffff;user-select:none;overflow:hidden">
-          ${catImg ? `<img src="${catImg}" style="width:56px;height:56px;object-fit:cover;flex-shrink:0">` : ''}
-          <div style="display:flex;align-items:center;gap:.7rem;padding:1rem ${catImg?'.8rem':'1.2rem'};flex:1">
+        <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:#ffffff;user-select:none">
+          <div style="display:flex;align-items:center;gap:.7rem">
             <span style="color:#111111;font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
             <span style="font-weight:600;font-size:.95rem">${cat}</span>
           </div>
-          ${state.selectedServices.some(s => s.category === cat) ? `<span style="padding:.3rem .6rem;background:#111111;color:#fff;font-size:.6rem;margin-right:.8rem">✓ ${state.selectedServices.filter(s=>s.category===cat).length}</span>` : ''}
         </div>
         ${isOpen ? `
-          <div style="background:#eeeeee;display:flex;flex-direction:column;gap:.5rem;padding:.7rem">
+          <div style="background:#f0f0f0;display:flex;flex-direction:column;gap:.5rem;padding:.7rem">
             ${services.map(s => {
               const isExpanded = expandedService === s.id;
-              const isSelected = state.selectedServices.some(sv => sv.id === s.id);
+              const isSelected = state.selectedServices.some(sel => sel.id === s.id);
               return `
-                <div style="border:2px solid ${isSelected?'#000000':'var(--border)'};overflow:hidden;background:#ffffff">
+                <div style="border:2px solid ${isSelected?'#111111':'var(--border)'};overflow:hidden;background:#ffffff">
                   <div onclick="toggleService(${s.id})" style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;cursor:pointer">
                     <div style="display:flex;align-items:center;gap:.7rem">
-                      <span style="font-size:1.2rem">${s.emoji}</span>
+                      <div style="width:20px;height:20px;border:2px solid ${isSelected?'#111':'#ccc'};background:${isSelected?'#111':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        ${isSelected?'<span style="color:white;font-size:.7rem">✓</span>':''}
+                      </div>
+                      <span style="font-size:1.1rem">${s.emoji && s.emoji.startsWith('http') ? `<img src="${s.emoji}" style="width:24px;height:24px;object-fit:cover;border-radius:3px;vertical-align:middle">` : s.emoji}</span>
                       <span style="font-size:.85rem;font-weight:500">${s.name}</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:.5rem">
-                      ${isSelected ? `<span style="font-size:.7rem;background:#111111;color:#fff;padding:.15rem .4rem">✓</span>` : ''}
-                      <span style="color:#111111;font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
-                    </div>
+                    <span style="color:#111111;font-size:.75rem;display:inline-block;transform:rotate(${isExpanded?'90':'0'}deg)">▶</span>
                   </div>
                   ${isExpanded ? `
                     <div style="border-top:1px solid var(--border)">
@@ -1230,8 +1155,8 @@ function renderServices() {
                           <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">⏱ ${s.duration}</div>
                           <div style="font-size:.9rem;color:#111111;font-weight:700;margin-top:.2rem">${s.price}</div>
                         </div>
-                        <button onclick="event.stopPropagation();toggleServiceSelection(${s.id})" style="background:${isSelected?'#111111':'rgba(0,0,0,0.08)'};border:1px solid #111111;color:${isSelected?'#ffffff':'#111111'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
-                          ${isSelected?'✓ Retiré':'+ Ajouter'}
+                        <button onclick="selectService(${s.id})" style="background:${isSelected?'#111111':'rgba(0,0,0,0.08)'};border:1px solid #111111;color:${isSelected?'#ffffff':'#111111'};padding:.6rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600">
+                          ${isSelected?'✓ Ajouté':'+ Ajouter'}
                         </button>
                       </div>
                     </div>
@@ -1244,6 +1169,7 @@ function renderServices() {
       </div>
     `;
   }).join('');
+  renderServicesBanner();
   renderBarbers();
 }
 
@@ -1260,41 +1186,27 @@ function toggleService(id) {
 
 window.toggleCategory = toggleCategory;
 window.toggleService = toggleService;
-window.toggleServiceSelection = toggleServiceSelection;
 
-function getTotalDuration() {
-  if (state.selectedServices.length === 0) return 45;
-  return state.selectedServices.reduce((sum, s) => sum + (s.durationMins || 45), 0);
-}
-
-function toggleServiceSelection(id) {
+function selectService(id) {
   const svc = SERVICES.find(s => s.id === id);
   if (!svc) return;
   const idx = state.selectedServices.findIndex(s => s.id === id);
   if (idx >= 0) {
-    state.selectedServices.splice(idx, 1);
+    state.selectedServices.splice(idx, 1); // deselect
   } else {
-    state.selectedServices.push(svc);
+    state.selectedServices.push(svc); // add
   }
+  // Keep backward compat
   state.selectedService = state.selectedServices[0] || null;
   renderServices();
   checkStep1();
 }
 
-function selectService(id) {
-  toggleServiceSelection(id);
-}
-
-function getActiveBarbers() {
-  return dynamicBarbers.length > 0 ? dynamicBarbers : BARBERS;
-}
-
 function renderBarbers() {
-  const barbers = getActiveBarbers();
   const list = document.getElementById('barbers-list');
-  list.innerHTML = barbers.map(b => `
-    <div class="barber-card ${String(state.selectedBarber?.id) === String(b.id) ? 'selected':''}" onclick="selectBarber('${b.id}')">
-      ${b.photo
+  list.innerHTML = BARBERS.map(b => `
+    <div class="barber-card ${state.selectedBarber?.id === b.id ? 'selected':''}" onclick="selectBarber(${b.id})">
+      ${b.photo 
         ? `<div class="barber-avatar" style="padding:0;overflow:hidden"><img src="${b.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
         : `<div class="barber-avatar">${b.emoji}</div>`}
       <div class="barber-name">${b.name}</div>
@@ -1304,7 +1216,7 @@ function renderBarbers() {
 }
 
 function selectBarber(id) {
-  state.selectedBarber = getActiveBarbers().find(b => String(b.id) === String(id));
+  state.selectedBarber = BARBERS.find(b => b.id === id);
   renderBarbers();
   checkStep1();
 }
@@ -1377,15 +1289,18 @@ async function selectDate(dateStr) {
     db.from('custom_hours').select('*').eq('date', dateStr).or(`barber.is.null,barber.eq.${state.selectedBarber?.name || ''}`)
   ]);
 
-  // Build all blocked slots considering duration (handles multi-service "A + B" format)
+  // Build all blocked slots considering duration
   const bookedSet = new Set();
   (slotsRes.data || []).forEach(r => {
-    const serviceNames = (r.service || '').split(' + ');
-    const dur = serviceNames.reduce((sum, name) => {
-      const svc = SERVICES.find(sv => sv.name === name.trim());
-      return sum + (svc?.durationMins || 45);
-    }, 0);
-    const slots = Math.ceil(dur / 45);
+    // Handle multi-service (e.g. "Coupe + Barbe + Protéine")
+    const serviceNames = r.service ? r.service.split(' + ') : [];
+    let totalDur = 0;
+    serviceNames.forEach(name => {
+      const svc = SERVICES.find(s => s.name === name.trim());
+      totalDur += svc?.durationMins || 45;
+    });
+    if (totalDur === 0) totalDur = 45;
+    const slots = Math.ceil(totalDur / 45);
     const [h, m] = r.reservation_time.split(':').map(Number);
     const startMins = h * 60 + m;
     for (let i = 0; i < slots; i++) {
@@ -1452,8 +1367,15 @@ function renderSlots() {
     if (isBlocked) return false;
     return true;
   });
-  const serviceDuration = getTotalDuration();
+  const serviceDuration = getTotalDuration() || 45;
   const slotsNeeded = Math.ceil(serviceDuration / 45);
+  const h = Math.floor(serviceDuration / 60);
+  const m = serviceDuration % 60;
+  const durStr = h > 0 ? `${h}h${m > 0 ? m+'min' : ''}` : `${m}min`;
+
+  // Show duration info
+  const slotsTitle = document.querySelector('.slots-title');
+  if (slotsTitle) slotsTitle.innerHTML = `CRÉNEAUX DISPONIBLES <span style="color:rgba(0,0,0,0.4);font-weight:400;font-size:.6rem">(durée totale: ${durStr})</span>`;
 
   grid.innerHTML = validSlots.map(s => {
     const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
@@ -1486,16 +1408,14 @@ function validateStep3() {
 
 // ── SUMMARY ──
 function renderSummary() {
-  const totalDur = getTotalDuration();
-  const durStr = totalDur >= 60 ? `${Math.floor(totalDur/60)}h${totalDur%60>0?totalDur%60+'min':''}` : `${totalDur} min`;
-  const servicesText = state.selectedServices.length > 0 ? state.selectedServices.map(s => s.name).join(' + ') + ` (${durStr})` : '—';
+  const servicesText = state.selectedServices.map(s => s.name).join(' + ') || '—';
   document.getElementById('sum-service').textContent = servicesText;
   document.getElementById('sum-barber').textContent = state.selectedBarber?.name || '—';
   document.getElementById('sum-date').textContent = formatDate(state.selectedDate);
   document.getElementById('sum-time').textContent = state.selectedTime || '—';
   document.getElementById('sum-name').textContent = document.getElementById('inp-name').value;
   document.getElementById('sum-phone').textContent = document.getElementById('inp-phone').value;
-  document.getElementById('sum-price').textContent = state.selectedServices[0]?.price || '—';
+  document.getElementById('sum-price').textContent = state.selectedService?.price || '—';
 }
 
 function formatDate(str) {
@@ -1510,15 +1430,48 @@ async function confirmBooking() {
   btn.disabled = true;
   btn.textContent = 'Enregistrement...';
 
-  // Check double booking same slot
-  const { data: existing } = await db.from('reservations')
-    .select('id')
-    .eq('reservation_date', state.selectedDate)
-    .eq('reservation_time', state.selectedTime)
-    .eq('barber', state.selectedBarber?.name)
-    .neq('status', 'cancelled');
+  // Check double booking — all slots that would be occupied by this reservation
+  const totalDur = getTotalDuration() || 45;
+  const slotsNeeded = Math.ceil(totalDur / 45);
+  const selectedMins = parseInt(state.selectedTime.slice(0,2)) * 60 + parseInt(state.selectedTime.slice(3,5));
+  
+  // Build list of slots this reservation would occupy
+  const occupiedSlots = [];
+  for (let i = 0; i < slotsNeeded; i++) {
+    const mins = selectedMins + i * 45;
+    const h = String(Math.floor(mins / 60) % 24).padStart(2,'0');
+    const m = String(mins % 60).padStart(2,'0');
+    occupiedSlots.push(`${h}:${m}`);
+  }
 
-  if(existing && existing.length > 0) {
+  // Check if any of these slots are taken
+  const { data: existingSlots } = await db.from('reservations')
+    .select('reservation_time, service')
+    .eq('reservation_date', state.selectedDate)
+    .eq('barber', state.selectedBarber?.name)
+    .neq('status', 'cancelled')
+    .neq('status', 'done');
+
+  let conflict = false;
+  (existingSlots || []).forEach(r => {
+    const serviceNames = r.service ? r.service.split(' + ') : [];
+    let dur = 0;
+    serviceNames.forEach(name => {
+      const svc = SERVICES.find(s => s.name === name.trim());
+      dur += svc?.durationMins || 45;
+    });
+    if (dur === 0) dur = 45;
+    const existingSlotsMins = parseInt(r.reservation_time.slice(0,2)) * 60 + parseInt(r.reservation_time.slice(3,5));
+    const existingSlotsCount = Math.ceil(dur / 45);
+    for (let i = 0; i < existingSlotsCount; i++) {
+      const mins = existingSlotsMins + i * 45;
+      const sh = String(Math.floor(mins / 60) % 24).padStart(2,'0');
+      const sm = String(mins % 60).padStart(2,'0');
+      if (occupiedSlots.includes(`${sh}:${sm}`)) { conflict = true; break; }
+    }
+  });
+
+  if (conflict) {
     showToast('Ce créneau est déjà pris! Choisissez un autre ⚠️', 'error');
     btn.disabled = false;
     btn.textContent = '✓ Confirmer le rendez-vous';
@@ -1907,300 +1860,126 @@ document.getElementById('btn-add-blacklist').addEventListener('click', async () 
   }
 });
 
-// ── ADMIN BARBERS ──
-async function loadAdminBarbers() {
-  const { data } = await db.from('barbers').select('*').order('created_at', { ascending: true });
-  const list = document.getElementById('barbers-admin-list');
+// ── BARBERS CONFIG ──
+async function loadBarbersConfig() {
+  const { data } = await db.from('barbers_config').select('*').eq('active', true).order('sort_order');
+  const list = document.getElementById('barbers-config-list');
   if (!list) return;
-  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucun coiffeur ajouté</div>'; return; }
+  if (!data || data.length === 0) { list.innerHTML = ''; return; }
   list.innerHTML = data.map(b => `
-    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border)">
-      ${b.photo_url ? `<img src="${b.photo_url}" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid var(--border)">` : `<div style="width:40px;height:40px;background:#eee;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem">💈</div>`}
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:.85rem">${b.name}</div>
-        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${b.speciality || ''}</div>
-      </div>
-      <button onclick="deleteBarberAdmin('${b.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
-    </div>
-  `).join('');
-}
-window.deleteBarberAdmin = async function(id) {
-  if (!confirm('Supprimer ce coiffeur?')) return;
-  await db.from('barbers').delete().eq('id', id);
-  showToast('Coiffeur supprimé', 'success');
-  await loadDynamicBarbers();
-  loadAdminBarbers();
-  renderBarbers();
-};
-document.addEventListener('DOMContentLoaded', () => {
-  const btnAddBarber = document.getElementById('btn-add-barber');
-  if (btnAddBarber) btnAddBarber.addEventListener('click', async () => {
-    const name = document.getElementById('barber-name').value.trim();
-    const speciality = document.getElementById('barber-job').value.trim();
-    const photo_url = document.getElementById('barber-img').value.trim();
-    if (!name) { showToast('Nom obligatoire ⚠️', 'error'); return; }
-    const { error } = await db.from('barbers').insert({ name, speciality: speciality || null, photo_url: photo_url || null });
-    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
-    showToast('Coiffeur ajouté ✓', 'success');
-    document.getElementById('barber-name').value = '';
-    document.getElementById('barber-job').value = '';
-    document.getElementById('barber-img').value = '';
-    await loadDynamicBarbers();
-    loadAdminBarbers();
-    renderBarbers();
-  });
-});
-
-// ── ADMIN CATEGORIES ──
-window.switchCatTab = function(tab) {
-  document.getElementById('form-cats').style.display = tab === 'cats' ? 'block' : 'none';
-  document.getElementById('form-svcs').style.display = tab === 'svcs' ? 'flex' : 'none';
-  document.getElementById('tab-cats').style.background = tab === 'cats' ? '#111' : '#fff';
-  document.getElementById('tab-cats').style.color = tab === 'cats' ? '#fff' : '#111';
-  document.getElementById('tab-svcs').style.background = tab === 'svcs' ? '#111' : '#fff';
-  document.getElementById('tab-svcs').style.color = tab === 'svcs' ? '#fff' : '#111';
-  if (tab === 'svcs') loadAdminServices();
-};
-
-async function loadAdminCats() {
-  const { data } = await db.from('service_categories').select('*').order('created_at', { ascending: true });
-  const list = document.getElementById('cats-admin-list');
-  if (!list) return;
-  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucune catégorie ajoutée</div>'; return; }
-  list.innerHTML = data.map(c => `
-    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border)">
-      ${c.image_url ? `<img src="${c.image_url}" style="width:40px;height:40px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:40px;height:40px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📂</div>`}
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:.85rem">${c.name}</div>
-        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${c.description || ''}</div>
-      </div>
-      <button onclick="deleteCatAdmin('${c.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
-    </div>
-  `).join('');
-}
-window.deleteCatAdmin = async function(id) {
-  if (!confirm('Supprimer cette catégorie?')) return;
-  await db.from('service_categories').delete().eq('id', id);
-  showToast('Catégorie supprimée', 'success');
-  await loadDynamicCategories();
-  loadAdminCats();
-};
-document.addEventListener('DOMContentLoaded', () => {
-  const btnAddCat = document.getElementById('btn-add-cat');
-  if (btnAddCat) btnAddCat.addEventListener('click', async () => {
-    const name = document.getElementById('cat-name').value.trim();
-    const description = document.getElementById('cat-job').value.trim();
-    const image_url = document.getElementById('cat-img').value.trim();
-    if (!name) { showToast('Nom obligatoire ⚠️', 'error'); return; }
-    const { error } = await db.from('service_categories').insert({ name, description: description || null, image_url: image_url || null });
-    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
-    showToast('Catégorie ajoutée ✓', 'success');
-    document.getElementById('cat-name').value = '';
-    document.getElementById('cat-job').value = '';
-    document.getElementById('cat-img').value = '';
-    await loadDynamicCategories();
-    loadAdminCats();
-    // Refresh category select in sous-service form
-    refreshSvcCatSelect();
-  });
-});
-
-async function loadAdminServices() {
-  const { data } = await db.from('services_list').select('*').order('created_at', { ascending: true });
-  const list = document.getElementById('svcs-admin-list');
-  if (!list) return;
-  if (!data || data.length === 0) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucun service ajouté</div>'; return; }
-  list.innerHTML = data.map(s => `
-    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border)">
-      ${s.image_url ? `<img src="${s.image_url}" style="width:40px;height:40px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:40px;height:40px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:1.2rem">✂️</div>`}
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:.85rem">${s.name}</div>
-        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${s.category} · ${s.duration_mins || 45} min</div>
-      </div>
-      <button onclick="deleteSvcAdmin('${s.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
-    </div>
-  `).join('');
-}
-window.deleteSvcAdmin = async function(id) {
-  if (!confirm('Supprimer ce service?')) return;
-  await db.from('services_list').delete().eq('id', id);
-  showToast('Service supprimé', 'success');
-  await loadDynamicServices();
-  loadAdminServices();
-};
-function refreshSvcCatSelect() {
-  const sel = document.getElementById('svc-cat-select');
-  if (!sel) return;
-  const defaultOpts = ['Coupe','Barbe','Combo','Soin'];
-  const dynOpts = dynamicCategories.map(c => c.name).filter(n => !defaultOpts.includes(n));
-  const all = [...defaultOpts, ...dynOpts];
-  const current = sel.value;
-  sel.innerHTML = '<option value="">Choisir catégorie...</option>' + all.map(n => `<option ${n===current?'selected':''}>${n}</option>`).join('');
-}
-document.addEventListener('DOMContentLoaded', () => {
-  const btnAddSvc = document.getElementById('btn-add-svc');
-  if (btnAddSvc) btnAddSvc.addEventListener('click', async () => {
-    const category = document.getElementById('svc-cat-select').value;
-    const name = document.getElementById('svc-name').value.trim();
-    const duration_mins = parseInt(document.getElementById('svc-duration').value) || 45;
-    const image_url = document.getElementById('svc-img').value.trim();
-    if (!name || !category) { showToast('Nom et catégorie obligatoires ⚠️', 'error'); return; }
-    const { error } = await db.from('services_list').insert({ name, category, duration_mins, image_url: image_url || null, emoji: '✂️' });
-    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
-    showToast('Service ajouté ✓', 'success');
-    document.getElementById('svc-name').value = '';
-    document.getElementById('svc-duration').value = '';
-    document.getElementById('svc-img').value = '';
-    await loadDynamicServices();
-    loadAdminServices();
-  });
-});
-
-// ── FINANCE / CAISSE ──
-let allTransactions = [];
-
-async function loadTransactions() {
-  const { data } = await db.from('transactions').select('*').order('date', { ascending: false });
-  allTransactions = data || [];
-  renderFinanceStats();
-  renderTxList();
-}
-
-function renderFinanceStats() {
-  const filterType = document.getElementById('tx-filter-type')?.value || 'month';
-  const now = new Date();
-  const filtered = allTransactions.filter(t => {
-    const d = new Date(t.date);
-    if (filterType === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    if (filterType === 'year') return d.getFullYear() === now.getFullYear();
-    return true;
-  });
-  const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
-  const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
-  const balance = income - expense;
-  const labelMap = { month: 'Ce mois', year: 'Cette année', all: 'Total' };
-  const container = document.getElementById('finance-stats');
-  if (!container) return;
-  container.innerHTML = `
-    <div style="background:#fff;border:1px solid var(--border);border-top:2px solid #34d399;padding:.8rem;text-align:center">
-      <div style="font-size:1rem;font-weight:700;color:#34d399">${income.toLocaleString()} DA</div>
-      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.2rem">📈 Entrées</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-top:2px solid #ff8080;padding:.8rem;text-align:center">
-      <div style="font-size:1rem;font-weight:700;color:#ff8080">${expense.toLocaleString()} DA</div>
-      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.2rem">📉 Sorties</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-top:2px solid ${balance>=0?'#111':'#ff8080'};padding:.8rem;text-align:center">
-      <div style="font-size:1rem;font-weight:700;color:${balance>=0?'#111':'#ff8080'}">${balance>=0?'+':''}${balance.toLocaleString()} DA</div>
-      <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-top:.2rem">💼 Balance</div>
-    </div>
-  `;
-}
-window.renderFinanceStats = renderFinanceStats;
-
-function renderTxList() {
-  const filterType = document.getElementById('tx-filter-type')?.value || 'month';
-  const now = new Date();
-  const filtered = allTransactions.filter(t => {
-    const d = new Date(t.date);
-    if (filterType === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    if (filterType === 'year') return d.getFullYear() === now.getFullYear();
-    return true;
-  });
-  const list = document.getElementById('tx-list');
-  if (!list) return;
-  if (!filtered.length) { list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);padding:.5rem">Aucune transaction</div>'; return; }
-  list.innerHTML = filtered.map(t => `
-    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#fff;border:1px solid var(--border);border-left:3px solid ${t.type==='income'?'#34d399':'#ff8080'}">
-      <div style="font-size:1.1rem">${t.type==='income'?'📈':'📉'}</div>
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:.85rem;color:${t.type==='income'?'#059669':'#dc2626'}">${t.type==='income'?'+':'−'}${(t.amount||0).toLocaleString()} DA</div>
-        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">${t.description||'—'} · ${t.date}</div>
-      </div>
-      <button onclick="deleteTx('${t.id}')" style="background:none;border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.3rem .6rem;cursor:pointer;font-size:.7rem">✕</button>
-    </div>
-  `).join('');
-}
-
-window.deleteTx = async function(id) {
-  await db.from('transactions').delete().eq('id', id);
-  showToast('Supprimé', 'success');
-  loadTransactions();
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Set today as default date for transaction
-  const txDate = document.getElementById('tx-date');
-  if (txDate) txDate.value = new Date().toISOString().split('T')[0];
-
-  const btnAddTx = document.getElementById('btn-add-tx');
-  if (btnAddTx) btnAddTx.addEventListener('click', async () => {
-    const amount = parseFloat(document.getElementById('tx-amount').value);
-    const type = document.getElementById('tx-type').value;
-    const description = document.getElementById('tx-desc').value.trim();
-    const date = document.getElementById('tx-date').value;
-    if (!amount || !date) { showToast('Montant et date obligatoires ⚠️', 'error'); return; }
-    const { error } = await db.from('transactions').insert({ amount, type, description: description || null, date });
-    if (error) { showToast('Erreur: ' + error.message, 'error'); return; }
-    showToast('Transaction enregistrée ✓', 'success');
-    document.getElementById('tx-amount').value = '';
-    document.getElementById('tx-desc').value = '';
-    loadTransactions();
-  });
-
-  const txFilterType = document.getElementById('tx-filter-type');
-  if (txFilterType) txFilterType.addEventListener('change', () => { renderFinanceStats(); renderTxList(); });
-});
-
-// ── CATEGORY PHOTOS ──
-function loadCatPhotos() {
-  const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
-  const categories = ['Coupe', 'Barbe', 'Combo', 'Soin'];
-  const container = document.getElementById('cat-photos-list');
-  if (!container) return;
-  container.innerHTML = categories.map(cat => {
-    const img = catImages[cat];
-    return `
-      <div style="border:1px solid var(--border);padding:.8rem 1rem;background:#ffffff;display:flex;align-items:center;gap:1rem">
-        ${img ? `<img src="${img}" style="width:56px;height:56px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)">` : `<div style="width:56px;height:56px;background:#eeeeee;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">📷</div>`}
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:.85rem">${cat}</div>
-          <label style="display:inline-block;margin-top:.4rem;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.4);color:#7c3aed;padding:.4rem .8rem;cursor:pointer;font-size:.7rem;font-family:'DM Sans',sans-serif">
-            📤 Upload photo
-            <input type="file" accept="image/*" style="display:none" onchange="uploadCatPhoto('${cat}', this)">
-          </label>
-          ${img ? `<button onclick="removeCatPhoto('${cat}')" style="margin-left:.5rem;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.4rem .8rem;cursor:pointer;font-size:.7rem;font-family:'DM Sans',sans-serif">✕ Supprimer</button>` : ''}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.15)">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        ${b.photo_url ? `<img src="${b.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover">` : `<span>${b.emoji||'💈'}</span>`}
+        <div>
+          <div style="font-size:.82rem;font-weight:600">${b.name}</div>
+          ${b.speciality ? `<div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${b.speciality}</div>` : ''}
         </div>
       </div>
-    `;
-  }).join('');
+      <button onclick="deleteBarberConfig(${b.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:.9rem">✕</button>
+    </div>
+  `).join('');
 }
 
-function uploadCatPhoto(cat, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const maxSize = 2 * 1024 * 1024; // 2MB
-  if (file.size > maxSize) { showToast('Photo trop grande (max 2MB) ⚠️', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
-    catImages[cat] = e.target.result;
-    localStorage.setItem('bangs_cat_images', JSON.stringify(catImages));
-    showToast(`Photo ${cat} mise à jour ✓`, 'success');
-    loadCatPhotos();
-  };
-  reader.readAsDataURL(file);
+async function deleteBarberConfig(id) {
+  if (!confirm('Supprimer ce coiffeur?')) return;
+  await db.from('barbers_config').update({ active: false }).eq('id', id);
+  showToast('Coiffeur supprimé ✓', 'success');
+  loadBarbersConfig();
+  await refreshDynamicData();
 }
-window.uploadCatPhoto = uploadCatPhoto;
+window.deleteBarberConfig = deleteBarberConfig;
 
-function removeCatPhoto(cat) {
-  const catImages = JSON.parse(localStorage.getItem('bangs_cat_images') || '{}');
-  delete catImages[cat];
-  localStorage.setItem('bangs_cat_images', JSON.stringify(catImages));
-  showToast(`Photo ${cat} supprimée`, 'success');
-  loadCatPhotos();
+document.getElementById('btn-add-barber').addEventListener('click', async () => {
+  const name = document.getElementById('bc-name').value.trim();
+  const speciality = document.getElementById('bc-speciality').value.trim();
+  const photo_url = document.getElementById('bc-photo').value.trim() || null;
+  if (!name) { showToast('Entrez le nom ⚠️', 'error'); return; }
+  const { error } = await db.from('barbers_config').insert({ name, speciality, photo_url });
+  if (error) { showToast('Erreur!', 'error'); return; }
+  showToast(`💈 ${name} ajouté!`, 'success');
+  document.getElementById('bc-name').value = '';
+  document.getElementById('bc-speciality').value = '';
+  document.getElementById('bc-photo').value = '';
+  loadBarbersConfig();
+  await refreshDynamicData();
+});
+
+// ── SERVICES CONFIG ──
+async function loadServicesConfig() {
+  const { data } = await db.from('services_config').select('*').eq('active', true).order('sort_order');
+  const list = document.getElementById('services-config-list');
+  if (!list) return;
+  if (!data || data.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = data.map(s => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.15)">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        ${s.emoji && s.emoji.startsWith('http') 
+          ? `<img src="${s.emoji}" style="width:24px;height:24px;object-fit:cover;border-radius:3px">` 
+          : `<span style="font-size:1.1rem">${s.emoji||'✂️'}</span>`}
+        <div>
+          <div style="font-size:.82rem;font-weight:600">${s.name}</div>
+          <div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${s.category} · ${s.duration} · ${s.price}</div>
+        </div>
+      </div>
+      <button onclick="deleteServiceConfig(${s.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:.9rem">✕</button>
+    </div>
+  `).join('');
 }
-window.removeCatPhoto = removeCatPhoto;
+
+async function deleteServiceConfig(id) {
+  if (!confirm('Supprimer ce service?')) return;
+  await db.from('services_config').update({ active: false }).eq('id', id);
+  showToast('Service supprimé ✓', 'success');
+  loadServicesConfig();
+  await refreshDynamicData();
+}
+window.deleteServiceConfig = deleteServiceConfig;
+
+document.getElementById('btn-add-service').addEventListener('click', async () => {
+  const name = document.getElementById('sc-name').value.trim();
+  const category = document.getElementById('sc-category').value;
+  const priceRaw = parseInt(document.getElementById('sc-price').value) || 0;
+  const durationMinsRaw = parseInt(document.getElementById('sc-duration').value) || 45;
+  const price = priceRaw > 0 ? `${priceRaw} DA` : 'À confirmer';
+  const h = Math.floor(durationMinsRaw / 60);
+  const m = durationMinsRaw % 60;
+  const duration = h > 0 ? `${h}h${m > 0 ? m+'min' : ''}` : `${durationMinsRaw} min`;
+  const emoji = document.getElementById('sc-emoji').value.trim() || '✂️';
+  const image_url = document.getElementById('sc-image').value.trim() || null;
+  if (!name) { showToast('Entrez le nom ⚠️', 'error'); return; }
+  const { error } = await db.from('services_config').insert({ name, category, price, duration, emoji, image_url, duration_mins: durationMinsRaw });
+  if (error) { showToast('Erreur!', 'error'); return; }
+  showToast(`✂️ ${name} ajouté!`, 'success');
+  ['sc-name','sc-price','sc-duration','sc-emoji','sc-image'].forEach(id => document.getElementById(id).value = '');
+  loadServicesConfig();
+  await refreshDynamicData();
+});
+
+// ── REFRESH DYNAMIC DATA ──
+async function refreshDynamicData() {
+  const [barbersRes, servicesRes] = await Promise.all([
+    db.from('barbers_config').select('*').eq('active', true).order('sort_order'),
+    db.from('services_config').select('*').eq('active', true).order('sort_order')
+  ]);
+  if (barbersRes.data && barbersRes.data.length > 0) {
+    BARBERS = barbersRes.data.map(b => ({
+      id: b.id, name: b.name, emoji: b.emoji || '💈',
+      photo: b.photo_url, speciality: b.speciality
+    }));
+  }
+  if (servicesRes.data && servicesRes.data.length > 0) {
+    SERVICES = servicesRes.data.map(s => ({
+      id: s.id, name: s.name, emoji: s.emoji || '✂️',
+      category: s.category, duration: s.duration,
+      price: s.price, img: s.image_url,
+      durationMins: s.duration_mins || 45
+    }));
+  }
+  // Re-render booking page if open
+  if (document.getElementById('page-booking').classList.contains('active')) {
+    renderServices();
+  }
+}
 
 // ── WALK-IN ──
 function openWalkin() {
@@ -2583,10 +2362,8 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     loadAdminProducts();
     loadAdminOrders();
     loadBlacklist();
-    loadCatPhotos();
-    loadAdminBarbers();
-    loadAdminCats();
-    loadTransactions();
+    loadBarbersConfig();
+    loadServicesConfig();
   } else {
     document.getElementById('admin-error').style.display = 'block';
   }
@@ -2892,6 +2669,48 @@ async function loadStats() {
       </div>
     </div>
   `).join('');
+
+  // Monthly bilan — last 6 months with revenue estimation
+  const monthlyData = {};
+  data.forEach(r => {
+    const month = r.reservation_date?.slice(0, 7);
+    if (!month) return;
+    if (!monthlyData[month]) monthlyData[month] = { count: 0, revenue: 0 };
+    monthlyData[month].count++;
+    // Extract price from services
+    const serviceNames = r.service ? r.service.split(' + ') : [];
+    serviceNames.forEach(name => {
+      const svc = SERVICES.find(s => s.name === name.trim());
+      if (svc?.price && svc.price !== 'À confirmer') {
+        const num = parseInt(svc.price.replace(/\s/g,'').replace('DA','').replace(',',''));
+        if (!isNaN(num) && num > 0) monthlyData[month].revenue += num;
+      }
+    });
+  });
+  const sortedMonths = Object.entries(monthlyData).sort((a,b) => a[0].localeCompare(b[0])).slice(-6);
+  const maxMonth = Math.max(...sortedMonths.map(m => m[1].count), 1);
+  const monthNames = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+  document.getElementById('stats-monthly').innerHTML = sortedMonths.length === 0
+    ? '<div style="font-size:.75rem;color:rgba(0,0,0,0.3)">Pas encore de données</div>'
+    : sortedMonths.map(([month, {count, revenue}]) => {
+        const [y, m] = month.split('-');
+        const label = `${monthNames[parseInt(m)-1]} ${y}`;
+        return `
+          <div style="padding:.6rem .8rem;background:#ffffff;border:1px solid var(--border);margin-bottom:.3rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+              <span style="font-weight:600;font-size:.85rem">${label}</span>
+              <div style="text-align:right">
+                <span style="font-size:.82rem;font-weight:600">${count} rdv</span>
+                ${revenue > 0 ? `<span style="font-size:.8rem;color:#111;font-weight:700;margin-left:.6rem">${revenue.toLocaleString()} DA</span>` : `<span style="font-size:.7rem;color:rgba(0,0,0,0.3);margin-left:.5rem">prix non définis</span>`}
+              </div>
+            </div>
+            <div style="background:rgba(0,0,0,0.07);height:5px;border-radius:3px">
+              <div style="background:#111111;height:100%;border-radius:3px;width:${(count/maxMonth)*100}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
 }
 
 document.getElementById('btn-stats-mode').addEventListener('click', openStatsMode);
@@ -3117,7 +2936,11 @@ document.getElementById('btn-appeler-suivant').addEventListener('click', async (
 });
 
 // ── SPLASH SCREEN ──
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  // Load barbers & services from DB
+  await refreshDynamicData();
+  // Re-render if booking page active
+  renderServices();
   const logo = document.getElementById('splash-logo');
   const bar = document.getElementById('splash-bar');
   const splash = document.getElementById('splash');
