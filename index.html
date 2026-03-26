@@ -1114,11 +1114,16 @@ function renderServices() {
     const services = SERVICES.filter(s => s.category === cat);
     if (!services.length) return '';
     const isOpen = openCategory === cat;
+    // Get category logo from first service that has one
+    const catLogo = services.find(s => s.categoryLogo)?.categoryLogo || null;
     return `
       <div style="border:1px solid var(--border);overflow:hidden;margin-bottom:.5rem">
         <div onclick="toggleCategory('${cat}')" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;cursor:pointer;background:#ffffff;user-select:none">
           <div style="display:flex;align-items:center;gap:.7rem">
             <span style="color:#111111;font-size:.9rem;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);transition:transform .2s">▶</span>
+            ${catLogo 
+              ? `<img src="${catLogo}" style="width:26px;height:26px;object-fit:cover;border-radius:4px">` 
+              : ''}
             <span style="font-weight:600;font-size:.95rem">${cat}</span>
           </div>
         </div>
@@ -1928,10 +1933,11 @@ document.getElementById('btn-add-service').addEventListener('click', async () =>
   const h = Math.floor(durationMinsRaw / 60);
   const m = durationMinsRaw % 60;
   const duration = h > 0 ? `${h}h${m > 0 ? m+'min' : ''}` : `${durationMinsRaw} min`;
-  const emoji = document.getElementById('sc-emoji').value.trim() || '✂️';
+  const category_logo = document.getElementById('sc-emoji').value.trim() || null;
+  const emoji = category_logo || '✂️';
   const image_url = document.getElementById('sc-image').value.trim() || null;
   if (!name) { showToast('Entrez le nom ⚠️', 'error'); return; }
-  const { error } = await db.from('services_config').insert({ name, category, price, duration, emoji, image_url, duration_mins: durationMinsRaw });
+  const { error } = await db.from('services_config').insert({ name, category, price, duration, emoji, image_url, duration_mins: durationMinsRaw, category_logo });
   if (error) { showToast('Erreur!', 'error'); return; }
   showToast(`✂️ ${name} ajouté!`, 'success');
   ['sc-name','sc-price','sc-duration','sc-emoji','sc-image'].forEach(id => document.getElementById(id).value = '');
@@ -1956,7 +1962,8 @@ async function refreshDynamicData() {
       id: s.id, name: s.name, emoji: s.emoji || '✂️',
       category: s.category, duration: s.duration,
       price: s.price, img: s.image_url,
-      durationMins: s.duration_mins || 45
+      durationMins: s.duration_mins || 45,
+      categoryLogo: s.category_logo || null
     }));
   }
   populateAdminSelects();
@@ -2913,12 +2920,27 @@ function setupRealtimeListener(reservationId) {
 }
 
 // Admin: Appeler suivant
-document.getElementById('btn-appeler-suivant').addEventListener('click', async () => {
-  const today = getToday();
+document.getElementById('btn-appeler-suivant').addEventListener('click', () => {
+  // Show barber select modal instead of prompt (works on mobile)
+  const modal = document.getElementById('barber-select-modal');
+  const btns = document.getElementById('barber-select-buttons');
+  btns.innerHTML = BARBERS.map(b => `
+    <button onclick="appellerSuivantPour('${b.name}')" style="padding:.9rem;background:#111111;border:none;color:#ffffff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.7rem;width:100%">
+      ${b.photo ? `<img src="${b.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">` : `<span style="font-size:1.2rem">${b.emoji}</span>`}
+      ${b.name}
+    </button>
+  `).join('');
+  modal.style.display = 'flex';
+});
 
-  const barberList = (window._barberNames || BARBERS.map(b => b.name)).join(' / ');
-  const barber = prompt(`Quel coiffeur? (${barberList})`);
-  if (!barber) return;
+function closeBarberModal() {
+  document.getElementById('barber-select-modal').style.display = 'none';
+}
+window.closeBarberModal = closeBarberModal;
+
+async function appellerSuivantPour(barber) {
+  closeBarberModal();
+  const today = getToday();
 
   // Mark current 'calling' as done first
   await db.from('reservations')
@@ -2947,7 +2969,8 @@ document.getElementById('btn-appeler-suivant').addEventListener('click', async (
   showToast(`🔔 ${next.client_name} appelé! Ticket #${next.daily_ticket || next.id}`, 'success');
   loadAdminBookings();
   loadLiveQueue();
-});
+}
+window.appellerSuivantPour = appellerSuivantPour;
 
 // ── SPLASH SCREEN ──
 window.addEventListener('load', async () => {
@@ -3065,6 +3088,16 @@ setInterval(checkUpcomingTickets, 30000);
       </div>
     </div>
     <button id="btn-order-confirm" class="btn-next" style="margin-top:.5rem">✓ Confirmer la commande</button>
+  </div>
+</div>
+
+<!-- Barber Select Modal -->
+<div id="barber-select-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;align-items:center;justify-content:center;padding:1.5rem">
+  <div style="background:#ffffff;width:100%;max-width:360px;padding:1.5rem">
+    <div style="font-size:.6rem;letter-spacing:.2em;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-bottom:.5rem">Appeler suivant</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:1.2rem">Quel coiffeur?</h3>
+    <div id="barber-select-buttons" style="display:flex;flex-direction:column;gap:.6rem"></div>
+    <button onclick="closeBarberModal()" style="margin-top:1rem;width:100%;padding:.8rem;background:none;border:1px solid rgba(0,0,0,0.15);color:rgba(0,0,0,0.4);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">Annuler</button>
   </div>
 </div>
 
