@@ -1095,16 +1095,21 @@ function renderServicesBanner() {
   const m = totalMins % 60;
   const durStr = h > 0 ? `${h}h${m > 0 ? m + 'min' : ''}` : `${m}min`;
   const names = state.selectedServices.map(s => s.name).join(' + ');
+  const isLong = totalMins > 90; // Plus de 2 slots
+  
   banner.style.display = 'block';
+  banner.style.background = isLong ? '#7f1d1d' : '#111111';
+  banner.style.borderLeft = isLong ? '3px solid #fca5a5' : '3px solid #ffffff';
   banner.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
-        <div style="font-size:.7rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Sélection</div>
-        <div style="font-size:.82rem;font-weight:600">${names}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em">Sélection</div>
+        <div style="font-size:.82rem;font-weight:600;color:#ffffff">${names}</div>
+        ${isLong ? `<div style="font-size:.7rem;color:#fca5a5;margin-top:.3rem">⚠️ Durée longue — confirmez avec le salon</div>` : ''}
       </div>
       <div style="text-align:right">
-        <div style="font-size:.7rem;color:rgba(0,0,0,0.4)">Durée totale</div>
-        <div style="font-size:.9rem;font-weight:700">⏱ ${durStr}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,0.5)">Durée totale</div>
+        <div style="font-size:.9rem;font-weight:700;color:${isLong ? '#fca5a5' : '#ffffff'}">⏱ ${durStr}</div>
       </div>
     </div>
   `;
@@ -1912,10 +1917,61 @@ async function loadServicesConfig() {
           <div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${s.category} · ${s.duration} · ${s.price}</div>
         </div>
       </div>
-      <button onclick="deleteServiceConfig(${s.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:.9rem">✕</button>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <button onclick="editServiceConfig(${s.id},'${(s.name||'').replace(/'/g,"\\'")}','${(s.price||'').replace(/'/g,"\\'")}','${(s.duration||'').replace(/'/g,"\\'")}','${(s.emoji||'').replace(/'/g,"\\'")}','${(s.image_url||'').replace(/'/g,"\\'")}','${(s.category_logo||'').replace(/'/g,"\\'")}','${(s.description||'').replace(/'/g,"\\'")}')" style="background:none;border:none;color:#60a5fa;cursor:pointer;font-size:.85rem">✏️</button>
+        <button onclick="deleteServiceConfig(${s.id})" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:.9rem">✕</button>
+      </div>
     </div>
   `).join('');
 }
+
+function editServiceConfig(id, name, price, duration, emoji, image_url, category_logo, description) {
+  document.getElementById('edit-svc-id').value = id;
+  document.getElementById('edit-svc-title').textContent = name;
+  // Price: extract number from "500 DA"
+  const priceNum = parseInt((price||'').replace(/\D/g,'')) || '';
+  document.getElementById('edit-svc-price').value = priceNum;
+  // Duration: extract minutes
+  const durMatch = (duration||'').match(/(\d+)h(?:(\d+)min)?|(\d+)\s*min/);
+  let durMins = 45;
+  if (durMatch) {
+    if (durMatch[1]) durMins = parseInt(durMatch[1])*60 + (parseInt(durMatch[2])||0);
+    else if (durMatch[3]) durMins = parseInt(durMatch[3]);
+  }
+  document.getElementById('edit-svc-duration').value = durMins;
+  document.getElementById('edit-svc-desc').value = description || '';
+  document.getElementById('edit-svc-cat-logo').value = category_logo || '';
+  document.getElementById('edit-svc-emoji').value = (emoji && emoji.startsWith('http')) ? emoji : '';
+  document.getElementById('edit-svc-image').value = image_url || '';
+  document.getElementById('edit-service-modal').style.display = 'flex';
+}
+window.editServiceConfig = editServiceConfig;
+
+function closeEditServiceModal() {
+  document.getElementById('edit-service-modal').style.display = 'none';
+}
+window.closeEditServiceModal = closeEditServiceModal;
+
+async function saveServiceEdit() {
+  const id = document.getElementById('edit-svc-id').value;
+  const priceRaw = parseInt(document.getElementById('edit-svc-price').value) || 0;
+  const price = priceRaw > 0 ? `${priceRaw} DA` : 'À confirmer';
+  const durationMins = parseInt(document.getElementById('edit-svc-duration').value) || 45;
+  const h = Math.floor(durationMins/60), m = durationMins%60;
+  const duration = h > 0 ? `${h}h${m > 0 ? m+'min' : ''}` : `${durationMins} min`;
+  const description = document.getElementById('edit-svc-desc').value.trim() || null;
+  const category_logo = document.getElementById('edit-svc-cat-logo').value.trim() || null;
+  const emoji = document.getElementById('edit-svc-emoji').value.trim() || '✂️';
+  const image_url = document.getElementById('edit-svc-image').value.trim() || null;
+
+  const { error } = await db.from('services_config').update({ price, duration, duration_mins: durationMins, description, category_logo, emoji, image_url }).eq('id', id);
+  if (error) { showToast('Erreur!', 'error'); return; }
+  showToast('Service modifié ✓', 'success');
+  closeEditServiceModal();
+  loadServicesConfig();
+  await refreshDynamicData();
+}
+window.saveServiceEdit = saveServiceEdit;
 
 async function deleteServiceConfig(id) {
   if (!confirm('Supprimer ce service?')) return;
@@ -3103,6 +3159,27 @@ setInterval(checkUpcomingTickets, 30000);
     <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:1.2rem">Quel coiffeur?</h3>
     <div id="barber-select-buttons" style="display:flex;flex-direction:column;gap:.6rem"></div>
     <button onclick="closeBarberModal()" style="margin-top:1rem;width:100%;padding:.8rem;background:none;border:1px solid rgba(0,0,0,0.15);color:rgba(0,0,0,0.4);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">Annuler</button>
+  </div>
+</div>
+
+<!-- Edit Service Modal -->
+<div id="edit-service-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;align-items:flex-start;justify-content:center;padding:1.5rem;overflow-y:auto">
+  <div style="background:#ffffff;width:100%;max-width:400px;padding:1.5rem;margin-top:2rem">
+    <div style="font-size:.6rem;letter-spacing:.2em;color:rgba(0,0,0,0.4);text-transform:uppercase;margin-bottom:.3rem">Modifier service</div>
+    <h3 id="edit-svc-title" style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1rem"></h3>
+    <input type="hidden" id="edit-svc-id">
+    <div style="display:flex;flex-direction:column;gap:.7rem">
+      <input class="form-input" id="edit-svc-price" type="number" placeholder="Prix en DA" style="font-size:.8rem" min="0">
+      <input class="form-input" id="edit-svc-duration" type="number" placeholder="Durée en minutes" style="font-size:.8rem" min="5">
+      <input class="form-input" id="edit-svc-desc" type="text" placeholder="Description (optionnel)" style="font-size:.8rem">
+      <input class="form-input" id="edit-svc-cat-logo" type="url" placeholder="① URL logo catégorie" style="font-size:.8rem">
+      <input class="form-input" id="edit-svc-emoji" type="url" placeholder="② URL logo service" style="font-size:.8rem">
+      <input class="form-input" id="edit-svc-image" type="url" placeholder="③ URL photo service" style="font-size:.8rem">
+    </div>
+    <div style="display:flex;gap:.7rem;margin-top:1.2rem">
+      <button onclick="saveServiceEdit()" style="flex:1;background:#111111;border:none;color:#ffffff;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600">✓ Enregistrer</button>
+      <button onclick="closeEditServiceModal()" style="flex:1;background:none;border:1px solid rgba(0,0,0,0.15);color:rgba(0,0,0,0.5);padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem">Annuler</button>
+    </div>
   </div>
 </div>
 
