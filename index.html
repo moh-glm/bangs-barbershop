@@ -354,7 +354,7 @@ body {
   cursor:pointer; transition: all .2s;
 }
 .barber-card:hover, .barber-card.selected { border-color:#111111; background:#eeeeee; }
-.barber-avatar { width:48px; height:48px; border-radius:50%; background:rgba(0,0,0,0.15); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+.barber-avatar { width:72px; height:72px; border-radius:50%; background:rgba(0,0,0,0.15); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
 .barber-card.selected .barber-avatar { border-color:#111111; }
 .barber-name { font-size:.8rem; font-weight:600; text-transform:capitalize; }
 
@@ -426,11 +426,11 @@ body {
     </button>
 
     <!-- LIVE QUEUE -->
-    <div id="live-queue" style="width:100%;padding:0 1.5rem;margin-top:.8rem;box-sizing:border-box">
-      <div style="background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);padding:.7rem">
-        <div style="font-size:.5rem;letter-spacing:.3em;color:#222222;text-transform:uppercase;margin-bottom:.5rem;text-align:center">🔴 Live — File d'attente</div>
-        <div id="my-ticket-banner"></div>
-        <div id="queue-content"></div>
+    <div id="live-queue" style="width:100%;padding:0 1rem;margin-top:.8rem;box-sizing:border-box">
+      <div style="background:#ffffff;border:1px solid rgba(0,0,0,0.1);overflow:hidden">
+        <div style="font-size:.5rem;letter-spacing:.3em;color:#222222;text-transform:uppercase;padding:.6rem;text-align:center;border-bottom:1px solid rgba(0,0,0,0.06)">🔴 Live — File d'attente</div>
+        <div id="my-ticket-banner" style="padding:0 .5rem"></div>
+        <div id="queue-content" style="padding:.5rem"></div>
       </div>
     </div>
     <div class="hero-info">
@@ -1386,7 +1386,7 @@ function renderSlots() {
     ? Math.max(closingMins, ...extra.map(e => parseInt(e.time_end.slice(0,2)) * 60 + parseInt(e.time_end.slice(3,5))))
     : closingMins;
 
-  // Filter: slot must exist + service must END at or before closing (21:00)
+  // Filter: slot must exist + service must END at or before closing (22:00)
   const availableSlots = validSlots.filter(s => {
     const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
     return slotMins + serviceDuration <= maxClosing;
