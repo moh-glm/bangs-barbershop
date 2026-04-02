@@ -686,7 +686,7 @@ body {
         🔔 Appeler suivant
       </button>
       <button id="btn-delete-today" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;white-space:nowrap">
-        🗑 Supprimer tout
+        🗂 Archiver tout
       </button>
     </div>
 
@@ -828,6 +828,7 @@ body {
           <option value="calling">En cours</option>
           <option value="done">Terminé</option>
           <option value="cancelled">Annulé</option>
+          <option value="archived">Archivé</option>
         </select>
       </div>
       <button id="btn-hist-search" style="background:#111111;border:none;color:#ffffff;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">🔍 Rechercher</button>
@@ -1312,7 +1313,7 @@ async function selectDate(dateStr) {
     db.from('reservations').select('reservation_time, service')
       .eq('reservation_date', dateStr)
       .eq('barber', state.selectedBarber?.name || '')
-      .neq('status', 'cancelled'),
+      .neq('status', 'cancelled').neq('status', 'archived'),
     db.from('custom_hours').select('*').eq('date', dateStr).or(`barber.is.null,barber.eq.${state.selectedBarber?.name || ''}`)
   ]);
 
@@ -1500,7 +1501,7 @@ async function confirmBooking() {
     .select('reservation_time, service')
     .eq('reservation_date', state.selectedDate)
     .eq('barber', state.selectedBarber?.name)
-    .neq('status', 'cancelled')
+    .neq('status', 'cancelled').neq('status', 'archived')
     .neq('status', 'done');
 
   let conflict = false;
@@ -1546,7 +1547,7 @@ async function confirmBooking() {
     .eq('reservation_date', state.selectedDate)
     .eq('barber', state.selectedBarber?.name)
     .eq('client_phone', clientPhone)
-    .neq('status', 'cancelled');
+    .neq('status', 'cancelled').neq('status', 'archived');
 
   if(alreadyBooked && alreadyBooked.length > 0) {
     showToast('Vous avez déjà une réservation avec ce coiffeur aujourd\'hui! ⚠️', 'error');
@@ -1560,7 +1561,7 @@ async function confirmBooking() {
     .select('*', { count: 'exact', head: true })
     .eq('reservation_date', state.selectedDate)
     .eq('barber', state.selectedBarber?.name)
-    .neq('status', 'cancelled');
+    .neq('status', 'cancelled').neq('status', 'archived');
   const dailyTicket = (count || 0) + 1;
 
   const { data: insertData, error: insertError } = await db.from('reservations').insert({
@@ -1743,13 +1744,14 @@ window.setRating = setRating;
 
 document.getElementById('btn-delete-today').addEventListener('click', async () => {
   const today = getToday();
-  if(!confirm(`Supprimer toutes les réservations de aujourd'hui (${today}) ?`)) return;
-  const { error } = await db.from('reservations').delete().eq('reservation_date', today);
+  if(!confirm(`Archiver toutes les réservations de aujourd'hui (${today}) ?`)) return;
+  const { error } = await db.from('reservations').update({ status: 'archived' }).eq('reservation_date', today);
   if(error) {
     showToast('Erreur! ' + error.message, 'error');
   } else {
-    showToast('Toutes les réservations d\'aujourd\'hui supprimées ✓', 'success');
+    showToast('Réservations archivées ✓', 'success');
     loadAdminBookings();
+    loadLiveQueue();
   }
 });
 
@@ -2690,8 +2692,9 @@ async function cancelBooking(id) {
 }
 
 async function deleteBooking(id) {
-  await db.from('reservations').delete().eq('id', id);
-  showToast('Supprimé | تم الحذف', 'error');
+  if(!confirm('Archiver cette réservation?')) return;
+  await db.from('reservations').update({ status: 'archived' }).eq('id', id);
+  showToast('Réservation archivée ✓', 'success');
   loadAdminBookings();
 }
 
@@ -2862,7 +2865,7 @@ function closeStatsMode() {
 window.closeStatsMode = closeStatsMode;
 
 async function loadStats() {
-  const { data } = await db.from('reservations').select('*').neq('status', 'cancelled');
+  const { data } = await db.from('reservations').select('*').neq('status', 'cancelled').neq('status', 'archived');
   if (!data) return;
 
   const today = new Date();
