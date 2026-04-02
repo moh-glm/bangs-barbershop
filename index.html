@@ -439,7 +439,7 @@ body {
         <div class="lbl">Ouverture</div>
       </div>
       <div class="hero-info-item">
-        <div class="val">22h</div>
+        <div class="val">22h30</div>
         <div class="lbl">Fermeture</div>
       </div>
       <div class="hero-info-item">
@@ -566,11 +566,11 @@ body {
     <div class="hours-card">
       <div class="hours-row">
         <span class="hours-day">Samedi — Jeudi</span>
-        <span class="hours-time">10:30 – 22:00</span>
+        <span class="hours-time">10:30 – 22:30</span>
       </div>
       <div class="hours-row">
         <span class="hours-day">Vendredi</span>
-        <span class="hours-time">15:00 – 22:00</span>
+        <span class="hours-time">15:00 – 22:30</span>
       </div>
     </div>
     <p style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-bottom:.8rem">Contact</p>
@@ -809,6 +809,30 @@ body {
       <input class="form-input" id="sc-image" type="url" placeholder="③ URL photo service (grande image détails)" style="font-size:.8rem">
       <button id="btn-add-service" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem">+ Ajouter service</button>
       <div id="services-config-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
+    <!-- Historique -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#f59e0b;text-transform:uppercase;margin-top:.5rem">📋 Historique complet</div>
+    <div style="padding:0 1.5rem .5rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <input class="form-input" id="hist-date-from" type="date" style="font-size:.8rem">
+        <input class="form-input" id="hist-date-to" type="date" style="font-size:.8rem">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <select class="form-input" id="hist-barber" style="font-size:.8rem">
+          <option value="">Tous les coiffeurs</option>
+        </select>
+        <select class="form-input" id="hist-status" style="font-size:.8rem">
+          <option value="">Tous les statuts</option>
+          <option value="confirmed">Confirmé</option>
+          <option value="calling">En cours</option>
+          <option value="done">Terminé</option>
+          <option value="cancelled">Annulé</option>
+        </select>
+      </div>
+      <button id="btn-hist-search" style="background:#111111;border:none;color:#ffffff;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">🔍 Rechercher</button>
+      <div id="hist-summary" style="font-size:.75rem;color:rgba(0,0,0,0.4)"></div>
+      <div id="hist-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
   </div>
 </div>
@@ -1356,7 +1380,7 @@ function renderSlots() {
 
   const validSlots = allSlots.filter(s => {
     const h = parseInt(s.split(':')[0]);
-    const isNight = h >= 22 || h < 4; // 21:00 → 03:30
+    const isNight = h >= 23 || h < 4; // after 22:00
     if (isFri && h < 15 && !extraSlots.includes(s)) return false;
     if (!isFri && h < 10 && !extraSlots.includes(s)) return false;
     if (isNight && !extraSlots.includes(s)) return false;
@@ -1380,7 +1404,7 @@ function renderSlots() {
   const slotsTitle = document.querySelector('.slots-title');
   if (slotsTitle) slotsTitle.innerHTML = `CRÉNEAUX DISPONIBLES <span style="color:rgba(0,0,0,0.4);font-weight:400;font-size:.6rem">(durée totale: ${durStr})</span>`;
 
-  const closingMins = 22 * 60; // 22:00 fermeture
+  const closingMins = 22 * 60 + 30; // 22:30 fermeture réelle
   // Extra hours might extend closing — find max closing from extras
   const maxClosing = extra.length > 0 
     ? Math.max(closingMins, ...extra.map(e => parseInt(e.time_end.slice(0,2)) * 60 + parseInt(e.time_end.slice(3,5))))
@@ -1454,8 +1478,8 @@ async function confirmBooking() {
   const endMins = selectedMins + totalDur;
 
   // Check closing time (21h)
-  if (endMins > 22 * 60) {
-    showToast('Ce créneau dépasse l\'heure de fermeture (22h) ⚠️', 'error');
+  if (endMins > 22 * 60 + 30) {
+    showToast('Ce créneau dépasse l\'heure de fermeture (22:30) ⚠️', 'error');
     btn.disabled = false;
     btn.textContent = '✓ Confirmer le rendez-vous';
     goStep(2);
@@ -1864,7 +1888,7 @@ function populateAdminSelects() {
   const barberOptions = BARBERS.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
   const serviceOptions = SERVICES.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
   
-  ['conge-barber', 'ch-barber'].forEach(id => {
+  ['conge-barber', 'ch-barber', 'hist-barber'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = `<option value="">Tous les coiffeurs</option>${barberOptions}`;
   });
@@ -1878,6 +1902,127 @@ function populateAdminSelects() {
   // Also update appeler suivant prompt options
   window._barberNames = BARBERS.map(b => b.name);
 }
+
+// ── HISTORIQUE ──
+async function loadHistorique() {
+  const from = document.getElementById('hist-date-from').value;
+  const to = document.getElementById('hist-date-to').value;
+  const barber = document.getElementById('hist-barber').value;
+  const status = document.getElementById('hist-status').value;
+  const list = document.getElementById('hist-list');
+  const summary = document.getElementById('hist-summary');
+
+  list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);text-align:center;padding:.5rem">Chargement...</div>';
+
+  let query = db.from('reservations').select('*').order('reservation_date', {ascending: false}).order('reservation_time', {ascending: true});
+  if (from) query = query.gte('reservation_date', from);
+  if (to) query = query.lte('reservation_date', to);
+  if (barber) query = query.eq('barber', barber);
+  if (status) query = query.eq('status', status);
+  query = query.limit(200);
+
+  const { data } = await query;
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);text-align:center;padding:1rem">Aucun résultat</div>';
+    summary.textContent = '';
+    return;
+  }
+
+  const done = data.filter(r => r.status === 'done').length;
+  const cancelled = data.filter(r => r.status === 'cancelled').length;
+  // Revenue
+  let revenue = 0;
+  data.forEach(r => {
+    (r.service||'').split(' + ').forEach(name => {
+      const svc = SERVICES.find(s => s.name === name.trim());
+      if (svc?.price && svc.price !== 'À confirmer') {
+        const n = parseInt(svc.price.replace(/\s/g,'').replace('DA',''));
+        if (!isNaN(n)) revenue += n;
+      }
+    });
+  });
+
+  summary.innerHTML = `<span style="color:#111;font-weight:600">${data.length} résultats</span> · ✓ ${done} terminés · ✗ ${cancelled} annulés${revenue > 0 ? ` · <strong>${revenue.toLocaleString()} DA</strong>` : ''}`;
+
+  // Group by date
+  const byDate = {};
+  data.forEach(r => {
+    if (!byDate[r.reservation_date]) byDate[r.reservation_date] = {};
+    if (!byDate[r.reservation_date][r.barber]) byDate[r.reservation_date][r.barber] = [];
+    byDate[r.reservation_date][r.barber].push(r);
+  });
+
+  const sortedDates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+  const statusColors = { confirmed:'#3b82f6', calling:'#f59e0b', done:'#34d399', cancelled:'#ff8080' };
+  const statusIcons = { confirmed:'📅', calling:'⚡', done:'✓', cancelled:'✗' };
+
+  // Column headers = barbers
+  const colW = `${Math.floor(100 / (BARBERS.length + 1))}%`;
+  const barberHeaders = BARBERS.map(b => `
+    <th style="padding:.5rem .4rem;text-align:center;border-left:1px solid var(--border);font-size:.7rem;font-weight:600;background:#111111;color:#ffffff;width:${colW}">
+      ${b.photo ? `<img src="${b.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;margin:0 auto .2rem">` : b.emoji}
+      ${b.name}
+    </th>
+  `).join('');
+
+  const tableRows = sortedDates.map(date => {
+    const [y,m,d] = date.split('-');
+    const dateLabel = `${d}/${m}`;
+    const dayName = new Date(date).toLocaleDateString('fr-FR', {weekday:'short'});
+
+    const cells = BARBERS.map(b => {
+      const rdvs = (byDate[date][b.name] || []).sort((a,c) => a.reservation_time > c.reservation_time ? 1 : -1);
+      if (rdvs.length === 0) return `<td style="border-left:1px solid var(--border);padding:.3rem;min-width:80px;background:rgba(0,0,0,0.01)"></td>`;
+      return `
+        <td style="border-left:1px solid var(--border);padding:.3rem;vertical-align:top">
+          ${rdvs.map(r => `
+            <div style="margin-bottom:.25rem;padding:.2rem .3rem;background:rgba(0,0,0,0.03);border-left:2px solid ${statusColors[r.status]||'#ccc'}">
+              <div style="font-size:.65rem;font-weight:600;color:#111">${r.reservation_time?.slice(0,5)} ${r.client_name}</div>
+              <div style="font-size:.58rem;color:rgba(0,0,0,0.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px">${r.service||'—'}</div>
+              <div style="font-size:.55rem;color:${statusColors[r.status]||'#888'}">${statusIcons[r.status]||''} ${r.status === 'done' ? 'Terminé' : r.status === 'cancelled' ? 'Annulé' : r.status === 'calling' ? 'En cours' : 'Confirmé'}</div>
+            </div>
+          `).join('')}
+        </td>
+      `;
+    }).join('');
+
+    // Day total
+    const dayRdvs = Object.values(byDate[date]).flat();
+    const dayDone = dayRdvs.filter(r => r.status === 'done').length;
+    const dayCancelled = dayRdvs.filter(r => r.status === 'cancelled').length;
+
+    return `
+      <tr>
+        <td style="padding:.4rem;background:#f5f5f5;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:top">
+          <div style="font-size:.75rem;font-weight:700;color:#111">${dateLabel}</div>
+          <div style="font-size:.6rem;color:rgba(0,0,0,0.4)">${dayName}</div>
+          <div style="font-size:.58rem;color:#34d399;margin-top:.2rem">✓${dayDone}</div>
+          ${dayCancelled > 0 ? `<div style="font-size:.58rem;color:#ff8080">✗${dayCancelled}</div>` : ''}
+        </td>
+        ${cells}
+      </tr>
+    `;
+  }).join('');
+
+  list.innerHTML = `
+    <div style="overflow-x:auto;border:1px solid var(--border)">
+      <table style="width:100%;border-collapse:collapse;min-width:300px">
+        <thead>
+          <tr>
+            <th style="padding:.5rem .4rem;text-align:left;background:#111111;color:#ffffff;font-size:.7rem;width:50px">Date</th>
+            ${barberHeaders}
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+window.loadHistorique = loadHistorique;
+
+document.getElementById('btn-hist-search').addEventListener('click', loadHistorique);
 
 // ── BARBERS CONFIG ──
 async function loadBarbersConfig() {
@@ -2440,6 +2585,12 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     loadBlacklist();
     loadBarbersConfig();
     loadServicesConfig();
+    // Default history dates: last 30 days
+    const t = getToday();
+    const from = new Date(); from.setDate(from.getDate()-30);
+    const fromStr = (() => { const y=from.getFullYear(),m=String(from.getMonth()+1).padStart(2,'0'),d=String(from.getDate()).padStart(2,'0'); return `${y}-${m}-${d}`; })();
+    document.getElementById('hist-date-from').value = fromStr;
+    document.getElementById('hist-date-to').value = t;
   } else {
     document.getElementById('admin-error').style.display = 'block';
   }
@@ -2592,15 +2743,12 @@ async function renderTVMode() {
   const today = getToday();
   const { data } = await db.from('reservations').select('*')
     .eq('reservation_date', today)
-    .neq('status', 'cancelled')
     .order('reservation_time', {ascending: true});
 
   const all = data || [];
   const nowHHMM = now.toTimeString().slice(0,5);
 
   const grid = document.getElementById('tv-grid');
-
-  // Build schedule grid: time rows x barber columns
   grid.style.display = 'block';
   grid.style.overflowY = 'auto';
 
@@ -2620,28 +2768,54 @@ async function renderTVMode() {
     const cells = BARBERS.map(b => {
       const rdv = all.find(r => r.barber === b.name && r.reservation_time.slice(0,5) === slot);
       const isCalling = rdv?.status === 'calling';
+      const isDone = rdv?.status === 'done';
+      const isCancelled = rdv?.status === 'cancelled';
+
+      let bg = 'transparent';
+      if (isCalling) bg = '#111111';
+      else if (isDone) bg = 'rgba(0,0,0,0.03)';
+      else if (rdv) bg = 'rgba(0,0,0,0.04)';
+      else if (isPast) bg = 'rgba(0,0,0,0.02)';
+
       return `
-        <div style="flex:1;border-left:1px solid var(--border);padding:.3rem .5rem;min-height:44px;background:${isCalling?'#111111':rdv?'rgba(0,0,0,0.04)':'transparent'}">
+        <div style="flex:1;border-left:1px solid var(--border);padding:.3rem .5rem;min-height:44px;background:${bg}">
           ${rdv ? `
-            <div style="font-size:.75rem;font-weight:700;color:${isCalling?'#ffffff':'#111'}">#${rdv.daily_ticket||rdv.id} ${rdv.client_name}</div>
-            <div style="font-size:.6rem;color:${isCalling?'rgba(255,255,255,0.6)':'rgba(0,0,0,0.4)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rdv.service}</div>
-          ` : ''}
+            <div style="font-size:.75rem;font-weight:700;color:${isCalling?'#ffffff':isDone?'rgba(0,0,0,0.3)':'#111'};${isDone||isCancelled?'text-decoration:line-through':''}">#${rdv.daily_ticket||rdv.id} ${rdv.client_name}</div>
+            <div style="font-size:.6rem;color:${isCalling?'rgba(255,255,255,0.6)':'rgba(0,0,0,0.35)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rdv.service}</div>
+            ${isDone ? `<div style="font-size:.55rem;color:#34d399;margin-top:.1rem">✓ Terminé</div>` : ''}
+            ${isCancelled ? `<div style="font-size:.55rem;color:#ff8080;margin-top:.1rem">✗ Annulé</div>` : ''}
+          ` : isPast ? '' : ''}
         </div>
       `;
     }).join('');
 
     return `
-      <div style="display:flex;border-bottom:1px solid var(--border);background:${isCurrent?'rgba(0,0,0,0.04)':isPast?'rgba(0,0,0,0.02)':'transparent'}">
+      <div style="display:flex;border-bottom:1px solid var(--border);background:${isCurrent?'rgba(0,0,0,0.05)':isPast?'rgba(0,0,0,0.015)':'transparent'}">
         <div style="width:52px;flex-shrink:0;padding:.3rem .4rem;display:flex;align-items:center;justify-content:center">
-          <span style="font-size:.75rem;font-weight:${isCurrent?'700':'400'};color:${isCurrent?'#111':'rgba(0,0,0,0.4)'}">${slot}</span>
+          <span style="font-size:.75rem;font-weight:${isCurrent?'700':'400'};color:${isPast?'rgba(0,0,0,0.25)':isCurrent?'#111':'rgba(0,0,0,0.5)'}">${slot}</span>
         </div>
         ${cells}
       </div>
     `;
   }).join('');
 
+  // Stats summary for history
+  const totalDone = all.filter(r => r.status === 'done').length;
+  const totalCalling = all.filter(r => r.status === 'calling').length;
+  const totalConfirmed = all.filter(r => r.status === 'confirmed').length;
+  const totalCancelled = all.filter(r => r.status === 'cancelled').length;
+
   grid.innerHTML = `
-    <div style="position:sticky;top:0;z-index:2;background:#ffffff;border-bottom:2px solid #111">
+    <!-- History bar -->
+    <div style="background:#111111;color:#ffffff;padding:.5rem 1rem;display:flex;gap:1.5rem;font-size:.7rem;align-items:center">
+      <span style="font-weight:600;letter-spacing:.1em">HISTORIQUE</span>
+      <span>✓ Terminés: <strong>${totalDone}</strong></span>
+      <span>⚡ En cours: <strong>${totalCalling}</strong></span>
+      <span>📅 En attente: <strong>${totalConfirmed}</strong></span>
+      ${totalCancelled > 0 ? `<span style="color:#ff8080">✗ Annulés: <strong>${totalCancelled}</strong></span>` : ''}
+      <span style="margin-left:auto;opacity:.5">${all.length} RDV total aujourd'hui</span>
+    </div>
+    <div style="position:sticky;top:36px;z-index:2;background:#ffffff;border-bottom:2px solid #111">
       <div style="display:flex">
         <div style="width:52px;flex-shrink:0"></div>
         ${colHeaders}
