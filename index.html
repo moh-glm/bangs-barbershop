@@ -2613,7 +2613,9 @@ let allAdminData = [];
 async function loadAdminBookings() {
   const container = document.getElementById('admin-bookings');
   container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  const { data } = await db.from('reservations').select('*').order('reservation_date', {ascending: true});
+  const { data } = await db.from('reservations').select('*')
+    .neq('status', 'archived')
+    .order('reservation_date', {ascending: true});
   allAdminData = data || [];
   renderAdminBookings(allAdminData);
 }
