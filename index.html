@@ -811,6 +811,20 @@ body {
       <div id="services-config-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
 
+    <!-- Crédits -->
+    <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#34d399;text-transform:uppercase;margin-top:.5rem">💰 Crédits Coiffeurs</div>
+    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <select class="form-input" id="credit-barber" style="font-size:.8rem">
+          <option value="">Choisir coiffeur...</option>
+        </select>
+        <input class="form-input" id="credit-amount" type="number" placeholder="Montant (DA)" style="font-size:.8rem" min="0">
+      </div>
+      <input class="form-input" id="credit-note" type="text" placeholder="Note (ex: slef 17/03)" style="font-size:.8rem">
+      <button id="btn-add-credit" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#34d399;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">+ Ajouter crédit</button>
+      <div id="credits-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
+    </div>
+
     <!-- Historique -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#f59e0b;text-transform:uppercase;margin-top:.5rem">📋 Historique complet</div>
     <div style="padding:0 1.5rem .5rem;display:flex;flex-direction:column;gap:.7rem">
@@ -1890,7 +1904,7 @@ function populateAdminSelects() {
   const barberOptions = BARBERS.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
   const serviceOptions = SERVICES.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
   
-  ['conge-barber', 'ch-barber', 'hist-barber'].forEach(id => {
+  ['conge-barber', 'ch-barber', 'hist-barber', 'credit-barber'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = `<option value="">Tous les coiffeurs</option>${barberOptions}`;
   });
@@ -1904,6 +1918,73 @@ function populateAdminSelects() {
   // Also update appeler suivant prompt options
   window._barberNames = BARBERS.map(b => b.name);
 }
+
+// ── CRÉDITS ──
+async function loadCredits() {
+  const { data } = await db.from('credits').select('*').order('created_at', { ascending: false });
+  const list = document.getElementById('credits-list');
+  if (!list) return;
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);text-align:center;padding:.5rem">Aucun crédit</div>';
+    return;
+  }
+
+  // Group by barber — calculate totals
+  const totals = {};
+  data.forEach(c => {
+    if (!totals[c.barber]) totals[c.barber] = 0;
+    totals[c.barber] += c.amount;
+  });
+
+  // Summary per barber
+  const summaryHTML = Object.entries(totals).map(([barber, total]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .8rem;background:${total > 0 ? 'rgba(52,211,153,0.08)' : 'rgba(0,0,0,0.03)'};border:1px solid ${total > 0 ? 'rgba(52,211,153,0.2)' : 'rgba(0,0,0,0.1)'}">
+      <span style="font-size:.85rem;font-weight:600">💈 ${barber}</span>
+      <span style="font-size:.9rem;font-weight:700;color:${total > 0 ? '#34d399' : '#111'}">${total > 0 ? '+' : ''}${total.toLocaleString()} DA</span>
+    </div>
+  `).join('');
+
+  // Individual entries
+  const entriesHTML = data.map(c => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .8rem;background:#ffffff;border:1px solid rgba(0,0,0,0.08)">
+      <div>
+        <div style="font-size:.78rem;font-weight:600">${c.barber} <span style="color:#34d399;font-weight:700">+${c.amount.toLocaleString()} DA</span></div>
+        ${c.note ? `<div style="font-size:.65rem;color:rgba(0,0,0,0.4)">${c.note}</div>` : ''}
+        <div style="font-size:.6rem;color:rgba(0,0,0,0.3)">${new Date(c.created_at).toLocaleDateString('fr-FR')}</div>
+      </div>
+      <button onclick="removeCredit(${c.id}, ${c.amount}, '${c.barber}')" style="background:none;border:none;color:#ff8080;cursor:pointer;font-size:.85rem">✕</button>
+    </div>
+  `).join('');
+
+  list.innerHTML = `
+    <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Total par coiffeur</div>
+    ${summaryHTML}
+    <div style="font-size:.6rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em;margin:.5rem 0 .3rem">Détail</div>
+    ${entriesHTML}
+  `;
+}
+
+async function removeCredit(id, amount, barber) {
+  if (!confirm(`Rembourser ${amount.toLocaleString()} DA de ${barber}?`)) return;
+  await db.from('credits').delete().eq('id', id);
+  showToast(`✓ Crédit de ${barber} remboursé`, 'success');
+  loadCredits();
+}
+window.removeCredit = removeCredit;
+
+document.getElementById('btn-add-credit').addEventListener('click', async () => {
+  const barber = document.getElementById('credit-barber').value;
+  const amount = parseInt(document.getElementById('credit-amount').value);
+  const note = document.getElementById('credit-note').value.trim();
+  if (!barber) { showToast('Choisissez un coiffeur ⚠️', 'error'); return; }
+  if (!amount || amount <= 0) { showToast('Entrez un montant ⚠️', 'error'); return; }
+  const { error } = await db.from('credits').insert({ barber, amount, note: note || null });
+  if (error) { showToast('Erreur!', 'error'); return; }
+  showToast(`💰 Crédit de ${amount.toLocaleString()} DA ajouté pour ${barber}`, 'success');
+  document.getElementById('credit-amount').value = '';
+  document.getElementById('credit-note').value = '';
+  loadCredits();
+});
 
 // ── HISTORIQUE ──
 async function loadHistorique() {
@@ -2570,7 +2651,12 @@ document.getElementById('btn-add-ch').addEventListener('click', async () => {
 });
 
 // ── ADMIN ──
-const ADMIN_PASS = 'Bangs2024!';
+let ADMIN_PASS = null; // Loaded from DB
+
+async function loadAdminPass() {
+  const { data } = await db.from('admin_config').select('value').eq('key', 'admin_password').single();
+  if (data) ADMIN_PASS = data.value;
+}
 let adminAuth = false;
 
 document.getElementById('btn-admin-login').addEventListener('click', () => {
@@ -2587,6 +2673,7 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     loadBlacklist();
     loadBarbersConfig();
     loadServicesConfig();
+    loadCredits();
     // Default history dates: last 30 days
     const t = getToday();
     const from = new Date(); from.setDate(from.getDate()-30);
@@ -3260,8 +3347,8 @@ window.appellerSuivantPour = appellerSuivantPour;
 
 // ── SPLASH SCREEN ──
 window.addEventListener('load', async () => {
-  // Load barbers & services + live queue in parallel immediately
-  await refreshDynamicData();
+  // Load barbers & services + live queue + admin pass in parallel
+  await Promise.all([refreshDynamicData(), loadAdminPass()]);
   loadLiveQueue(); // Load queue right away — no wait
   // Re-render if booking page active
   renderServices();
