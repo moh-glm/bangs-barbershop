@@ -685,9 +685,6 @@ body {
       <button id="btn-appeler-suivant" style="flex:1;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:#444444;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">
         🔔 Appeler suivant
       </button>
-      <button id="btn-delete-today" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.9rem 1rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;white-space:nowrap">
-        🗂 Archiver tout
-      </button>
     </div>
 
     <!-- Walk-in Modal -->
@@ -725,26 +722,6 @@ body {
       </div>
     </div>
     
-    <!-- Filtres -->
-    <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
-      <input class="form-input" id="filter-name" type="text" placeholder="🔍 Chercher par nom | بحث بالاسم" style="font-size:.8rem">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-        <input class="form-input" id="filter-date" type="date" style="font-size:.8rem">
-        <select class="form-input" id="filter-status" style="font-size:.8rem;cursor:pointer">
-          <option value="">Tous | الكل</option>
-          <option value="confirmed">Confirmé | مؤكد</option>
-          <option value="calling">🔔 Appelé</option>
-          <option value="cancelled">Annulé | ملغى</option>
-        </select>
-      </div>
-      <button id="btn-filter-reset" style="background:none;border:1px solid var(--border);color:rgba(0,0,0,0.4);padding:.5rem;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.1em">✕ Réinitialiser | إعادة تعيين</button>
-    </div>
-
-    <!-- Summary -->
-    <div id="filter-summary" style="display:none;margin:0 1.5rem .5rem;padding:.7rem 1rem;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.15);font-size:.75rem;color:rgba(255,255,255,0.6)"></div>
-
-    <div id="admin-bookings" style="padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem"></div>
-
     <!-- Admin Products -->
     <div style="padding:.8rem 1.5rem;font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-top:1rem">🛍 Produits | المنتجات</div>
     <div style="padding:0 1.5rem 1rem;display:flex;flex-direction:column;gap:.7rem">
@@ -832,6 +809,7 @@ body {
         <input class="form-input" id="hist-date-from" type="date" style="font-size:.8rem">
         <input class="form-input" id="hist-date-to" type="date" style="font-size:.8rem">
       </div>
+      <input class="form-input" id="hist-search" type="text" placeholder="Nom ou numéro téléphone..." style="font-size:.8rem">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
         <select class="form-input" id="hist-barber" style="font-size:.8rem">
           <option value="">Tous les coiffeurs</option>
@@ -839,10 +817,8 @@ body {
         <select class="form-input" id="hist-status" style="font-size:.8rem">
           <option value="">Tous les statuts</option>
           <option value="confirmed">Confirmé</option>
-          <option value="calling">En cours</option>
           <option value="done">Terminé</option>
           <option value="cancelled">Annulé</option>
-          <option value="archived">Archivé</option>
         </select>
       </div>
       <button id="btn-hist-search" style="background:#111111;border:none;color:#ffffff;padding:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600">🔍 Rechercher</button>
@@ -1085,7 +1061,7 @@ function showPage(p) {
   if (p === 'reviews') loadReviews();
   if (p === 'boutique') loadProducts();
   if (p === 'booking' && state.step === 1) { renderServices(); loadBlockedDates(); }
-  if (p === 'admin' && adminAuth) { loadAdminBookings(); loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); }
+  if (p === 'admin' && adminAuth) { loadConges(); loadCustomHours(); loadAdminProducts(); loadAdminOrders(); loadBlacklist(); }
   if (p === 'home') loadProducts();
 }
 
@@ -1327,7 +1303,9 @@ async function selectDate(dateStr) {
     db.from('reservations').select('reservation_time, service')
       .eq('reservation_date', dateStr)
       .eq('barber', state.selectedBarber?.name || '')
-      .neq('status', 'cancelled').neq('status', 'archived'),
+      .neq('status', 'cancelled')
+      .neq('status', 'done')
+      .in('status', ['confirmed', 'calling']),
     db.from('custom_hours').select('*').eq('date', dateStr).or(`barber.is.null,barber.eq.${state.selectedBarber?.name || ''}`)
   ]);
 
@@ -1515,8 +1493,7 @@ async function confirmBooking() {
     .select('reservation_time, service')
     .eq('reservation_date', state.selectedDate)
     .eq('barber', state.selectedBarber?.name)
-    .neq('status', 'cancelled').neq('status', 'archived')
-    .neq('status', 'done');
+    .in('status', ['confirmed', 'calling']);
 
   let conflict = false;
   (existingSlots || []).forEach(r => {
@@ -1555,13 +1532,13 @@ async function confirmBooking() {
     return;
   }
 
-  // Check client already booked today with same barber
+  // Check client already booked same date + barber (active only)
   const { data: alreadyBooked } = await db.from('reservations')
     .select('id')
     .eq('reservation_date', state.selectedDate)
     .eq('barber', state.selectedBarber?.name)
     .eq('client_phone', clientPhone)
-    .neq('status', 'cancelled').neq('status', 'archived');
+    .in('status', ['confirmed', 'calling']);
 
   if(alreadyBooked && alreadyBooked.length > 0) {
     showToast('Vous avez déjà une réservation avec ce coiffeur aujourd\'hui! ⚠️', 'error');
@@ -1575,7 +1552,7 @@ async function confirmBooking() {
     .select('*', { count: 'exact', head: true })
     .eq('reservation_date', state.selectedDate)
     .eq('barber', state.selectedBarber?.name)
-    .neq('status', 'cancelled').neq('status', 'archived');
+    .in('status', ['confirmed', 'calling']);
   const dailyTicket = (count || 0) + 1;
 
   const { data: insertData, error: insertError } = await db.from('reservations').insert({
@@ -1755,19 +1732,6 @@ document.getElementById('btn-submit-review').addEventListener('click', async () 
 
 document.getElementById('nav-reviews').addEventListener('click', () => showPage('reviews'));
 window.setRating = setRating;
-
-document.getElementById('btn-delete-today').addEventListener('click', async () => {
-  const today = getToday();
-  if(!confirm(`Archiver toutes les réservations de aujourd'hui (${today}) ?`)) return;
-  const { error } = await db.from('reservations').update({ status: 'archived' }).eq('reservation_date', today);
-  if(error) {
-    showToast('Erreur! ' + error.message, 'error');
-  } else {
-    showToast('Réservations archivées ✓', 'success');
-    loadAdminBookings();
-    loadLiveQueue();
-  }
-});
 
 // ── BOUTIQUE ──
 let currentProduct = null;
@@ -1992,6 +1956,7 @@ async function loadHistorique() {
   const to = document.getElementById('hist-date-to').value;
   const barber = document.getElementById('hist-barber').value;
   const status = document.getElementById('hist-status').value;
+  const search = document.getElementById('hist-search').value.trim().toLowerCase();
   const list = document.getElementById('hist-list');
   const summary = document.getElementById('hist-summary');
 
@@ -2002,10 +1967,20 @@ async function loadHistorique() {
   if (to) query = query.lte('reservation_date', to);
   if (barber) query = query.eq('barber', barber);
   if (status) query = query.eq('status', status);
-  query = query.limit(200);
+  query = query.limit(500);
 
-  const { data } = await query;
-  if (!data || data.length === 0) {
+  let { data } = await query;
+  if (!data) data = [];
+
+  // Client-side filter by name or phone
+  if (search) {
+    data = data.filter(r => 
+      (r.client_name || '').toLowerCase().includes(search) ||
+      (r.client_phone || '').includes(search)
+    );
+  }
+
+  if (data.length === 0) {
     list.innerHTML = '<div style="font-size:.75rem;color:rgba(0,0,0,0.3);text-align:center;padding:1rem">Aucun résultat</div>';
     summary.textContent = '';
     return;
@@ -2027,6 +2002,20 @@ async function loadHistorique() {
 
   summary.innerHTML = `<span style="color:#111;font-weight:600">${data.length} résultats</span> · ✓ ${done} terminés · ✗ ${cancelled} annulés${revenue > 0 ? ` · <strong>${revenue.toLocaleString()} DA</strong>` : ''}`;
 
+  const nowStr = getToday();
+  const nowTime = new Date().toTimeString().slice(0,5);
+  const statusColors = { confirmed:'#3b82f6', done:'#34d399', cancelled:'#ff8080', calling:'#f59e0b', past:'#aaa' };
+  const statusLabels = { confirmed:'Confirmé', calling:'En cours', done:'✓ Terminé', cancelled:'✗ Annulé', past:'Passé' };
+
+  function getDS(r) {
+    if (r.status === 'done') return 'done';
+    if (r.status === 'cancelled') return 'cancelled';
+    if (r.status === 'calling') return 'calling';
+    if (r.reservation_date < nowStr) return 'past';
+    if (r.reservation_date === nowStr && r.reservation_time?.slice(0,5) < nowTime) return 'past';
+    return 'confirmed';
+  }
+
   // Group by date
   const byDate = {};
   data.forEach(r => {
@@ -2034,75 +2023,81 @@ async function loadHistorique() {
     if (!byDate[r.reservation_date][r.barber]) byDate[r.reservation_date][r.barber] = [];
     byDate[r.reservation_date][r.barber].push(r);
   });
-
   const sortedDates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
-  const statusColors = { confirmed:'#3b82f6', calling:'#f59e0b', done:'#34d399', cancelled:'#ff8080' };
-  const statusIcons = { confirmed:'📅', calling:'⚡', done:'✓', cancelled:'✗' };
-
-  // Column headers = barbers
   const colW = `${Math.floor(100 / (BARBERS.length + 1))}%`;
+
   const barberHeaders = BARBERS.map(b => `
-    <th style="padding:.5rem .4rem;text-align:center;border-left:1px solid var(--border);font-size:.7rem;font-weight:600;background:#111111;color:#ffffff;width:${colW}">
-      ${b.photo ? `<img src="${b.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;margin:0 auto .2rem">` : b.emoji}
+    <th style="padding:.5rem .4rem;text-align:center;border-left:1px solid #ddd;font-size:.7rem;font-weight:600;background:#111;color:#fff;width:${colW};min-width:80px">
+      ${b.photo ? `<img src="${b.photo}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;display:block;margin:0 auto .2rem">` : b.emoji}
       ${b.name}
     </th>
   `).join('');
 
   const tableRows = sortedDates.map(date => {
     const [y,m,d] = date.split('-');
-    const dateLabel = `${d}/${m}`;
     const dayName = new Date(date).toLocaleDateString('fr-FR', {weekday:'short'});
+    const dayAll = Object.values(byDate[date]).flat();
+    const dayDone = dayAll.filter(r => r.status === 'done').length;
+    const dayCancelled = dayAll.filter(r => r.status === 'cancelled').length;
 
     const cells = BARBERS.map(b => {
       const rdvs = (byDate[date][b.name] || []).sort((a,c) => a.reservation_time > c.reservation_time ? 1 : -1);
-      if (rdvs.length === 0) return `<td style="border-left:1px solid var(--border);padding:.3rem;min-width:80px;background:rgba(0,0,0,0.01)"></td>`;
-      return `
-        <td style="border-left:1px solid var(--border);padding:.3rem;vertical-align:top">
-          ${rdvs.map(r => `
-            <div style="margin-bottom:.25rem;padding:.2rem .3rem;background:rgba(0,0,0,0.03);border-left:2px solid ${statusColors[r.status]||'#ccc'}">
-              <div style="font-size:.65rem;font-weight:600;color:#111">${r.reservation_time?.slice(0,5)} ${r.client_name}</div>
-              <div style="font-size:.58rem;color:rgba(0,0,0,0.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px">${r.service||'—'}</div>
-              <div style="font-size:.55rem;color:${statusColors[r.status]||'#888'}">${statusIcons[r.status]||''} ${r.status === 'done' ? 'Terminé' : r.status === 'cancelled' ? 'Annulé' : r.status === 'calling' ? 'En cours' : 'Confirmé'}</div>
+      if (!rdvs.length) return `<td style="border-left:1px solid #eee;padding:.3rem;background:rgba(0,0,0,0.01)"></td>`;
+      return `<td style="border-left:1px solid #eee;padding:.3rem;vertical-align:top">
+        ${rdvs.map(r => `
+          <div style="margin-bottom:.3rem;padding:.25rem .4rem;border-left:2px solid ${statusColors[getDS(r)]||'#ccc'};background:rgba(0,0,0,0.02);display:flex;align-items:flex-start;gap:.4rem">
+            ${r.status !== 'cancelled' ? `<input type="checkbox" data-id="${r.id}" style="margin-top:.15rem;flex-shrink:0;cursor:pointer">` : '<span style="width:13px;display:inline-block"></span>'}
+            <div style="min-width:0">
+              <div style="font-size:.68rem;font-weight:700;color:#111">${r.reservation_time?.slice(0,5)} ${r.client_name}</div>
+              <div style="font-size:.6rem;color:rgba(0,0,0,0.45)">${r.service||'—'}</div>
+              <div style="font-size:.6rem;color:rgba(0,0,0,0.35)">📞 ${r.client_phone||'—'}</div>
+              <div style="font-size:.58rem;color:${statusColors[getDS(r)]||'#888'}">${statusLabels[getDS(r)]||''}</div>
             </div>
-          `).join('')}
-        </td>
-      `;
+          </div>
+        `).join('')}
+      </td>`;
     }).join('');
 
-    // Day total
-    const dayRdvs = Object.values(byDate[date]).flat();
-    const dayDone = dayRdvs.filter(r => r.status === 'done').length;
-    const dayCancelled = dayRdvs.filter(r => r.status === 'cancelled').length;
-
-    return `
-      <tr>
-        <td style="padding:.4rem;background:#f5f5f5;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:top">
-          <div style="font-size:.75rem;font-weight:700;color:#111">${dateLabel}</div>
-          <div style="font-size:.6rem;color:rgba(0,0,0,0.4)">${dayName}</div>
-          <div style="font-size:.58rem;color:#34d399;margin-top:.2rem">✓${dayDone}</div>
-          ${dayCancelled > 0 ? `<div style="font-size:.58rem;color:#ff8080">✗${dayCancelled}</div>` : ''}
-        </td>
-        ${cells}
-      </tr>
-    `;
+    return `<tr>
+      <td style="padding:.4rem .5rem;background:#f5f5f5;border-bottom:1px solid #ddd;white-space:nowrap;vertical-align:top;position:sticky;left:0;z-index:1">
+        <div style="font-size:.78rem;font-weight:700;color:#111">${d}/${m}</div>
+        <div style="font-size:.6rem;color:rgba(0,0,0,0.4)">${dayName}</div>
+        <div style="font-size:.58rem;color:#34d399">✓${dayDone}</div>
+        ${dayCancelled > 0 ? `<div style="font-size:.58rem;color:#ff8080">✗${dayCancelled}</div>` : ''}
+      </td>
+      ${cells}
+    </tr>`;
   }).join('');
 
   list.innerHTML = `
-    <div style="overflow-x:auto;border:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <span style="font-size:.7rem;color:rgba(0,0,0,0.4)">Cochez pour sélectionner</span>
+      <button onclick="cancelSelectedHist()" style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#ff8080;padding:.4rem .8rem;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif">✗ Annuler sélection</button>
+    </div>
+    <div style="overflow-x:auto;border:1px solid #ddd;max-height:60vh;overflow-y:auto">
       <table style="width:100%;border-collapse:collapse;min-width:300px">
-        <thead>
+        <thead style="position:sticky;top:0;z-index:2">
           <tr>
-            <th style="padding:.5rem .4rem;text-align:left;background:#111111;color:#ffffff;font-size:.7rem;width:50px">Date</th>
+            <th style="padding:.5rem .4rem;text-align:left;background:#111;color:#fff;font-size:.7rem;width:50px;position:sticky;left:0;z-index:3">Date</th>
             ${barberHeaders}
           </tr>
         </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
+        <tbody>${tableRows}</tbody>
       </table>
     </div>
   `;
 }
+async function cancelSelectedHist() {
+  const checkboxes = document.querySelectorAll('#hist-list input[type="checkbox"]:checked');
+  if (checkboxes.length === 0) { showToast('Aucune sélection ⚠️', 'error'); return; }
+  if (!confirm(`Annuler ${checkboxes.length} réservation(s)?`)) return;
+  const ids = [...checkboxes].map(cb => cb.dataset.id);
+  await Promise.all(ids.map(id => db.from('reservations').update({status:'cancelled'}).eq('id', id)));
+  showToast(`✗ ${ids.length} annulée(s)`, 'success');
+  loadHistorique();
+}
+window.cancelSelectedHist = cancelSelectedHist;
+
 window.loadHistorique = loadHistorique;
 
 document.getElementById('btn-hist-search').addEventListener('click', loadHistorique);
@@ -2349,8 +2344,7 @@ document.getElementById('btn-walkin-confirm').addEventListener('click', async ()
   } else {
     showToast('Walk-in enregistré! ✓', 'success');
     closeWalkin();
-    loadAdminBookings();
-  }
+      }
   btn.disabled = false;
   btn.textContent = '✓ Enregistrer';
 });
@@ -2651,11 +2645,13 @@ document.getElementById('btn-add-ch').addEventListener('click', async () => {
 });
 
 // ── ADMIN ──
-let ADMIN_PASS = null; // Loaded from DB
+let ADMIN_PASS = 'Bangs2024!'; // Default fallback
 
 async function loadAdminPass() {
-  const { data } = await db.from('admin_config').select('value').eq('key', 'admin_password').single();
-  if (data) ADMIN_PASS = data.value;
+  try {
+    const { data } = await db.from('admin_config').select('value').eq('key', 'admin_password').single();
+    if (data?.value) ADMIN_PASS = data.value;
+  } catch(e) { /* use default */ }
 }
 let adminAuth = false;
 
@@ -2665,7 +2661,6 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     adminAuth = true;
     document.getElementById('admin-login').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'block';
-    loadAdminBookings();
     loadConges();
     loadCustomHours();
     loadAdminProducts();
@@ -2674,6 +2669,13 @@ document.getElementById('btn-admin-login').addEventListener('click', () => {
     loadBarbersConfig();
     loadServicesConfig();
     loadCredits();
+    // Update stats
+    db.from('reservations').select('*', {count:'exact', head:true}).eq('reservation_date', getToday()).neq('status','cancelled').then(({count}) => {
+      document.getElementById('stat-today').textContent = count || 0;
+    });
+    db.from('reservations').select('*', {count:'exact', head:true}).neq('status','cancelled').then(({count}) => {
+      document.getElementById('stat-total').textContent = count || 0;
+    });
     // Default history dates: last 30 days
     const t = getToday();
     const from = new Date(); from.setDate(from.getDate()-30);
@@ -2695,109 +2697,14 @@ document.getElementById('btn-admin-logout').addEventListener('click', () => {
 
 document.getElementById('nav-admin').addEventListener('click', () => showPage('admin'));
 
-let allAdminData = [];
 
-async function loadAdminBookings() {
-  const container = document.getElementById('admin-bookings');
-  container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  const { data } = await db.from('reservations').select('*')
-    .neq('status', 'archived')
-    .order('reservation_date', {ascending: true});
-  allAdminData = data || [];
-  renderAdminBookings(allAdminData);
-}
 
-function renderAdminBookings(data) {
-  const container = document.getElementById('admin-bookings');
-
-  // Results summary
-  const confirmed = data.filter(r => r.status !== 'cancelled').length;
-  const cancelled = data.filter(r => r.status === 'cancelled').length;
-  const summaryEl = document.getElementById('filter-summary');
-  if(data.length > 0) {
-    summaryEl.style.display = 'block';
-    summaryEl.innerHTML = `
-      <span style="color:#111111;font-weight:600">${data.length} résultat${data.length > 1 ? 's' : ''}</span>
-      &nbsp;·&nbsp;
-      <span style="color:#cccccc">✓ ${confirmed} confirmé${confirmed > 1 ? 'es' : 'e'}</span>
-      ${cancelled > 0 ? `&nbsp;·&nbsp;<span style="color:#ff8080">✗ ${cancelled} annulé${cancelled > 1 ? 'es' : 'e'}</span>` : ''}
-    `;
-  } else {
-    summaryEl.style.display = 'none';
-  }
-
-  if(!data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>Aucun résultat | لا توجد نتائج</p></div>';
-    return;
-  }
-
-  const today = getToday();
-  const todayCount = allAdminData.filter(r => r.reservation_date === today).length;
-  document.getElementById('stat-today').textContent = todayCount;
-  document.getElementById('stat-total').textContent = allAdminData.length;
-
-  container.innerHTML = data.map(r => `
-    <div class="admin-card" id="acard-${r.id}">
-      <div class="admin-card-header">
-        <div>
-          <div class="admin-service">${r.service} ${r.barber ? `<span style="color:#111111;font-size:.75rem">· ${r.barber}</span>` : ''} <span style="background:#ffffff;color:#000;font-size:.6rem;font-weight:700;padding:.1rem .4rem;margin-left:.3rem">#${r.daily_ticket || r.id}</span></div>
-          <div class="admin-datetime">📅 ${formatDate(r.reservation_date)} · ⏰ ${r.reservation_time}</div>
-          <div style="font-size:.65rem;color:rgba(0,0,0,0.3);margin-top:.2rem">🕐 Enregistré à ${r.created_at ? new Date(r.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit', timeZone:'Africa/Algiers'}) : '—'}</div>
-        </div>
-        <span class="bc-status ${r.status === 'cancelled' ? 'cancelled' : ''}">${r.status === 'cancelled' ? 'Annulé | ملغى' : 'Confirmé | مؤكد'}</span>
-      </div>
-      <div class="admin-client">
-        <span>👤 ${r.client_name}</span>
-        <a href="tel:${r.client_phone}" style="color:#111111;text-decoration:none">📞 ${r.client_phone}</a>
-      </div>
-      <div class="admin-actions">
-        ${r.status !== 'cancelled' ? `<button class="btn-cancel" onclick="cancelBooking(${r.id})">✗ Annuler | إلغاء</button>` : ''}
-        <button class="btn-delete" onclick="deleteBooking(${r.id})">🗑 Supprimer | حذف</button>
-        <button class="btn-cancel" onclick="blacklistPhone('${r.client_phone}', '${r.client_name}')" style="background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.2);color:#555">🚫 Blacklist</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function applyFilters() {
-  const name = document.getElementById('filter-name').value.trim().toLowerCase();
-  const date = document.getElementById('filter-date').value;
-  const status = document.getElementById('filter-status').value;
-
-  let filtered = allAdminData.filter(r => {
-    const matchName = !name || r.client_name.toLowerCase().includes(name);
-    const matchDate = !date || r.reservation_date === date;
-    const matchStatus = !status || r.status === status;
-    return matchName && matchDate && matchStatus;
-  });
-
-  renderAdminBookings(filtered);
-}
 
 async function cancelBooking(id) {
   await db.from('reservations').update({status: 'cancelled'}).eq('id', id);
   showToast('Réservation annulée | تم الإلغاء', 'error');
-  loadAdminBookings();
-}
+  }
 
-async function deleteBooking(id) {
-  if(!confirm('Archiver cette réservation?')) return;
-  await db.from('reservations').update({ status: 'archived' }).eq('id', id);
-  showToast('Réservation archivée ✓', 'success');
-  loadAdminBookings();
-}
-
-document.getElementById('btn-admin-refresh').addEventListener('click', loadAdminBookings);
-
-document.getElementById('filter-name').addEventListener('input', applyFilters);
-document.getElementById('filter-date').addEventListener('change', applyFilters);
-document.getElementById('filter-status').addEventListener('change', applyFilters);
-document.getElementById('btn-filter-reset').addEventListener('click', () => {
-  document.getElementById('filter-name').value = '';
-  document.getElementById('filter-date').value = '';
-  document.getElementById('filter-status').value = '';
-  renderAdminBookings(allAdminData);
-});
 
 // ── TV MODE ──
 let tvInterval = null;
@@ -2858,24 +2765,32 @@ async function renderTVMode() {
     const isCurrent = slot === ALL_SLOTS.find(s => s >= nowHHMM);
 
     const cells = BARBERS.map(b => {
-      const rdv = all.find(r => r.barber === b.name && r.reservation_time.slice(0,5) === slot);
+      // Priority: calling > confirmed > done > cancelled/archived
+      const rdvs = all.filter(r => r.barber === b.name && r.reservation_time.slice(0,5) === slot);
+      const rdv = rdvs.find(r => r.status === 'calling') 
+        || rdvs.find(r => r.status === 'confirmed')
+        || rdvs.find(r => r.status === 'done')
+        || rdvs[0];
       const isCalling = rdv?.status === 'calling';
       const isDone = rdv?.status === 'done';
       const isCancelled = rdv?.status === 'cancelled';
+      const isArchived = rdv?.status === 'archived';
+      const showRdv = rdv;
 
       let bg = 'transparent';
       if (isCalling) bg = '#111111';
-      else if (isDone) bg = 'rgba(0,0,0,0.03)';
+      else if (isDone || isArchived) bg = 'rgba(0,0,0,0.03)';
+      else if (isCancelled) bg = 'transparent';
       else if (rdv) bg = 'rgba(0,0,0,0.04)';
       else if (isPast) bg = 'rgba(0,0,0,0.02)';
 
       return `
         <div style="flex:1;border-left:1px solid var(--border);padding:.3rem .5rem;min-height:44px;background:${bg}">
-          ${rdv ? `
-            <div style="font-size:.75rem;font-weight:700;color:${isCalling?'#ffffff':isDone?'rgba(0,0,0,0.3)':'#111'};${isDone||isCancelled?'text-decoration:line-through':''}">#${rdv.daily_ticket||rdv.id} ${rdv.client_name}</div>
+          ${showRdv && !isCancelled ? `
+            <div style="font-size:.75rem;font-weight:700;color:${isCalling?'#ffffff':(isDone||isArchived)?'rgba(0,0,0,0.3)':'#111'};${(isDone||isArchived)?'text-decoration:line-through':''}">#${rdv.daily_ticket||rdv.id} ${rdv.client_name}</div>
             <div style="font-size:.6rem;color:${isCalling?'rgba(255,255,255,0.6)':'rgba(0,0,0,0.35)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rdv.service}</div>
             ${isDone ? `<div style="font-size:.55rem;color:#34d399;margin-top:.1rem">✓ Terminé</div>` : ''}
-            ${isCancelled ? `<div style="font-size:.55rem;color:#ff8080;margin-top:.1rem">✗ Annulé</div>` : ''}
+            ${isArchived ? `<div style="font-size:.55rem;color:#aaa;margin-top:.1rem">🗂 Vidé</div>` : ''}
           ` : isPast ? '' : ''}
         </div>
       `;
@@ -2933,6 +2848,7 @@ window.selectDate = selectDate;
 window.selectSlot = selectSlot;
 window.selectBarber = selectBarber;
 window.cancelBooking = cancelBooking;
+async function deleteBooking(id) { /* removed */ }
 window.deleteBooking = deleteBooking;
 window.showPage = showPage;
 window.goStep = goStep;
@@ -2954,7 +2870,7 @@ function closeStatsMode() {
 window.closeStatsMode = closeStatsMode;
 
 async function loadStats() {
-  const { data } = await db.from('reservations').select('*').neq('status', 'cancelled').neq('status', 'archived');
+  const { data } = await db.from('reservations').select('*').neq('status', 'cancelled');
   if (!data) return;
 
   const today = new Date();
@@ -3333,22 +3249,20 @@ async function appellerSuivantPour(barber) {
 
   if (!data || data.length === 0) {
     showToast(`Aucun client en attente pour ${barber}`, 'error');
-    loadAdminBookings();
-    return;
+        return;
   }
 
   const next = data[0];
   await db.from('reservations').update({ status: 'calling' }).eq('id', next.id);
   showToast(`🔔 ${next.client_name} appelé! Ticket #${next.daily_ticket || next.id}`, 'success');
-  loadAdminBookings();
-  loadLiveQueue();
+    loadLiveQueue();
 }
 window.appellerSuivantPour = appellerSuivantPour;
 
 // ── SPLASH SCREEN ──
 window.addEventListener('load', async () => {
   // Load barbers & services + live queue + admin pass in parallel
-  await Promise.all([refreshDynamicData(), loadAdminPass()]);
+  await Promise.all([refreshDynamicData(), loadAdminPass()]).catch(()=>{});
   loadLiveQueue(); // Load queue right away — no wait
   // Re-render if booking page active
   renderServices();
