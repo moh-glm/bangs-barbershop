@@ -570,7 +570,7 @@ body {
       </div>
       <div class="hours-row">
         <span class="hours-day">Vendredi</span>
-        <span class="hours-time">15:00 – 22:30</span>
+        <span class="hours-time">14:15 – 22:30</span>
       </div>
     </div>
     <p style="font-size:.6rem;letter-spacing:.3em;color:#111111;text-transform:uppercase;margin-bottom:.8rem">Contact</p>
@@ -1346,6 +1346,8 @@ function renderSlots() {
   const grid = document.getElementById('slots-grid');
   const d = new Date(state.selectedDate);
   const isFri = d.getDay() === 5;
+  const fridayStartMins = 14 * 60 + 15;
+  const regularStartMins = 10 * 60;
   const now = new Date();
   const isToday = state.selectedDate === getToday();
   const currentHHMM = now.toTimeString().slice(0,5);
@@ -1369,17 +1371,18 @@ function renderSlots() {
     }
   });
 
-  const allSlots = [...new Set([...ALL_SLOTS, ...extraSlots])].sort();
+  const baseSlots = isFri ? [...ALL_SLOTS, '14:15'] : ALL_SLOTS;
+  const allSlots = [...new Set([...baseSlots, ...extraSlots])].sort();
 
   const validSlots = allSlots.filter(s => {
     const h = parseInt(s.split(':')[0]);
+    const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
     const isNight = h >= 23 || h < 4; // after 22:00
-    if (isFri && h < 15 && !extraSlots.includes(s)) return false;
-    if (!isFri && h < 10 && !extraSlots.includes(s)) return false;
+    if (isFri && slotMins < fridayStartMins && !extraSlots.includes(s)) return false;
+    if (!isFri && slotMins < regularStartMins && !extraSlots.includes(s)) return false;
     if (isNight && !extraSlots.includes(s)) return false;
     if (isToday && s <= currentHHMM) return false;
     const isBlocked = blocked.some(b => {
-      const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
       const startMins = parseInt(b.time_start.slice(0,2)) * 60 + parseInt(b.time_start.slice(3,5));
       const endMins = parseInt(b.time_end.slice(0,2)) * 60 + parseInt(b.time_end.slice(3,5));
       return slotMins >= startMins && slotMins < endMins;
@@ -2307,12 +2310,18 @@ function openWalkin() {
   const todayStr = getToday();
   const isFri = now.getDay() === 5;
   const timeSelect = document.getElementById('wi-time');
-  timeSelect.innerHTML = ALL_SLOTS
-    .filter(s => { const h = parseInt(s); return isFri ? h >= 15 : h >= 10; })
+  const fridayStartMins = 14 * 60 + 15;
+  const regularStartMins = 10 * 60;
+  const walkinSlots = isFri ? [...ALL_SLOTS, '14:15'] : ALL_SLOTS;
+  const filteredSlots = [...new Set(walkinSlots)].sort().filter(s => {
+    const slotMins = parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(3,5));
+    return isFri ? slotMins >= fridayStartMins : slotMins >= regularStartMins;
+  });
+  timeSelect.innerHTML = filteredSlots
     .map(s => `<option>${s}</option>`).join('');
   // Set closest time
   const hhmm = now.toTimeString().slice(0,5);
-  const closest = ALL_SLOTS.find(s => s >= hhmm) || ALL_SLOTS[ALL_SLOTS.length-1];
+  const closest = filteredSlots.find(s => s >= hhmm) || filteredSlots[filteredSlots.length-1] || '';
   timeSelect.value = closest;
   document.getElementById('walkin-modal').style.display = 'block';
 }
