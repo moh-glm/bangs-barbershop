@@ -1097,6 +1097,32 @@ function getTotalDuration() {
   return state.selectedServices.reduce((sum, s) => sum + (s.durationMins || 45), 0);
 }
 
+function getSummaryPriceText() {
+  let total = 0;
+  let hasDefinedPrice = false;
+  let hasUndefinedPrice = false;
+
+  state.selectedServices.forEach(s => {
+    const rawPrice = (s?.price || '').toString().trim();
+    if (!rawPrice || rawPrice.toLowerCase() === 'à confirmer') {
+      hasUndefinedPrice = true;
+      return;
+    }
+    const numeric = parseInt(rawPrice.replace(/\D/g, ''), 10);
+    if (!isNaN(numeric) && numeric > 0) {
+      total += numeric;
+      hasDefinedPrice = true;
+    } else {
+      hasUndefinedPrice = true;
+    }
+  });
+
+  if (!hasDefinedPrice && hasUndefinedPrice) return 'À confirmer';
+  if (hasDefinedPrice && hasUndefinedPrice) return `${total.toLocaleString()} DA + À confirmer`;
+  if (hasDefinedPrice) return `${total.toLocaleString()} DA`;
+  return '—';
+}
+
 function renderServicesBanner() {
   const banner = document.getElementById('services-banner');
   if (!banner) return;
@@ -1452,7 +1478,7 @@ function renderSummary() {
   document.getElementById('sum-time').textContent = state.selectedTime || '—';
   document.getElementById('sum-name').textContent = document.getElementById('inp-name').value;
   document.getElementById('sum-phone').textContent = document.getElementById('inp-phone').value;
-  document.getElementById('sum-price').textContent = state.selectedService?.price || '—';
+  document.getElementById('sum-price').textContent = getSummaryPriceText();
 }
 
 function formatDate(str) {
@@ -1580,6 +1606,7 @@ async function confirmBooking() {
     btn.textContent = '✓ Confirmer le rendez-vous';
   } else {
     // Show success details
+    const totalPriceText = getSummaryPriceText();
     document.getElementById('success-details').innerHTML = `
       <div style="text-align:center;margin-bottom:1rem;padding:.8rem;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.15)">
         <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(0,0,0,0.4);text-transform:uppercase">Votre ticket</div>
@@ -1607,6 +1634,10 @@ async function confirmBooking() {
         <div style="display:flex;justify-content:space-between">
           <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Heure</span>
           <span style="font-weight:600;color:#000000">${state.selectedTime}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:.65rem;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:.1em">Prix total</span>
+          <span style="font-weight:700;color:#000000">${totalPriceText}</span>
         </div>
       </div>
     `;
