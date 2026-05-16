@@ -1005,6 +1005,61 @@ function getToday() {
   const day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
+
+function normalizePhone(phone) {
+  if (!phone || phone === 'Walk-in') return phone;
+  let p = String(phone).replace(/[\s\-\.\(\)]/g, '');
+  if (p.startsWith('+213')) p = '0' + p.slice(4);
+  else if (p.startsWith('213') && p.length >= 12) p = '0' + p.slice(3);
+  else if (p.length === 9 && /^[567]\d{8}$/.test(p)) p = '0' + p;
+  return p;
+}
+
+function parseTimeToMins(timeStr) {
+  if (!timeStr) return 0;
+  const [h, m] = timeStr.slice(0, 5).split(':').map(Number);
+  return h * 60 + m;
+}
+
+function getServiceDurationFromString(serviceStr) {
+  const serviceNames = serviceStr ? serviceStr.split(' + ') : [];
+  let dur = 0;
+  serviceNames.forEach(name => {
+    const svc = SERVICES.find(s => s.name === name.trim());
+    dur += svc?.durationMins || 45;
+  });
+  return dur || 45;
+}
+
+function reservationOverlaps(existing, startMins, durationMins) {
+  const exStart = parseTimeToMins(existing.reservation_time);
+  const exDur = getServiceDurationFromString(existing.service);
+  const endMins = startMins + durationMins;
+  const exEnd = exStart + exDur;
+  return startMins < exEnd && exStart < endMins;
+}
+
+async function fetchActiveReservations(date, barber) {
+  const { data } = await db.from('reservations')
+    .select('reservation_time, service')
+    .eq('reservation_date', date)
+    .eq('barber', barber)
+    .in('status', ['confirmed', 'calling']);
+  return data || [];
+}
+
+async function hasBookingConflict(date, barber, timeStr, durationMins) {
+  const existing = await fetchActiveReservations(date, barber);
+  const startMins = parseTimeToMins(timeStr);
+  return existing.some(r => reservationOverlaps(r, startMins, durationMins));
+}
+
+async function isPhoneBlacklisted(phone) {
+  const normalized = normalizePhone(phone);
+  if (!normalized || normalized === 'Walk-in') return false;
+  const { data } = await db.from('blacklist').select('phone');
+  return (data || []).some(b => normalizePhone(b.phone) === normalized);
+}
 const SUPABASE_URL = 'https://rdnptrgktqgdepzscrev.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_pKqN66Sd9W5CxxXXnWnXIQ_jUyH8Fts';
 const { createClient } = supabase;
@@ -1351,17 +1406,9 @@ async function selectDate(dateStr) {
   // Build all blocked slots considering duration
   const bookedSet = new Set();
   (slotsRes.data || []).forEach(r => {
-    // Handle multi-service (e.g. "Coupe + Barbe + Protéine")
-    const serviceNames = r.service ? r.service.split(' + ') : [];
-    let totalDur = 0;
-    serviceNames.forEach(name => {
-      const svc = SERVICES.find(s => s.name === name.trim());
-      totalDur += svc?.durationMins || 45;
-    });
-    if (totalDur === 0) totalDur = 45;
+    const totalDur = getServiceDurationFromString(r.service);
     const slots = Math.ceil(totalDur / 45);
-    const [h, m] = r.reservation_time.split(':').map(Number);
-    const startMins = h * 60 + m;
+    const startMins = parseTimeToMins(r.reservation_time);
     for (let i = 0; i < slots; i++) {
       const mins = startMins + i * 45;
       const sh = String(Math.floor(mins / 60) % 24).padStart(2,'0');
@@ -1506,13 +1553,14 @@ async function confirmBooking() {
   btn.disabled = true;
   btn.textContent = 'Enregistrement...';
 
-  // Check double booking — all slots that would be occupied by this reservation
   const totalDur = getTotalDuration() || 45;
-  const slotsNeeded = Math.ceil(totalDur / 45);
-  const selectedMins = parseInt(state.selectedTime.slice(0,2)) * 60 + parseInt(state.selectedTime.slice(3,5));
+  const selectedMins = parseTimeToMins(state.selectedTime);
   const endMins = selectedMins + totalDur;
+  const clientPhone = normalizePhone(document.getElementById('inp-phone').value.trim());
+  const clientName = document.getElementById('inp-name').value.trim();
+  const serviceStr = state.selectedServices.map(s => s.name).join(' + ');
+  const barber = state.selectedBarber?.name;
 
-  // Check closing time (21h)
   if (endMins > 22 * 60 + 30) {
     showToast('Ce créneau dépasse l\'heure de fermeture (22:30) ⚠️', 'error');
     btn.disabled = false;
@@ -1520,43 +1568,15 @@ async function confirmBooking() {
     goStep(2);
     return;
   }
-  
-  // Build list of slots this reservation would occupy
-  const occupiedSlots = [];
-  for (let i = 0; i < slotsNeeded; i++) {
-    const mins = selectedMins + i * 45;
-    const h = String(Math.floor(mins / 60) % 24).padStart(2,'0');
-    const m = String(mins % 60).padStart(2,'0');
-    occupiedSlots.push(`${h}:${m}`);
+
+  if (await isPhoneBlacklisted(clientPhone)) {
+    showToast('Réservation impossible ⚠️', 'error');
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmer le rendez-vous';
+    return;
   }
 
-  // Check if any of these slots are taken
-  const { data: existingSlots } = await db.from('reservations')
-    .select('reservation_time, service')
-    .eq('reservation_date', state.selectedDate)
-    .eq('barber', state.selectedBarber?.name)
-    .in('status', ['confirmed', 'calling']);
-
-  let conflict = false;
-  (existingSlots || []).forEach(r => {
-    const serviceNames = r.service ? r.service.split(' + ') : [];
-    let dur = 0;
-    serviceNames.forEach(name => {
-      const svc = SERVICES.find(s => s.name === name.trim());
-      dur += svc?.durationMins || 45;
-    });
-    if (dur === 0) dur = 45;
-    const existingSlotsMins = parseInt(r.reservation_time.slice(0,2)) * 60 + parseInt(r.reservation_time.slice(3,5));
-    const existingSlotsCount = Math.ceil(dur / 45);
-    for (let i = 0; i < existingSlotsCount; i++) {
-      const mins = existingSlotsMins + i * 45;
-      const sh = String(Math.floor(mins / 60) % 24).padStart(2,'0');
-      const sm = String(mins % 60).padStart(2,'0');
-      if (occupiedSlots.includes(`${sh}:${sm}`)) { conflict = true; break; }
-    }
-  });
-
-  if (conflict) {
+  if (await hasBookingConflict(state.selectedDate, barber, state.selectedTime, totalDur)) {
     showToast('Ce créneau est déjà pris! Choisissez un autre ⚠️', 'error');
     btn.disabled = false;
     btn.textContent = '✓ Confirmer le rendez-vous';
@@ -1564,49 +1584,82 @@ async function confirmBooking() {
     return;
   }
 
-  // Check blacklist
-  const clientPhone = document.getElementById('inp-phone').value.trim();
-  const { data: blacklisted } = await db.from('blacklist').select('id').eq('phone', clientPhone).limit(1);
-  if (blacklisted && blacklisted.length > 0) {
-    showToast('Réservation impossible ⚠️', 'error');
-    btn.disabled = false;
-    btn.textContent = '✓ Confirmer le rendez-vous';
-    return;
+  let insertData = null;
+  let insertError = null;
+
+  const { data: rpcResult, error: rpcError } = await db.rpc('create_reservation', {
+    p_client_name: clientName,
+    p_client_phone: clientPhone,
+    p_service: serviceStr,
+    p_barber: barber,
+    p_reservation_date: state.selectedDate,
+    p_reservation_time: state.selectedTime,
+    p_duration_mins: totalDur
+  });
+
+  if (!rpcError && rpcResult) {
+    if (rpcResult.ok) {
+      insertData = { id: rpcResult.id, daily_ticket: rpcResult.daily_ticket };
+    } else if (rpcResult.error === 'blacklisted') {
+      showToast('Réservation impossible ⚠️', 'error');
+      btn.disabled = false;
+      btn.textContent = '✓ Confirmer le rendez-vous';
+      return;
+    } else if (rpcResult.error === 'already_booked') {
+      showToast('Vous avez déjà une réservation avec ce coiffeur aujourd\'hui! ⚠️', 'error');
+      btn.disabled = false;
+      btn.textContent = '✓ Confirmer le rendez-vous';
+      return;
+    } else if (rpcResult.error === 'conflict') {
+      showToast('Ce créneau vient d\'être pris! Choisissez un autre ⚠️', 'error');
+      btn.disabled = false;
+      btn.textContent = '✓ Confirmer le rendez-vous';
+      goStep(2);
+      return;
+    }
   }
 
-  // Check client already booked same date + barber (active only)
-  const { data: alreadyBooked } = await db.from('reservations')
-    .select('id')
-    .eq('reservation_date', state.selectedDate)
-    .eq('barber', state.selectedBarber?.name)
-    .eq('client_phone', clientPhone)
-    .in('status', ['confirmed', 'calling']);
+  if (!insertData) {
+    if (await hasBookingConflict(state.selectedDate, barber, state.selectedTime, totalDur)) {
+      showToast('Ce créneau vient d\'être pris! Choisissez un autre ⚠️', 'error');
+      btn.disabled = false;
+      btn.textContent = '✓ Confirmer le rendez-vous';
+      goStep(2);
+      return;
+    }
 
-  if(alreadyBooked && alreadyBooked.length > 0) {
-    showToast('Vous avez déjà une réservation avec ce coiffeur aujourd\'hui! ⚠️', 'error');
-    btn.disabled = false;
-    btn.textContent = '✓ Confirmer le rendez-vous';
-    return;
+    const { data: alreadyBooked } = await db.from('reservations')
+      .select('id, client_phone')
+      .eq('reservation_date', state.selectedDate)
+      .eq('barber', barber)
+      .in('status', ['confirmed', 'calling']);
+    if ((alreadyBooked || []).some(r => normalizePhone(r.client_phone) === clientPhone)) {
+      showToast('Vous avez déjà une réservation avec ce coiffeur aujourd\'hui! ⚠️', 'error');
+      btn.disabled = false;
+      btn.textContent = '✓ Confirmer le rendez-vous';
+      return;
+    }
+
+    const { count } = await db.from('reservations')
+      .select('*', { count: 'exact', head: true })
+      .eq('reservation_date', state.selectedDate)
+      .eq('barber', barber)
+      .in('status', ['confirmed', 'calling']);
+    const dailyTicket = (count || 0) + 1;
+
+    const res = await db.from('reservations').insert({
+      client_name: clientName,
+      client_phone: clientPhone,
+      service: serviceStr,
+      barber: barber,
+      reservation_date: state.selectedDate,
+      reservation_time: state.selectedTime,
+      status: 'confirmed',
+      daily_ticket: dailyTicket
+    }).select('id, daily_ticket').single();
+    insertData = res.data;
+    insertError = res.error;
   }
-
-  // Get daily ticket number PER BARBER
-  const { count } = await db.from('reservations')
-    .select('*', { count: 'exact', head: true })
-    .eq('reservation_date', state.selectedDate)
-    .eq('barber', state.selectedBarber?.name)
-    .in('status', ['confirmed', 'calling']);
-  const dailyTicket = (count || 0) + 1;
-
-  const { data: insertData, error: insertError } = await db.from('reservations').insert({
-    client_name: document.getElementById('inp-name').value.trim(),
-    client_phone: document.getElementById('inp-phone').value.trim(),
-    service: state.selectedServices.map(s => s.name).join(' + '),
-    barber: state.selectedBarber?.name,
-    reservation_date: state.selectedDate,
-    reservation_time: state.selectedTime,
-    status: 'confirmed',
-    daily_ticket: dailyTicket
-  }).select('id, daily_ticket').single();
 
   if(insertError) {
     if(insertError.code === '23505') {
@@ -1655,7 +1708,7 @@ async function confirmBooking() {
       </div>
     `;
     // Save phone locally for Mes RDV
-    localStorage.setItem('bangs_phone', document.getElementById('inp-phone').value.trim());
+    localStorage.setItem('bangs_phone', clientPhone);
     // Save my ticket info
     localStorage.setItem('my_ticket', JSON.stringify({
       ticket: insertData?.daily_ticket || insertData?.id,
@@ -1862,7 +1915,7 @@ window.changeQty = changeQty;
 
 async function blacklistPhone(phone, name) {
   if (!confirm(`Blacklister ${name} (${phone}) ?`)) return;
-  const { error } = await db.from('blacklist').insert({ phone, reason: 'Spam/No show' });
+  const { error } = await db.from('blacklist').insert({ phone: normalizePhone(phone), reason: 'Spam/No show' });
   if (error && error.code === '23505') {
     showToast('Déjà blacklisté!', 'error');
   } else if (error) {
@@ -1897,7 +1950,7 @@ async function removeBlacklist(id) {
 window.removeBlacklist = removeBlacklist;
 
 document.getElementById('btn-add-blacklist').addEventListener('click', async () => {
-  const phone = document.getElementById('bl-phone').value.trim();
+  const phone = normalizePhone(document.getElementById('bl-phone').value.trim());
   if (!phone) return;
   const { error } = await db.from('blacklist').insert({ phone, reason: 'Manuel' });
   if (error && error.code === '23505') {
@@ -2385,11 +2438,13 @@ function closeWalkin() {
 document.getElementById('btn-walkin').addEventListener('click', openWalkin);
 document.getElementById('btn-walkin-confirm').addEventListener('click', async () => {
   const name = document.getElementById('wi-name').value.trim();
-  const phone = document.getElementById('wi-phone').value.trim() || 'Walk-in';
+  const phone = normalizePhone(document.getElementById('wi-phone').value.trim()) || 'Walk-in';
   const barber = document.getElementById('wi-barber').value;
   const service = document.getElementById('wi-service').value;
   const time = document.getElementById('wi-time').value;
   const today = getToday();
+  const svc = SERVICES.find(s => s.name === service);
+  const durationMins = svc?.durationMins || 45;
 
   if(!name || !barber || !service) {
     showToast('Remplissez tous les champs ⚠️', 'error');
@@ -2400,28 +2455,61 @@ document.getElementById('btn-walkin-confirm').addEventListener('click', async ()
   btn.disabled = true;
   btn.textContent = '...';
 
-  const { count: wiCount } = await db.from('reservations')
-    .select('*', { count: 'exact', head: true })
-    .eq('reservation_date', today);
-  const wiTicket = (wiCount || 0) + 1;
+  if (phone !== 'Walk-in' && await isPhoneBlacklisted(phone)) {
+    showToast('Numéro blacklisté — réservation refusée ⚠️', 'error');
+    btn.disabled = false;
+    btn.textContent = '✓ Enregistrer';
+    return;
+  }
 
-  const { error } = await db.from('reservations').insert({
-    client_name: name,
-    client_phone: phone,
-    service: service,
-    barber: barber,
-    reservation_date: today,
-    reservation_time: time,
-    status: 'confirmed',
-    daily_ticket: wiTicket
+  if (await hasBookingConflict(today, barber, time, durationMins)) {
+    showToast('Ce créneau est déjà pris! ⚠️', 'error');
+    btn.disabled = false;
+    btn.textContent = '✓ Enregistrer';
+    return;
+  }
+
+  let error = null;
+  const { data: rpcResult, error: rpcError } = await db.rpc('create_reservation', {
+    p_client_name: name,
+    p_client_phone: phone,
+    p_service: service,
+    p_barber: barber,
+    p_reservation_date: today,
+    p_reservation_time: time,
+    p_duration_mins: durationMins
   });
+
+  if (!rpcError && rpcResult?.ok) {
+    // ok
+  } else if (!rpcError && rpcResult && !rpcResult.ok) {
+    error = { code: rpcResult.error === 'conflict' ? '23505' : 'blocked' };
+  } else {
+    const { count: wiCount } = await db.from('reservations')
+      .select('*', { count: 'exact', head: true })
+      .eq('reservation_date', today)
+      .eq('barber', barber)
+      .in('status', ['confirmed', 'calling']);
+    const wiTicket = (wiCount || 0) + 1;
+    const res = await db.from('reservations').insert({
+      client_name: name,
+      client_phone: phone,
+      service: service,
+      barber: barber,
+      reservation_date: today,
+      reservation_time: time,
+      status: 'confirmed',
+      daily_ticket: wiTicket
+    });
+    error = res.error;
+  }
 
   if(error) {
     showToast(error.code === '23505' ? 'Créneau déjà pris! ⚠️' : 'Erreur!', 'error');
   } else {
     showToast('Walk-in enregistré! ✓', 'success');
     closeWalkin();
-      }
+  }
   btn.disabled = false;
   btn.textContent = '✓ Enregistrer';
 });
